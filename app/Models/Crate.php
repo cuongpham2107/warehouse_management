@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CrateStatus;
 use App\Enums\PackingType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,7 +33,7 @@ class Crate extends Model
         'dimensions_length' => 'decimal:2',
         'dimensions_width' => 'decimal:2',
         'dimensions_height' => 'decimal:2',
-        'status' => 'string',
+        'status' => CrateStatus::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -43,14 +44,6 @@ class Crate extends Model
     public function receivingPlan()
     {
         return $this->belongsTo(ReceivingPlan::class);
-    }
-
-    /**
-     * Get the pallet for this crate.
-     */
-    public function pallet()
-    {
-        return $this->hasOne(Pallet::class);
     }
 
     /**

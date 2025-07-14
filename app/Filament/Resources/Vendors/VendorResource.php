@@ -23,7 +23,7 @@ class VendorResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Dữ liệu chính';
+    protected static string|UnitEnum|null $navigationGroup = '👥 Dữ liệu chính';
 
     protected static ?int $navigationSort = 1;
 
@@ -38,6 +38,11 @@ class VendorResource extends Resource
     {
         return 'Nhà cung cấp';
     }
+
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::where('status', 'active')->count();
+    // }
 
     public static function getPluralModelLabel(): string
     {

@@ -21,7 +21,7 @@ class PalletResource extends Resource
 {
     protected static ?string $model = Pallet::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Hàng hóa';
+    protected static string|UnitEnum|null $navigationGroup = '📦 Hàng hóa';
 
     protected static ?int $navigationSort = 2;
 
@@ -38,6 +38,11 @@ class PalletResource extends Resource
     {
         return 'Pallet';
     }
+
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::count();
+    // }
 
     public static function getPluralModelLabel(): string
     {

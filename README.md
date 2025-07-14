@@ -89,3 +89,106 @@ Chức năng này quản lý quy trình lấy hàng từ kho và chuẩn bị ch
 
 
 
+
+
+
+Dựa trên phân tích README và quy trình warehouse management, đây là các Actions đặc biệt cần có ngoài CRUD cơ bản:
+
+📥 RECEIVING PLAN Actions
+1. Bulk Import/Export
+Import Excel - Tải lên file Excel chứa nhiều crate
+Export Template - Tải xuống template Excel để import
+Export Report - Xuất báo cáo kế hoạch nhận hàng
+2. Plan Management
+Activate Plan - Kích hoạt kế hoạch để bắt đầu nhận hàng
+Close Plan - Đóng kế hoạch khi hoàn thành
+Duplicate Plan - Sao chép kế hoạch cho lần nhập tiếp theo
+📦 CRATES Actions
+3. Check-in Process
+Check-in Crate - Nhận crate vào kho (từ PDA/Web)
+Assign Pallet - Gán crate vào pallet
+Print Barcode - In mã vạch cho crate
+Bulk Check-in - Nhận nhiều crate cùng lúc
+4. Status Management
+Mark as Damaged - Đánh dấu hàng bị hỏng
+Mark as Lost - Đánh dấu hàng bị mất
+Hold/Release - Tạm giữ/Thả hàng
+🏭 WAREHOUSE LOCATION Actions
+5. Location Management
+Assign to Location - Gán pallet vào vị trí cụ thể
+Move Location - Di chuyển pallet giữa các vị trí
+Block/Unblock Location - Khóa/Mở khóa vị trí kho
+Check Location Capacity - Kiểm tra sức chứa vị trí
+📤 SHIPPING REQUEST Actions
+6. Request Processing
+Approve Request - Phê duyệt yêu cầu xuất hàng
+Reject Request - Từ chối yêu cầu
+Split Request - Tách yêu cầu thành nhiều phần
+Generate Pick List - Tạo danh sách lấy hàng
+🚛 SHIPMENT Actions
+7. Shipment Operations
+Create Vehicle - Tạo xe cho chuyến hàng
+Load Items - Chất hàng lên xe
+Check-out from Location - Lấy hàng từ vị trí kho
+Depart Vehicle - Xe rời khỏi kho
+Print POD - In biên bản giao hàng
+8. Tracking
+Track Shipment - Theo dõi trạng thái chuyến hàng
+Update Delivery Status - Cập nhật tình trạng giao hàng
+Confirm Delivery - Xác nhận đã giao hàng
+🚛 VEHICLE Actions
+9. Vehicle Operations
+Assign Driver - Gán tài xế cho xe
+Check Vehicle Status - Kiểm tra tình trạng xe
+Schedule Maintenance - Lên lịch bảo trì
+Track Vehicle Location - Theo dõi vị trí xe (GPS)
+📱 DEVICE Integration Actions
+10. PDA/Mobile Actions
+Scan Barcode - Quét mã vạch
+Manual Entry - Nhập thủ công khi không có barcode
+Sync Data - Đồng bộ dữ liệu với server
+Offline Mode - Hoạt động offline
+📊 REPORTING & ANALYTICS Actions
+11. Reports
+Inventory Report - Báo cáo tồn kho
+Movement Report - Báo cáo di chuyển hàng hóa
+Performance Report - Báo cáo hiệu suất
+Daily Summary - Tóm tắt hoạt động hàng ngày
+12. Dashboard Actions
+Refresh Dashboard - Làm mới dashboard
+Filter by Date Range - Lọc theo khoảng thời gian
+Export Dashboard Data - Xuất dữ liệu dashboard
+🔄 WORKFLOW Actions
+13. Process Control
+Workflow Approval - Phê duyệt quy trình
+Emergency Stop - Dừng khẩn cấp quy trình
+Resume Process - Tiếp tục quy trình
+Rollback - Hoàn tác thao tác
+🔔 NOTIFICATION Actions
+14. Alerts
+Send Alert - Gửi cảnh báo
+Mark as Read - Đánh dấu đã đọc
+Escalate Issue - Báo cáo vấn đề lên cấp trên
+💡 Đề xuất implement priority:
+High Priority (Cần có ngay):
+✅ Import/Export Excel
+✅ Check-in/Check-out Crates
+✅ Assign to Location
+✅ Create/Depart Vehicle
+✅ Print POD
+✅ Scan Barcode integration
+Medium Priority (Giai đoạn 2):
+🔄 Approve/Reject Requests
+🔄 Track Shipment
+🔄 Reports generation
+🔄 Move Location
+Low Priority (Tính năng nâng cao):
+📱 GPS Vehicle tracking
+📱 Offline PDA mode
+📊 Advanced analytics
+🔔 Real-time notifications
+Những actions này sẽ tạo nên một hệ thống warehouse management hoàn chỉnh, đáp ứng đầy đủ quy trình từ nhận hàng đến xuất hàng như mô tả trong README.
+
+
+
+

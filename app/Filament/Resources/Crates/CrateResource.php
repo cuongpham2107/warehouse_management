@@ -23,7 +23,7 @@ class CrateResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBox;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Hàng hóa';
+    protected static string|UnitEnum|null $navigationGroup = '📦 Hàng hóa';
 
     protected static ?int $navigationSort = 1;
 
@@ -31,18 +31,23 @@ class CrateResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Thùng hàng';
+        return 'Kiện hàng';
     }
 
     public static function getModelLabel(): string
     {
-        return 'Thùng hàng';
+        return 'Kiện hàng';
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Thùng hàng';
+        return 'Kiện hàng';
     }
+
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::count();
+    // }
 
     public static function form(Schema $schema): Schema
     {

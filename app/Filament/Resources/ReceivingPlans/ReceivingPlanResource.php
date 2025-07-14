@@ -6,6 +6,7 @@ use App\Filament\Resources\ReceivingPlans\Pages\CreateReceivingPlan;
 use App\Filament\Resources\ReceivingPlans\Pages\EditReceivingPlan;
 use App\Filament\Resources\ReceivingPlans\Pages\ListReceivingPlans;
 use App\Filament\Resources\ReceivingPlans\Pages\ViewReceivingPlan;
+use App\Filament\Resources\ReceivingPlans\RelationManagers\CratesRelationManager;
 use App\Filament\Resources\ReceivingPlans\Schemas\ReceivingPlanForm;
 use App\Filament\Resources\ReceivingPlans\Schemas\ReceivingPlanInfolist;
 use App\Filament\Resources\ReceivingPlans\Tables\ReceivingPlansTable;
@@ -23,7 +24,9 @@ class ReceivingPlanResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Nhập kho';
+    protected static string|UnitEnum|null $navigationGroup = '📥 Nhập kho';
+
+    protected static ?int $navigationGroupSort = 1;
 
     protected static ?int $navigationSort = 1;
 
@@ -38,6 +41,11 @@ class ReceivingPlanResource extends Resource
     {
         return 'Kế hoạch nhập kho';
     }
+
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::where('status', 'active')->count();
+    // }
 
     public static function getPluralModelLabel(): string
     {
@@ -62,7 +70,7 @@ class ReceivingPlanResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CratesRelationManager::class,
         ];
     }
 

@@ -23,7 +23,7 @@ class VehicleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Phương tiện';
+    protected static string|UnitEnum|null $navigationGroup = '🚛 Phương tiện';
 
     protected static ?int $navigationSort = 1;
 
@@ -31,18 +31,23 @@ class VehicleResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Xe nâng';
+        return 'Xe vận chuyển';
     }
 
     public static function getModelLabel(): string
     {
-        return 'Xe nâng';
+        return 'Xe vận chuyển';
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Xe nâng';
+        return 'Xe vận chuyển';
     }
+
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::where('status', 'available')->count() . '/' . static::getModel()::count();
+    // }
 
     public static function form(Schema $schema): Schema
     {

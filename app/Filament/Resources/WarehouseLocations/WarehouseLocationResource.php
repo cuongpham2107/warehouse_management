@@ -23,7 +23,7 @@ class WarehouseLocationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Quản lý kho';
+    protected static string|UnitEnum|null $navigationGroup = '🏭 Quản lý kho';
 
     protected static ?int $navigationSort = 1;
 
@@ -38,6 +38,11 @@ class WarehouseLocationResource extends Resource
     {
         return 'Vị trí kho';
     }
+
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::where('status', 'active')->count();
+    // }
 
     public static function getPluralModelLabel(): string
     {

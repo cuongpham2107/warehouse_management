@@ -36,7 +36,7 @@ class ShipmentItem extends Model
     }
 
     /**
-     * Get the crate for this shipment item
+     * Nhận thùng cho mặt hàng lô hàng này
      */
     public function crate(): BelongsTo
     {
@@ -44,7 +44,7 @@ class ShipmentItem extends Model
     }
 
     /**
-     * Get the pallet for this shipment item
+     * Nhận pallet cho mặt hàng lô hàng này
      */
     public function pallet(): BelongsTo
     {

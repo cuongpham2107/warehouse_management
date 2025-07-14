@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('dimensions_length', 8, 2)->nullable();
             $table->decimal('dimensions_width', 8, 2)->nullable();
             $table->decimal('dimensions_height', 8, 2)->nullable();
-            $table->enum('status', ['planned', 'checked_in', 'checked_out', 'shipped'])->default('planned');
+            $table->enum('status', ['planned', 'received', 'checked_in', 'stored', 'shipped'])->default('planned');
             $table->string('barcode', 255)->nullable();
             $table->timestamps();
             

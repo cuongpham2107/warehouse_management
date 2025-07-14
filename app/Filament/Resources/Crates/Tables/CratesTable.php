@@ -2,13 +2,23 @@
 
 namespace App\Filament\Resources\Crates\Tables;
 
+use App\Enums\CrateStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Collection;
+use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
+use DateTime;
+use Filament\Forms\Components\TextInput;
 
 class CratesTable
 {
@@ -21,26 +31,26 @@ class CratesTable
                     ->searchable()
                     ->sortable()
                     ->copyable(),
-                    
+
                 TextColumn::make('receivingPlan.plan_code')
                     ->label('Kế hoạch nhập kho')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
-                    
+
                 TextColumn::make('pieces')
                     ->label('Số lượng')
                     ->alignCenter(true)
                     ->numeric()
                     ->sortable(),
-                    
+
                 TextColumn::make('gross_weight')
                     ->label('Trọng lượng')
                     ->alignCenter(true)
                     ->numeric()
                     ->sortable()
-                    ->formatStateUsing(fn ($state) => number_format($state, 2) . ' kg'),
-                    
+                    ->formatStateUsing(fn($state) => number_format($state, 2) . ' kg'),
+
                 TextColumn::make('dimensions')
                     ->label('Kích thước (L×W×H)')
                     ->getStateUsing(function ($record) {
@@ -50,70 +60,105 @@ class CratesTable
                         return "{$l} × {$w} × {$h} cm";
                     })
                     ->toggleable(),
-                    
+
                 TextColumn::make('status')
                     ->label('Trạng thái')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'planned' => 'gray',
-                        'received' => 'info',
-                        'checked_in' => 'warning',
-                        'stored' => 'success',
-                        'shipped' => 'danger',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'planned' => 'Đã lên kế hoạch',
-                        'received' => 'Đã nhận',
-                        'checked_in' => 'Đã kiểm tra nhập kho',
-                        'stored' => 'Đã lưu kho',
-                        'shipped' => 'Đã xuất kho',
-                        default => ucfirst($state),
-                    })
+                    ->color(fn($state): string => $state instanceof CrateStatus ? $state->getColor() : 'gray')
+                    ->formatStateUsing(fn($state): string => $state instanceof CrateStatus ? $state->getLabel() : ($state ?? 'N/A'))
+                    ->icon(fn($state): string => $state instanceof CrateStatus ? $state->getIcon() : 'heroicon-m-question-mark-circle')
                     ->sortable(),
-                    
+
                 TextColumn::make('barcode')
                     ->label('Mã vạch')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->copyable(),
-                    
+
                 TextColumn::make('created_at')
                     ->label('Ngày tạo')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                    
+
                 TextColumn::make('updated_at')
                     ->label('Ngày cập nhật')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('type')
+                    ->label('Loại đóng gói')
+                    ->badge()
+                    ->color(fn($state): string => $state instanceof \App\Enums\PackingType ? ($state->getColor() ?? 'gray') : 'gray')
+                    ->icon(fn($state): string => $state instanceof \App\Enums\PackingType ? ($state->getIcon() ?? 'heroicon-m-cube') : 'heroicon-m-cube')
+                    ->formatStateUsing(fn($state): string => $state instanceof \App\Enums\PackingType ? $state->getLabel() : ($state ?? 'N/A'))
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
                     ->label('Trạng thái')
-                    ->options([
-                        'planned' => 'Đã lên kế hoạch',
-                        'received' => 'Đã nhận',
-                        'checked_in' => 'Đã kiểm tra nhập kho',
-                        'stored' => 'Đã lưu kho',
-                        'shipped' => 'Đã xuất kho',
-                    ])
-                    ->native(false),
-                    
-                SelectFilter::make('receiving_plan_id')
-                    ->label('Kế hoạch nhập kho')
-                    ->relationship('receivingPlan', 'plan_code')
-                    ->searchable()
+                    ->options(CrateStatus::class)
+                    ->multiple()
                     ->preload()
                     ->native(false),
+                Filter::make('list_crates')
+                    ->schema([
+                        Textarea::make('crate_ids')
+                            ->label('Danh sách mã thùng hàng')
+                            ->helperText('Nhập mã thùng hàng, mỗi mã trên một dòng')
+                            ->placeholder('Nhập mã thùng hàng để lọc')
+                            ->rows(5)
+                            ->columnSpanFull(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['crate_ids'])) {
+                            return $query;
+                        }
+                        return $query->whereIn('crate_id', explode("\n", trim($data['crate_ids'] ?? '')));
+                    })
+
+
+            ])
+            ->defaultGroup('receivingPlan.plan_code')
+            ->groups([
+                Group::make('receivingPlan.plan_code')
+                    ->label('Kế hoạch nhập kho')
+                    ->collapsible(),
             ])
             ->recordActions([
-                ViewAction::make()->label('Xem'),
+                // ViewAction::make()->label(''),
                 EditAction::make()->label('Sửa'),
             ])
-            ->bulkActions([
+            ->headerActions([
+                BulkAction::make('choose_crate_export_warehouse')
+                    ->label('Chọn thùng hàng để xuất kho')
+                    ->icon('heroicon-o-check')
+                    ->color('primary')
+                    ->modalHeading('Chi tiết yêu cầu xuất kho')
+                    ->modalDescription('Vui lòng nhập các thông tin cần thiết để xuất kho các kiện hàng.')
+                    ->schema([
+                        TextInput::make('shipping_request_id')
+                            ->label('Mã yêu cầu xuất kho')
+                            ->required()
+                            ->placeholder('Nhập mã yêu cầu xuất kho'),
+                    ])
+                    ->fillForm(function (Collection $records) {
+                        
+                    })
+                    ->action(function (Collection $records, array $data) {
+                        
+
+                       
+                        // Hiển thị thông báo thành công
+                        \Filament\Notifications\Notification::make()
+                            ->title('Xuất kho thành công')
+                            ->body("Đã xuất {$records->count()} thùng hàng.")
+                            ->success()
+                            ->send();
+                    }),
+            ])
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()->label('Xóa đã chọn'),
                 ])->label('Hành động hàng loạt'),

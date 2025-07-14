@@ -23,7 +23,7 @@ class InventoryMovementResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Theo dõi';
+    protected static string|UnitEnum|null $navigationGroup = '📊 Báo cáo & Theo dõi';
 
     protected static ?int $navigationSort = 1;
 
@@ -38,6 +38,11 @@ class InventoryMovementResource extends Resource
     {
         return 'Di chuyển hàng hóa';
     }
+
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::whereDate('created_at', today())->count();
+    // }
 
     public static function getPluralModelLabel(): string
     {

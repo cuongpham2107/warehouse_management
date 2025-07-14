@@ -30,10 +30,20 @@ enum PackingType: string
     public function getIcon(): string
     {
         return match ($this) {
-            self::STANDARD => 'heroicon-o-package',
-            self::BOX => 'heroicon-o-box',
-            self::PALLET => 'heroicon-o-pallet',
-            self::CRATE => 'heroicon-o-crate',
+            self::STANDARD => 'heroicon-o-cube',
+            self::BOX => 'heroicon-o-archive-box',
+            self::PALLET => 'heroicon-o-rectangle-stack',
+            self::CRATE => 'heroicon-o-cube',
+        };
+    }
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::STANDARD => 'primary',
+            self::BOX => 'info',
+            self::PALLET => 'success',
+            self::CRATE => 'warning',
+            default => 'gray',
         };
     }
     public static function getOptions(): array

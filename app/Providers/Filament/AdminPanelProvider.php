@@ -6,6 +6,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -37,7 +38,15 @@ class AdminPanelProvider extends PanelProvider
                 'success' => Color::Emerald,
                 'warning' => Color::Orange,
             ])
+            ->unsavedChangesAlerts()
             // ->topNavigation()
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Hàng hoá')
+                    ->icon('heroicon-o-box')
+                    ->collapsible()
+
+            ])
             ->globalSearch(true)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {

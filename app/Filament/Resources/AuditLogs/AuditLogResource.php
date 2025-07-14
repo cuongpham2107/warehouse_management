@@ -23,20 +23,25 @@ class AuditLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Hệ thống';
+    protected static string|UnitEnum|null $navigationGroup = '📊 Báo cáo & Theo dõi';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'table_name';
 
     public static function getNavigationLabel(): string
     {
-        return 'Audit Log';
+        return 'Nhật ký hệ thống';
     }
 
     public static function getModelLabel(): string
     {
-        return 'Audit Log';
+        return 'Nhật ký hệ thống';
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::whereDate('created_at', today())->count();
     }
 
     public static function getPluralModelLabel(): string

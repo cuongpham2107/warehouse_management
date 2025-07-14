@@ -39,7 +39,6 @@ class PalletsTable
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'in_transit' => 'warning',
-                        'received' => 'info', 
                         'stored' => 'success',
                         'shipped' => 'danger',
                         'damaged' => 'gray',
@@ -47,7 +46,6 @@ class PalletsTable
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'in_transit' => 'Đang vận chuyển',
-                        'received' => 'Đã nhận',
                         'stored' => 'Đã lưu kho',
                         'shipped' => 'Đã xuất kho',
                         'damaged' => 'Bị hư hỏng',
@@ -111,7 +109,7 @@ class PalletsTable
                 ViewAction::make()->label('Xem'),
                 EditAction::make()->label('Sửa'),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()->label('Xóa đã chọn'),
                 ])->label('Hành động hàng loạt'),

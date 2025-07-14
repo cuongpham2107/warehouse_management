@@ -32,6 +32,17 @@ enum CrateStatus: string
         };
     }
 
+    public function getIcon(): string
+    {
+        return match ($this) {
+            self::PLANNED => 'heroicon-m-clock',
+            self::RECEIVED => 'heroicon-m-inbox-arrow-down',
+            self::CHECKED_IN => 'heroicon-m-check-badge',
+            self::STORED => 'heroicon-m-archive-box',
+            self::SHIPPED => 'heroicon-m-truck',
+        };
+    }
+
     public static function getOptions(): array
     {
         return collect(self::cases())

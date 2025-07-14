@@ -9,6 +9,7 @@ use App\Filament\Resources\ShippingRequests\Pages\ViewShippingRequest;
 use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
 use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestInfolist;
 use App\Filament\Resources\ShippingRequests\Tables\ShippingRequestsTable;
+use App\Filament\Resources\ShippingRequests\RelationManagers\ItemsRelationManager;
 use App\Models\ShippingRequest;
 use BackedEnum;
 use UnitEnum;
@@ -21,9 +22,9 @@ class ShippingRequestResource extends Resource
 {
     protected static ?string $model = ShippingRequest::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Xuất kho';
+    protected static string|UnitEnum|null $navigationGroup = '📤 Xuất kho';
 
     protected static ?int $navigationSort = 1;
 
@@ -38,6 +39,11 @@ class ShippingRequestResource extends Resource
     {
         return 'Yêu cầu xuất kho';
     }
+
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::where('status', 'pending')->count();
+    // }
 
     public static function getPluralModelLabel(): string
     {
@@ -62,7 +68,7 @@ class ShippingRequestResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ItemsRelationManager::class,
         ];
     }
 

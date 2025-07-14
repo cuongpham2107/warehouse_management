@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Crates\Pages;
 
 use App\Filament\Resources\Crates\CrateResource;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -18,7 +19,10 @@ class ListCrates extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->label('Tạo mới'),
+            CreateAction::make()
+                ->label('Tạo mới')
+                ->icon('heroicon-o-plus'),
+            
         ];
     }
 }

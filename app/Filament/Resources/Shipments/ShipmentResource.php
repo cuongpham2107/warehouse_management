@@ -23,7 +23,7 @@ class ShipmentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Xuất kho';
+    protected static string|UnitEnum|null $navigationGroup = '📤 Xuất kho';
 
     protected static ?int $navigationSort = 2;
 
@@ -38,6 +38,11 @@ class ShipmentResource extends Resource
     {
         return 'Đơn hàng';
     }
+
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return static::getModel()::whereIn('status', ['loading', 'ready', 'departed'])->count();
+    // }
 
     public static function getPluralModelLabel(): string
     {

@@ -5,7 +5,6 @@ namespace App\Enums;
 enum PalletStatus: string
 {
     case IN_TRANSIT = 'in_transit';
-    case RECEIVED = 'received';
     case STORED = 'stored';
     case SHIPPED = 'shipped';
     case DAMAGED = 'damaged';
@@ -14,7 +13,6 @@ enum PalletStatus: string
     {
         return match ($this) {
             self::IN_TRANSIT => 'Đang vận chuyển',
-            self::RECEIVED => 'Đã nhận',
             self::STORED => 'Đã lưu kho',
             self::SHIPPED => 'Đã xuất kho',
             self::DAMAGED => 'Bị hư hỏng',
@@ -25,7 +23,6 @@ enum PalletStatus: string
     {
         return match ($this) {
             self::IN_TRANSIT => 'warning',
-            self::RECEIVED => 'info',
             self::STORED => 'success',
             self::SHIPPED => 'primary',
             self::DAMAGED => 'danger',
