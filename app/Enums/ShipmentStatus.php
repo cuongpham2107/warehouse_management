@@ -13,7 +13,7 @@ enum ShipmentStatus: string
     public function getLabel(): string
     {
         return match ($this) {
-            self::LOADING => 'Đang tải hàng',
+            self::LOADING => 'Chuẩn bị hàng',
             self::READY => 'Sẵn sàng',
             self::DEPARTED => 'Đã khởi hành',
             self::DELIVERED => 'Đã giao hàng',

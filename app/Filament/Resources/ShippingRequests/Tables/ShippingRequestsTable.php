@@ -11,6 +11,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use App\Enums\ShippingRequestPriority;
 use App\Enums\ShippingRequestStatus;
+use App\States\ShippingRequestState;
 
 class ShippingRequestsTable
 {
@@ -43,11 +44,11 @@ class ShippingRequestsTable
                     ->badge()
                     ->alignCenter()
                     ->label('Trạng thái')
-                    ->formatStateUsing(fn($state) => $state->getLabel())
-                    ->color(fn($state) => $state->getColor())
+                    ->formatStateUsing(fn($state) => $state instanceof ShippingRequestState ? $state->label() : $state)
+                    ->color(fn($state) => $state instanceof ShippingRequestState ? $state->color() : 'gray')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('created_by')
+                TextColumn::make('creator.name')
                     ->label('Người tạo')
                     ->numeric()
                     ->sortable(),
@@ -70,7 +71,14 @@ class ShippingRequestsTable
                     
                 SelectFilter::make('status')
                     ->label('Trạng thái')
-                    ->options(ShippingRequestStatus::getOptions())
+                    ->options([
+                        'pending' => 'Chờ xử lý',
+                        'processing' => 'Đang xử lý',
+                        'ready' => 'Sẵn sàng',
+                        'shipped' => 'Đã vận chuyển',
+                        'delivered' => 'Đã giao hàng',
+                        'cancelled' => 'Đã hủy',
+                    ])
                     ->placeholder('Tất cả trạng thái'),
             ])
             ->recordActions([

@@ -18,7 +18,10 @@ class ViewPallet extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make()->label('Sửa'),
+            EditAction::make()
+                ->label('Sửa')
+                ->icon('heroicon-o-pencil')
+                ->outlined(),
         ];
     }
 }

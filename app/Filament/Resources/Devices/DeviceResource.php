@@ -23,9 +23,9 @@ class DeviceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDevicePhoneMobile;
 
-    protected static string|UnitEnum|null $navigationGroup = '🚛 Phương tiện';
+    protected static string|UnitEnum|null $navigationGroup = 'Danh mục';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $recordTitleAttribute = 'device_name';
 

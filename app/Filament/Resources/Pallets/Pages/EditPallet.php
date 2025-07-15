@@ -20,8 +20,20 @@ class EditPallet extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make()->label('Xem'),
-            DeleteAction::make()->label('Xóa'),
+            $this->getSaveFormAction()
+                ->formId('form')
+                ->icon('heroicon-o-check')
+                ->label('Lưu'),
+            $this->getCancelFormAction()
+                ->formId('form')
+                ->icon('heroicon-o-x-mark')
+                ->label('Hủy'),
+            ViewAction::make()
+                ->label('Xem')
+                ->icon('heroicon-o-eye')
+                ->outlined(),
+            DeleteAction::make()->label('Xóa')
+                ->icon('heroicon-o-trash'),
         ];
     }
 
@@ -33,5 +45,10 @@ class EditPallet extends EditRecord
     protected function getCancelFormAction(): Action
     {
         return parent::getCancelFormAction()->label('Hủy');
+    }
+
+    protected function getFormActions(): array
+    {
+        return [];
     }
 }

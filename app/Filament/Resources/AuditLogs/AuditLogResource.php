@@ -23,9 +23,9 @@ class AuditLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static string|UnitEnum|null $navigationGroup = '📊 Báo cáo & Theo dõi';
+    protected static string|UnitEnum|null $navigationGroup = 'Danh mục';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $recordTitleAttribute = 'table_name';
 

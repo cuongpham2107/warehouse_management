@@ -21,11 +21,11 @@ class ShipmentsTable
                 TextColumn::make('shipment_code')
                     ->label('Mã lô hàng')
                     ->searchable(),
-                TextColumn::make('vehicle.id')
+                TextColumn::make('vehicle.vehicle_code')
                     ->label('Xe tải')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('shippingRequest.id')
+                TextColumn::make('shippingRequest.request_code')
                     ->label('Yêu cầu vận chuyển')
                     ->numeric()
                     ->sortable(),
@@ -51,11 +51,11 @@ class ShipmentsTable
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
+                    ->formatStateUsing(fn($state) => $state->getLabel())
+                    ->color(fn($state) => $state->getColor())
+                    ->icon(fn($state) => $state->getIcon())
                     ->label('Trạng thái')
-                    ->formatStateUsing(fn ($state) => $state?->getLabel() ?? 'N/A')
-                    ->colors(fn ($state) => $state?->getColor() ?? 'gray')
-                    ->icons(fn ($state) => $state?->getIcon() ?? 'heroicon-o-question-mark-circle')
-                    ->sortable(),
+                    ->searchable(),
                 IconColumn::make('pod_generated')
                     ->label('POD được tạo')
                     ->boolean(),
@@ -92,6 +92,7 @@ class ShipmentsTable
                     DeleteBulkAction::make()
                         ->label('Xóa'),
                 ]),
-            ]);
+            ])
+            ->reorderableColumns();
     }
 }

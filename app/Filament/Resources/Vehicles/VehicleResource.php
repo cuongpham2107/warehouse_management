@@ -23,9 +23,9 @@ class VehicleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
-    protected static string|UnitEnum|null $navigationGroup = '🚛 Phương tiện';
+    protected static string|UnitEnum|null $navigationGroup = 'Danh mục';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'vehicle_code';
 

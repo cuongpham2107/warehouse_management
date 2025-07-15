@@ -29,6 +29,16 @@ enum PalletStatus: string
         };
     }
 
+    public function getIcon(): string
+    {
+        return match ($this) {
+            self::IN_TRANSIT => 'heroicon-m-truck',
+            self::STORED => 'heroicon-m-archive-box',
+            self::SHIPPED => 'heroicon-m-paper-airplane',
+            self::DAMAGED => 'heroicon-m-x-circle',
+        };
+    }
+
     public static function getOptions(): array
     {
         return collect(self::cases())

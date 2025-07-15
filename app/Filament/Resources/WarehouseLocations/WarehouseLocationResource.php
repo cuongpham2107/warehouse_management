@@ -23,7 +23,7 @@ class WarehouseLocationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
 
-    protected static string|UnitEnum|null $navigationGroup = '🏭 Quản lý kho';
+    protected static string|UnitEnum|null $navigationGroup = 'Danh mục';
 
     protected static ?int $navigationSort = 1;
 

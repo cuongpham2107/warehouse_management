@@ -21,11 +21,25 @@ class EditReceivingPlan extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            $this->getSaveFormAction()
+                ->formId('form')
+                ->icon('heroicon-o-check')
+                ->label('Lưu'),
+            $this->getCancelFormAction()
+                ->formId('form')
+                ->icon('heroicon-o-x-mark')
+                ->label('Hủy'),
             ViewAction::make()
+                ->icon('heroicon-o-eye')
                 ->label('Xem'),
             DeleteAction::make()
+                ->icon('heroicon-o-trash')
                 ->label('Xóa'),
         ];
+    }
+    protected function getFormActions(): array
+    {
+        return [];
     }
 
     #[On('receivingPlan.refresh')]

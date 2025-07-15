@@ -9,7 +9,7 @@ use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use App\Enums\ReceivingPlanStatus;
-use Filament\Schemas\Components\Flex;
+use App\Filament\Resources\Vehicles\Schemas\VehicleForm;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ReceivingPlan;
 
@@ -38,7 +38,8 @@ class ReceivingPlanForm
                             ->searchable()
                             ->preload()
                             ->placeholder('Chọn nhà cung cấp')
-                            ->columnSpan(3),
+                            ->columnSpan(3)
+                            ->createOptionForm(fn (Schema $schema) => VehicleForm::configure($schema)),
 
                         DatePicker::make('plan_date')
                             ->label('Ngày kế hoạch')
@@ -52,8 +53,10 @@ class ReceivingPlanForm
                             ->required()
                             ->options(ReceivingPlanStatus::getOptions())
                             ->default(ReceivingPlanStatus::PENDING->value)
+                            ->disabled()
+                            ->dehydrated()
                             ->native(false)
-                             ->columnSpan(2),
+                            ->columnSpan(2),
                          Select::make('created_by')
                             ->label('Người tạo')
                             ->relationship('creator', 'name')

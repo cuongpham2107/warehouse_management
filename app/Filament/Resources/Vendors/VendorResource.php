@@ -23,9 +23,9 @@ class VendorResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
-    protected static string|UnitEnum|null $navigationGroup = '👥 Dữ liệu chính';
+    protected static string|UnitEnum|null $navigationGroup = 'Danh mục';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'vendor_name';
 

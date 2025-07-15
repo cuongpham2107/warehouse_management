@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\PalletStatus;
 
 class Pallet extends Model
 {
@@ -23,7 +24,7 @@ class Pallet extends Model
     protected $casts = [
         'crate_id' => 'integer',
         'location_id' => 'integer',
-        'status' => 'string',
+        'status' => PalletStatus::class,
         'checked_in_at' => 'datetime',
         'checked_in_by' => 'integer',
         'checked_out_at' => 'datetime',

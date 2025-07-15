@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\ShippingRequestItemStatus;
 
 class ShippingRequestItem extends Model
 {
@@ -23,7 +24,7 @@ class ShippingRequestItem extends Model
         'crate_id' => 'integer',
         'quantity_requested' => 'integer',
         'quantity_shipped' => 'integer',
-        'status' => 'string',
+        'status' => ShippingRequestItemStatus::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

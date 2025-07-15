@@ -29,20 +29,9 @@ class ReceivingPlanInfolist
                                 TextEntry::make('status')
                                     ->label('Trạng thái')
                                     ->badge()
-                                    ->color(fn ($state) => match ($state) {
-                                        'pending' => 'warning',
-                                        'in_progress' => 'info',
-                                        'completed' => 'success',
-                                        'cancelled' => 'danger',
-                                        default => 'gray',
-                                    })
-                                    ->formatStateUsing(fn ($state) => match ($state) {
-                                        'pending' => 'Chờ xử lý',
-                                        'in_progress' => 'Đang thực hiện',
-                                        'completed' => 'Hoàn thành',
-                                        'cancelled' => 'Đã hủy',
-                                        default => $state,
-                                    }),
+                                    ->color(fn ($state) => $state instanceof ReceivingPlanStatus ? $state->getColor() : 'gray')
+                                    ->icon(fn ($state) => $state instanceof ReceivingPlanStatus ? $state->getIcon() : null)
+                                    ->formatStateUsing(fn ($state) => $state instanceof ReceivingPlanStatus ? $state->getLabel() : ($state ?? 'N/A')),
 
                                 TextEntry::make('vendor.vendor_name')
                                     ->label('Nhà cung cấp')

@@ -28,6 +28,15 @@ enum ShippingRequestPriority: string
             self::URGENT => 'danger',
         };
     }
+    public function getIcon(): string
+    {
+        return match ($this) {
+            self::LOW => 'heroicon-m-arrow-down',
+            self::MEDIUM => 'heroicon-m-arrow-right',
+            self::HIGH => 'heroicon-m-arrow-up',
+            self::URGENT => 'heroicon-m-exclamation',
+        };
+    }
 
     public function getBadgeClass(): string
     {

@@ -6,13 +6,13 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
+use App\States\ShippingRequestState;
 
 class ShippingRequestInfolist
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->columns(3)
             ->components([
                 Section::make('Thông tin chính')
                     ->schema([
@@ -28,30 +28,16 @@ class ShippingRequestInfolist
                                 TextEntry::make('priority')
                                     ->label('Độ ưu tiên')
                                     ->badge()
-                                    ->color(fn ($state) => match ($state) {
-                                        'high' => 'danger',
-                                        'medium' => 'warning',
-                                        'low' => 'info',
-                                        default => 'gray',
-                                    }),
+                                    ->color(fn ($state) => $state instanceof \App\Enums\ShippingRequestPriority ? $state->getColor() : 'gray')
+                                    ->icon(fn ($state) => $state instanceof \App\Enums\ShippingRequestPriority ? $state->getIcon() : null)
+                                    ->formatStateUsing(fn ($state) => $state instanceof \App\Enums\ShippingRequestPriority ? $state->getLabel() : ($state ?? 'N/A')),
 
                                 TextEntry::make('status')
                                     ->label('Trạng thái')
                                     ->badge()
-                                    ->color(fn ($state) => match ($state) {
-                                        'pending' => 'warning',
-                                        'approved' => 'info',
-                                        'completed' => 'success',
-                                        'cancelled' => 'danger',
-                                        default => 'gray',
-                                    })
-                                    ->formatStateUsing(fn ($state) => match ($state) {
-                                        'pending' => 'Chờ xử lý',
-                                        'approved' => 'Đã duyệt',
-                                        'completed' => 'Hoàn thành',
-                                        'cancelled' => 'Đã hủy',
-                                        default => $state,
-                                    }),
+                                    ->color(fn ($state) => $state instanceof ShippingRequestState ? $state->color() : 'gray')
+                                    ->icon(fn ($state) => $state instanceof ShippingRequestState ? $state->icon() : null)
+                                    ->formatStateUsing(fn ($state) => $state instanceof ShippingRequestState ? $state->label() : ($state ?? 'N/A')),
 
                                 TextEntry::make('requested_date')
                                     ->label('Ngày yêu cầu')
@@ -70,30 +56,15 @@ class ShippingRequestInfolist
                                     ->icon('heroicon-m-phone'),
                             ]),
                     ])
-                    ->columnSpan(2),
+                    ->columnSpanFull(),
 
-                Section::make('Thống kê')
-                    ->schema([
-                        TextEntry::make('total_items')
-                            ->label('Tổng số sản phẩm')
-                            ->icon('heroicon-m-squares-2x2')
-                            ->numeric()
-                            ->suffix(' sản phẩm')
-                            ->color('info'),
-                        TextEntry::make('total_weight')
-                            ->label('Tổng khối lượng')
-                            ->icon('heroicon-m-scale')
-                            ->numeric(decimalPlaces: 2)
-                            ->suffix(' kg')
-                            ->color('warning'),
-                    ])
-                    ->columnSpan(1),
+               
 
                 Section::make('Thông tin hệ thống')
                     ->schema([
                         Grid::make(3)
                             ->schema([
-                                TextEntry::make('created_by')
+                                TextEntry::make('creator.name')
                                     ->label('Người tạo')
                                     ->icon('heroicon-m-user')
                                     ->placeholder('Không xác định'),
@@ -114,8 +85,9 @@ class ShippingRequestInfolist
                                     ->color('gray'),
                             ]),
                     ])
-                    ->columnSpan(3)
-                    ->collapsible(),
+                    ->collapsible()
+                    ->columnSpanFull(),
+
             ]);
     }
 }

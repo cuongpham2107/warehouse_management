@@ -2,10 +2,8 @@
 
 namespace App\Filament\Resources\ReceivingPlans\RelationManagers;
 
-use App\Enums\PalletStatus;
-use App\Enums\ReceivingPlanStatus;
-use App\Filament\Resources\Crates\CrateResource;
-use App\Models\ReceivingPlan;
+use Exception;
+use Livewire\Component;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -22,20 +20,28 @@ use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Hidden;
-use Filament\Actions\Action;
-use Filament\Notifications\Notification;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Filament\Resources\Crates\Imports\CratesExcelImport;
-use App\Models\Pallet;
-use App\Models\WarehouseLocation;
-use Exception;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-use Illuminate\Support\Facades\Storage;
-use Livewire\Component;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\Width;
+use App\Filament\Resources\Crates\Imports\CratesExcelImport;
+use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
+use App\Filament\Resources\Crates\CrateResource;
+use App\Enums\PalletStatus;
+use App\Enums\ReceivingPlanStatus;
+use App\Models\Pallet;
+use App\Models\WarehouseLocation;
+use App\Models\ReceivingPlan;
+use App\Models\ShippingRequest;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Collection;
+use Maatwebsite\Excel\Facades\Excel;
+
+
 
 class CratesRelationManager extends RelationManager
 {
@@ -144,7 +150,7 @@ class CratesRelationManager extends RelationManager
                         $data['receiving_plan_id'] = $this->getOwnerRecord()->getKey();
                         return $data;
                     }),
-                Action::make('import_and_assign')
+                BulkAction::make('import_and_assign')
                     ->label('Nhập kho và gán vị trí')
                     ->icon('heroicon-o-arrow-right-circle')
                     ->button()
@@ -167,8 +173,7 @@ class CratesRelationManager extends RelationManager
                                     }
                                     $set('pallets', $pallets);
                                 }
-                            })
-                            ->required(),
+                            }),
 
                         Repeater::make('pallets')
                             ->label("Thông tin kiện hàng")
@@ -185,7 +190,7 @@ class CratesRelationManager extends RelationManager
                                 TextInput::make('crate_code')
                                     ->readOnly()
                                     ->required(),
-                               
+
                                 Select::make('location_id')
                                     ->options(WarehouseLocation::query()->pluck('location_code', 'id'))
                                     ->searchable()
@@ -196,21 +201,23 @@ class CratesRelationManager extends RelationManager
                                     ->required(),
                                 Hidden::make('crate_id')
                             ])
-                            ->default(function () {
-                                $crates = $this->getOwnerRecord()->crates()->select('id', 'crate_id', 'created_at')->orderBy('crate_id', 'desc')->get();
-                                foreach ($crates as $crate) {
-                                    $crateData[] = [
-                                        'pallet_id' => 'PALLET-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6)),
-                                        'crate_code' => $crate->crate_id,
-                                        'location_id' => '',
-                                        'checked_in_at' => now(),
-                                        'crate_id' => $crate->id,
-                                    ];
-                                }
-                                return $crateData;
-                            })
+
                     ])
+                    ->fillForm(function (Collection $collection) {
+                        foreach ($collection as $crate) {
+                            $crateData['pallets'][] = [
+                                'pallet_id' => 'PALLET-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6)),
+                                'crate_code' => $crate->crate_id,
+                                'location_id' => '',
+                                'checked_in_at' => now(),
+                                'crate_id' => $crate->id,
+                                'crate' => $crate
+                            ];
+                        }
+                        return $crateData;
+                    })
                     ->action(function (array $data, Component $livewire): void {
+                        
                         try {
                             $pallets = $data['pallets'];
                             if (!$pallets || !is_array($pallets)) {
@@ -222,17 +229,26 @@ class CratesRelationManager extends RelationManager
                                 return;
                             }
                             foreach ($pallets as $pallet) {
-                               Pallet::create(
-                                    [
-                                        'pallet_id' => $pallet['pallet_id'],
-                                        'crate_id' => $pallet['crate_id'],
-                                        'location_id' => intval($pallet['location_id']),
-                                        'status' => PalletStatus::IN_TRANSIT->value,
-                                        'checked_in_at' => $pallet['checked_in_at'],
-                                        'checked_in_by' => Auth::id(),
-                                    ]
-                                );
-                                // dd($test);
+                                // Kiểm tra crate_id đã tồn tại trong pallet chưa
+                                $exists = \App\Models\Pallet::where('crate_id', $pallet['crate_id'])->exists();
+                                if ($exists) {
+                                    // Có thể bỏ qua hoặc thông báo, ở đây sẽ bỏ qua
+                                    \Filament\Notifications\Notification::make()
+                                        ->warning()
+                                        ->title('Cảnh báo')
+                                        ->body('Kiện hàng ' . $pallet['crate_code'] . ' đã tồn tại trong pallet, bỏ qua.')
+                                        ->send();
+                                    continue;
+                                }
+                                $pallet['crate']->update(['status' => 'stored']);
+                                Pallet::create([
+                                    'pallet_id' => $pallet['pallet_id'],
+                                    'crate_id' => $pallet['crate_id'],
+                                    'location_id' => intval($pallet['location_id']),
+                                    'status' => PalletStatus::IN_TRANSIT->value,
+                                    'checked_in_at' => $pallet['checked_in_at'],
+                                    'checked_in_by' => Auth::id(),
+                                ]);
                             }
                             Notification::make()
                                 ->success()
@@ -250,20 +266,88 @@ class CratesRelationManager extends RelationManager
                     }),
 
 
+                BulkAction::make('choose_crate_export_warehouse')
+                    ->label('Chọn thùng hàng để xuất kho')
+                    ->icon('heroicon-o-check')
+                    ->color('primary')
+                    ->button()
+                    ->outlined()
+                    ->modalHeading('Chi tiết yêu cầu xuất kho')
+                    ->modalDescription('Vui lòng nhập các thông tin cần thiết để xuất kho các kiện hàng.')
+                    ->schema(fn($schema) => ShippingRequestForm::configure($schema))
+                    ->action(function (Collection $records, array $data) {
+                        $records = $records->select('id', 'pieces', 'status')->toArray();
+                        $allStored = collect($records)->every(function ($record) {
+                            $status = $record['status'];
+                            return ($status instanceof \App\Enums\CrateStatus ? $status->value : $status) === 'stored';
+                        });
+
+                        if (empty($records)) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Không có thùng hàng nào được chọn')
+                                ->body('Vui lòng chọn ít nhất một thùng hàng để xuất kho.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        if (!$allStored) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Không thể xuất kho')
+                                ->body('Tất cả các kiện hàng được chọn phải ở trạng thái "Đã lưu kho" mới có thể xuất kho.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        try {
+                            $shippingRequest = ShippingRequest::create($data);
+                            if (!$shippingRequest) {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Lỗi khi tạo yêu cầu xuất kho')
+                                    ->body('Không thể tạo yêu cầu xuất kho. Vui lòng thử lại sau.')
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+                            foreach ($records as $record) {
+                                $shippingRequest->items()->create([
+                                    'crate_id' => $record['id'],
+                                    'quantity_requested' => $record['pieces'],
+                                    'status' => 'pending', // Đã tạo yêu cầu xuất kho, chưa xử lý
+                                ]);
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title('Xuất kho thành công')
+                                ->body("Đã tạo yêu cầu xuất {$shippingRequest->items()->count()} thùng hàng.")
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Lỗi khi xuất kho')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+                    }),
+
             ])
             ->recordActions([
                 ViewAction::make()
                     ->label('Xem')
                     ->icon('heroicon-o-eye')
                     ->color('info')
-                    ->url(fn($record) => CrateResource::getUrl('view', ['record' => $record])),
+                    ->modal()
+                    ->modalWidth(Width::SevenExtraLarge)
+                    ->schema(fn(Schema $schema) => CrateResource::infolist($schema)),
 
                 EditAction::make()
                     ->label('Sửa')
                     ->icon('heroicon-o-pencil')
                     ->color('warning')
-                    ->url(fn($record) => CrateResource::getUrl('edit', ['record' => $record])),
-
+                    ->modal()
+                    ->modalWidth(Width::SevenExtraLarge),
                 // DissociateAction::make()
                 //     ->label('Hủy liên kết')
                 //     ->icon('heroicon-o-x-mark')
@@ -300,6 +384,7 @@ class CratesRelationManager extends RelationManager
                         ->modalHeading('Xóa các kiện hàng đã chọn')
                         ->modalDescription('Bạn có chắc muốn xóa tất cả kiện hàng đã chọn? Hành động này không thể hoàn tác.'),
                 ]),
+
             ])
             ->defaultSort('created_at', 'desc')
             ->striped()

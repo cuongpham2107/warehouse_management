@@ -14,6 +14,7 @@ class CreateCrate extends CreateRecord
     {
         return 'Tạo thùng hàng';
     }
+    
 
     protected function getCreateFormAction(): \Filament\Actions\Action
     {

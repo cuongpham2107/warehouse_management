@@ -19,7 +19,8 @@ class ListReceivingPlans extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Tạo mới'),
+                ->label('Tạo kế hoạch nhập kho mới')
+                ->icon('heroicon-o-plus'),
         ];
     }
 }

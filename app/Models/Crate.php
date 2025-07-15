@@ -37,7 +37,7 @@ class Crate extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
-
+   
     /**
      * Get the receiving plan for this crate.
      */

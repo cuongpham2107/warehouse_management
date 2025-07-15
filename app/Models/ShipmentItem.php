@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ShipmentItemStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,15 +17,17 @@ class ShipmentItem extends Model
         'shipment_id',
         'crate_id',
         'pallet_id',
+        'status',
         'quantity',
-        'loaded_at',
         'notes',
         'loaded_by',
+        'loaded_at',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
         'loaded_at' => 'datetime',
+        'status' => ShipmentItemStatus::class
     ];
 
     /**

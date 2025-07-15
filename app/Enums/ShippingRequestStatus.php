@@ -34,6 +34,17 @@ enum ShippingRequestStatus: string
             self::CANCELLED => 'danger',
         };
     }
+    public function getIcon(): string
+    {
+        return match ($this) {
+            self::PENDING => 'heroicon-m-clock',
+            self::PROCESSING => 'heroicon-m-cog',
+            self::READY => 'heroicon-m-check-circle',
+            self::SHIPPED => 'heroicon-m-truck',
+            self::DELIVERED => 'heroicon-m-check-circle',
+            self::CANCELLED => 'heroicon-m-x-circle',
+        };
+    }
 
     public function getBadgeClass(): string
     {

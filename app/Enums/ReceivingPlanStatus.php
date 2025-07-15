@@ -29,6 +29,16 @@ enum ReceivingPlanStatus: string
         };
     }
 
+    public function getIcon(): string
+    {
+        return match ($this) {
+            self::PENDING => 'heroicon-m-clock',
+            self::IN_PROGRESS => 'heroicon-m-cog',
+            self::COMPLETED => 'heroicon-m-check-circle',
+            self::CANCELLED => 'heroicon-m-x-circle',
+        };
+    }
+
     public static function getOptions(): array
     {
         return collect(self::cases())

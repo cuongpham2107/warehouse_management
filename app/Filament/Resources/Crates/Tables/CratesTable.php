@@ -17,8 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
-use DateTime;
-use Filament\Forms\Components\TextInput;
+use App\Models\ShippingRequest;
 
 class CratesTable
 {
@@ -127,36 +126,11 @@ class CratesTable
                     ->collapsible(),
             ])
             ->recordActions([
-                // ViewAction::make()->label(''),
+                ViewAction::make()->label('Xem'),
                 EditAction::make()->label('Sửa'),
             ])
             ->headerActions([
-                BulkAction::make('choose_crate_export_warehouse')
-                    ->label('Chọn thùng hàng để xuất kho')
-                    ->icon('heroicon-o-check')
-                    ->color('primary')
-                    ->modalHeading('Chi tiết yêu cầu xuất kho')
-                    ->modalDescription('Vui lòng nhập các thông tin cần thiết để xuất kho các kiện hàng.')
-                    ->schema([
-                        TextInput::make('shipping_request_id')
-                            ->label('Mã yêu cầu xuất kho')
-                            ->required()
-                            ->placeholder('Nhập mã yêu cầu xuất kho'),
-                    ])
-                    ->fillForm(function (Collection $records) {
-                        
-                    })
-                    ->action(function (Collection $records, array $data) {
-                        
-
-                       
-                        // Hiển thị thông báo thành công
-                        \Filament\Notifications\Notification::make()
-                            ->title('Xuất kho thành công')
-                            ->body("Đã xuất {$records->count()} thùng hàng.")
-                            ->success()
-                            ->send();
-                    }),
+                
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

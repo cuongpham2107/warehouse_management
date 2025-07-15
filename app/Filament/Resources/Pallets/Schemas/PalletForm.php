@@ -57,14 +57,18 @@ class PalletForm
                         ->schema([
                             DateTimePicker::make('checked_in_at')
                                 ->label('Thời gian nhập kho')
-                                ->placeholder('Chọn thời gian nhập kho'),
+                                ->placeholder('Chọn thời gian nhập kho')
+                                ->seconds(false)
+                                ->displayFormat('d/m/Y H:i')
+                                ->readOnly(),
 
                             Select::make('checked_in_by')
                                 ->label('Người nhập kho')
                                 ->relationship('checkedInBy', 'name')
                                 ->searchable()
                                 ->preload()
-                                ->placeholder('Chọn người nhập kho'),
+                                ->placeholder('Chọn người nhập kho')
+                                ->disabled(),
                         ])
                         ->columns(2),
 
@@ -73,14 +77,21 @@ class PalletForm
                         ->schema([
                             DateTimePicker::make('checked_out_at')
                                 ->label('Thời gian xuất kho')
-                                ->placeholder('Chọn thời gian xuất kho'),
+                                ->placeholder('Chọn thời gian xuất kho')
+                                ->displayFormat('d/m/Y H:i')
+                                ->native(false)
+                                ->seconds(false)
+                                ->weekStartsOnMonday()
+                                ->locale('vi'),
+                                // ->readOnly(),
 
                             Select::make('checked_out_by')
                                 ->label('Người xuất kho')
                                 ->relationship('checkedOutBy', 'name')
                                 ->searchable()
                                 ->preload()
-                                ->placeholder('Chọn người xuất kho'),
+                                ->placeholder('Chọn người xuất kho')
+                                ->disabled(),
                         ])
                         ->columns(2),
                 ])

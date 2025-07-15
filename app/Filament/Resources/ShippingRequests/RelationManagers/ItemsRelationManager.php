@@ -2,13 +2,17 @@
 
 namespace App\Filament\Resources\ShippingRequests\RelationManagers;
 
-use Filament\Actions\Action;
+use App\Filament\Resources\Shipments\Schemas\ShippingRequestItemForm;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\AssociateAction;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 
 class ItemsRelationManager extends RelationManager
 {
@@ -41,24 +45,63 @@ class ItemsRelationManager extends RelationManager
             ->heading('📦 Danh sách kiện hàng')
             ->description('')
             ->columns([
-                TextColumn::make('crate_id')
+                TextColumn::make('crate.crate_id')
                     ->label('Mã kiện hàng')
-                    ->searchable()
-                    ->sortable()
-                    ->copyable(),
+                    ->searchable(),
+                TextColumn::make('crate.pieces')
+                    ->label('Số kiện')
+                    ->color('info')
+                    ->badge()
+                    ->alignCenter(),
+                TextColumn::make('crate.gross_weight')
+                    ->label('Tổng trọng lượng kiện hàng (kg)')
+                    ->color('warning')
+                    ->badge()
+                    ->alignCenter(),
                 TextColumn::make('quantity_requested')
-                    ->label('Số lượng yêu cầu'),
+                    ->label('Số kiện yêu cầu')
+                    ->color('primary')
+                    ->alignCenter(),
                 TextColumn::make('quantity_shipped')
-                    ->label('Số lượng đã giao'),
+                    ->label('Số kiện đã xuất kho')
+                    ->color('success')
+                    ->alignCenter(),
                 TextColumn::make('status')
+                    ->label('Trạng thái')
+                    ->color(fn($state): string => $state instanceof \App\Enums\ShippingRequestItemStatus ? ($state->getColor() ?? 'gray') : 'gray')
+                    ->icon(fn($state): string => $state instanceof \App\Enums\ShippingRequestItemStatus ? ($state->getIcon() ?? 'heroicon-m-cube') : 'heroicon-m-cube')
+                    ->formatStateUsing(fn($state): string => $state instanceof \App\Enums\ShippingRequestItemStatus ? $state->getLabel() : ($state ?? 'N/A'))
+                    ->badge(),
+            ])
+            ->reorderableColumns()
+            ->filters([
+                SelectFilter::make('status')
+                    ->options(\App\Enums\ShippingRequestItemStatus::getOptions())
                     ->label('Trạng thái'),
             ])
-            ->filters([
-                // Thêm filter nếu cần
-            ])
             ->headerActions([
-                
-
+                CreateAction::make()
+                    ->label('Thêm kiện hàng')
+                    ->modalHeading('Thêm kiện hàng mới')
+                    ->modalSubmitActionLabel('Tạo kiện hàng')
+                    ->successNotificationTitle('Kiện hàng đã được tạo thành công')
+                    ->schema(fn (Schema $schema) => ShippingRequestItemForm::configure($schema)),
+        
+            ])
+             ->recordActions([
+                EditAction::make()
+                    ->label('Chỉnh sửa')
+                    ->modalHeading('Chỉnh sửa kiện hàng')
+                    ->modalSubmitActionLabel('Cập nhật kiện hàng')
+                    ->successNotificationTitle('Kiện hàng đã được cập nhật thành công')
+                    ->schema(fn (Schema $schema) => ShippingRequestItemForm::configure($schema)),
+                DeleteAction::make()
+                    ->label('Xóa')
+                    ->modalHeading('Xác nhận xóa kiện hàng')
+                    ->modalSubmitActionLabel('Xóa kiện hàng')
+                    ->successNotificationTitle('Kiện hàng đã được xóa thành công')
+                    ->requiresConfirmation()
+                    ->color('danger'),  
             ])
             ->defaultSort('created_at', 'desc')
             ->striped()

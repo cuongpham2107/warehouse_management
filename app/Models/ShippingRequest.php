@@ -5,11 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\ShippingRequestPriority;
-use App\Enums\ShippingRequestStatus;
+use Spatie\ModelStates\HasStates;
+use App\States\ShippingRequestState;
+use App\States\PendingState;
+use App\States\ProcessingState;
+use App\States\ReadyState;
+use App\States\CancelledState;
 
 class ShippingRequest extends Model
 {
-    use HasFactory;
+    use HasFactory, HasStates;
 
     protected $fillable = [
         'request_code',
@@ -26,11 +31,97 @@ class ShippingRequest extends Model
     protected $casts = [
         'requested_date' => 'date',
         'priority' => ShippingRequestPriority::class,
-        'status' => ShippingRequestStatus::class,
+        'status' => ShippingRequestState::class,
         'created_by' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    protected function registerStates(): void
+    {
+        $this
+            ->addState('status', ShippingRequestState::class)
+            ->default(PendingState::class)
+            ->allowTransition(PendingState::class, ProcessingState::class)
+            ->allowTransition(PendingState::class, CancelledState::class)
+            ->allowTransition(ProcessingState::class, ReadyState::class)
+            ->allowTransition(ProcessingState::class, CancelledState::class)
+            ->allowTransition(ReadyState::class, CancelledState::class);
+    }
+
+    /**
+     * Chuyển sang bước tiếp theo trong quy trình làm việc
+     */
+    public function nextStep(): bool
+    {
+        try {
+            switch (get_class($this->status)) {
+                case PendingState::class:
+                    $this->status->transitionTo(ProcessingState::class);
+                    break;
+                case ProcessingState::class:
+                    $this->status->transitionTo(ReadyState::class);
+                    break;
+                default:
+                    return false;
+            }
+            $this->save();
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Cancel the shipping request
+     */
+    public function cancel(): bool
+    {
+        
+        try {
+            // Chỉ có thể hủy bỏ khỏi các trạng thái đang chờ xử lý, xử lý hoặc sẵn sàng
+            if (in_array(get_class($this->status), [
+                PendingState::class,
+                ProcessingState::class,
+                ReadyState::class
+            ])) {
+                $this->status->transitionTo(CancelledState::class);
+                $this->save();
+                return true;
+            }
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Kiểm tra xem yêu cầu có thể bị hủy không
+     */
+    public function canBeCancelled(): bool
+    {
+        return in_array(get_class($this->status), [
+            PendingState::class,
+            ProcessingState::class,
+            ReadyState::class
+        ]);
+    }
+
+    /**
+     * Check if the request can move to next step
+     */
+    public function canMoveToNextStep(): bool
+    {
+        return in_array(get_class($this->status), [
+            PendingState::class,
+            ProcessingState::class,
+        ]);
+    }
+
+    public function canExport(): bool
+    {
+        return $this->status instanceof ReadyState;
+    }
 
     /**
      * Get the user who created this shipping request.

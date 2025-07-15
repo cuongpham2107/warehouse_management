@@ -19,7 +19,9 @@ class ViewReceivingPlan extends ViewRecord
     {
         return [
             EditAction::make()
-                ->label('Chỉnh sửa'),
+                ->label('Chỉnh sửa')
+                ->icon('heroicon-o-pencil')
+                ->outlined(),
         ];
     }
 }
