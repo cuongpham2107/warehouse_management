@@ -21,22 +21,6 @@ class ItemsRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            TextInput::make('product_name')
-                ->label('Tên sản phẩm')
-                ->required()
-                ->maxLength(255),
-            TextInput::make('quantity_requested')
-                ->label('Số lượng yêu cầu')
-                ->required()
-                ->numeric(),
-            TextInput::make('quantity_shipped')
-                ->label('Số lượng đã giao')
-                ->numeric()
-                ->default(0),
-            TextInput::make('status')
-                ->label('Trạng thái')
-                ->required()
-                ->maxLength(50),
         ]);
     }
     public function table(Tables\Table $table): Tables\Table
@@ -66,18 +50,10 @@ class ItemsRelationManager extends RelationManager
                     ->label('Số kiện đã xuất kho')
                     ->color('success')
                     ->alignCenter(),
-                TextColumn::make('status')
-                    ->label('Trạng thái')
-                    ->color(fn($state): string => $state instanceof \App\Enums\ShippingRequestItemStatus ? ($state->getColor() ?? 'gray') : 'gray')
-                    ->icon(fn($state): string => $state instanceof \App\Enums\ShippingRequestItemStatus ? ($state->getIcon() ?? 'heroicon-m-cube') : 'heroicon-m-cube')
-                    ->formatStateUsing(fn($state): string => $state instanceof \App\Enums\ShippingRequestItemStatus ? $state->getLabel() : ($state ?? 'N/A'))
-                    ->badge(),
+                
             ])
             ->reorderableColumns()
             ->filters([
-                SelectFilter::make('status')
-                    ->options(\App\Enums\ShippingRequestItemStatus::getOptions())
-                    ->label('Trạng thái'),
             ])
             ->headerActions([
                 CreateAction::make()

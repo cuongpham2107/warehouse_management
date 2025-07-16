@@ -28,12 +28,6 @@ class ShipmentItemForm
                 ->columnSpan(2),
 
 
-            Select::make('status')
-                ->label('Trạng thái')
-                ->options(\App\Enums\ShipmentItemStatus::getOptions())
-                ->default(\App\Enums\ShipmentItemStatus::LOADED)
-                ->required()
-                ->columnSpan(3),
             TextInput::make('quantity')
                 ->label('Số lượng')
                 ->required()

@@ -17,12 +17,22 @@ return new class extends Migration
             $table->foreignId('pallet_id')->constrained('pallets');
             $table->timestamp('loaded_at')->nullable();
             $table->foreignId('loaded_by')->nullable()->constrained('users');
-            $table->enum('status', ['loading', 'loaded', 'shipped', 'delivered'])->default('loading');
             $table->timestamps();
+             $table->foreignId('crate_id')
+                ->nullable()
+                ->constrained('crates')
+                ->nullOnDelete()
+                ->after('shipment_id');
+            $table->integer('quantity')
+                ->default(0)
+                ->after('crate_id');
+            $table->string('notes')
+                ->nullable()
+                ->after('quantity');
+
             
             $table->index(['shipment_id']);
             $table->index(['pallet_id']);
-            $table->index(['status']);
             $table->index(['loaded_at']);
         });
     }

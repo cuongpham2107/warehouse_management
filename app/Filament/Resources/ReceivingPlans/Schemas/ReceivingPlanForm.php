@@ -10,6 +10,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use App\Enums\ReceivingPlanStatus;
 use App\Filament\Resources\Vehicles\Schemas\VehicleForm;
+use App\Filament\Resources\Vendors\Schemas\VendorForm;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ReceivingPlan;
 
@@ -39,7 +40,7 @@ class ReceivingPlanForm
                             ->preload()
                             ->placeholder('Chọn nhà cung cấp')
                             ->columnSpan(3)
-                            ->createOptionForm(fn (Schema $schema) => VehicleForm::configure($schema)),
+                            ->createOptionForm(fn (Schema $schema) => VendorForm::configure($schema)),
 
                         DatePicker::make('plan_date')
                             ->label('Ngày kế hoạch')

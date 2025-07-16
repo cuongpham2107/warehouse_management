@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\ShippingRequestItemStatus;
 
 class ShippingRequestItem extends Model
 {
@@ -15,7 +14,6 @@ class ShippingRequestItem extends Model
         'crate_id',
         'quantity_requested',
         'quantity_shipped',
-        'status',
         'notes',
     ];
 
@@ -24,7 +22,6 @@ class ShippingRequestItem extends Model
         'crate_id' => 'integer',
         'quantity_requested' => 'integer',
         'quantity_shipped' => 'integer',
-        'status' => ShippingRequestItemStatus::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -45,37 +42,6 @@ class ShippingRequestItem extends Model
         return $this->belongsTo(Crate::class);
     }
 
-    /**
-     * Scope a query to only include pending items.
-     */
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
-    }
-
-    /**
-     * Scope a query to only include allocated items.
-     */
-    public function scopeAllocated($query)
-    {
-        return $query->where('status', 'allocated');
-    }
-
-    /**
-     * Scope a query to only include picked items.
-     */
-    public function scopePicked($query)
-    {
-        return $query->where('status', 'picked');
-    }
-
-    /**
-     * Scope a query to only include shipped items.
-     */
-    public function scopeShipped($query)
-    {
-        return $query->where('status', 'shipped');
-    }
 
     /**
      * Get remaining quantity to ship.
@@ -101,21 +67,6 @@ class ShippingRequestItem extends Model
         return $this->quantity_shipped > 0 && $this->quantity_shipped < $this->quantity_requested;
     }
 
-    /**
-     * Mark item as allocated.
-     */
-    public function allocate()
-    {
-        $this->update(['status' => 'allocated']);
-    }
-
-    /**
-     * Mark item as picked.
-     */
-    public function pick()
-    {
-        $this->update(['status' => 'picked']);
-    }
 
     /**
      * Ship a specific quantity.
@@ -126,7 +77,6 @@ class ShippingRequestItem extends Model
         
         $this->update([
             'quantity_shipped' => $newShippedQuantity,
-            'status' => $newShippedQuantity >= $this->quantity_requested ? 'shipped' : 'picked'
         ]);
     }
 }

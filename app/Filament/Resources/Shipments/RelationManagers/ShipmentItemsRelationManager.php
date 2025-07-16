@@ -34,14 +34,6 @@ class ShipmentItemsRelationManager extends RelationManager
                     ->searchable(),
                 TextColumn::make('crate.crate_id')
                     ->searchable(),
-                TextColumn::make('status')
-                    ->label('Trạng thái')
-                    ->formatStateUsing(fn($state) => $state instanceof \App\Enums\ShipmentItemStatus ? $state->getLabel() : ($state ? \App\Enums\ShipmentItemStatus::from($state)->getLabel() : ''))
-                    ->icon(fn ($state) => $state instanceof \App\Enums\ShipmentItemStatus ? $state->getIcon() : ($state ? \App\Enums\ShipmentItemStatus::from($state)->getIcon() : ''))
-                    ->searchable()
-                    ->badge()
-                    ->color(fn ($state) => $state instanceof \App\Enums\ShipmentItemStatus ? $state->getColor() : ($state ? \App\Enums\ShipmentItemStatus::from($state)->getColor() : '')), 
-
                 TextColumn::make('quantity')
                     ->searchable(),
             ])

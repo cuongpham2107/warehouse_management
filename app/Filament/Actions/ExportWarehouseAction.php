@@ -20,6 +20,7 @@ use App\Models\Pallet;
 use Filament\Forms\Components\Hidden;
 use App\Enums\ShipmentItemStatus;
 use App\Enums\ShippingRequestItemStatus;
+use App\States\ShippingState;
 
 class ExportWarehouseAction extends Action
 {
@@ -187,16 +188,14 @@ class ExportWarehouseAction extends Action
                             'quantity' => $item['quantity_requested'] ?? 0,
                             'loaded_at' => now(),
                             'loaded_by' => Auth::user()->id,
-                            'status' => ShipmentItemStatus::LOADED->value,
                         ]);
                     });
 
                     //Cập nhập trạng thái yêu cầu vận chuyển
-                    $record->update(['status' => ShippedState::class]);
+                    $record->update(['status' => ShippingState::class]);
 
                     //Cập nhập trạng thái cho các item
                     $record->items->each(fn($item) => $item->update([
-                        'status' => ShippingRequestItemStatus::PENDING->value,
                         'quantity_shipped' => $item->quantity_requested,
                     ]));
 

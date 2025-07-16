@@ -2,9 +2,9 @@
 
 namespace App\States;
 
-class ShippedState extends ShippingRequestState
+class ShippingState extends ShippingRequestState
 {
-    public static $name = 'shipped';
+    public static $name = 'shipping';
 
     public function color(): string
     {
@@ -13,7 +13,7 @@ class ShippedState extends ShippingRequestState
 
     public function label(): string
     {
-        return 'Đã vận chuyển';
+        return 'Đang vận chuyển';
     }
 
     public function icon(): string

@@ -26,14 +26,7 @@ class ShippingRequestItemForm
                     ->numeric()
                     ->default(1)
                     ->columnSpan(1),
-
-                Select::make('status')
-                    ->label('Trạng thái')
-                    ->options(\App\Enums\ShippingRequestItemStatus::getOptions())
-                    ->default(\App\Enums\ShippingRequestItemStatus::PENDING)
-                    ->required()
-                    ->columnSpan(2),
             ])
-            ->columns(6);
+            ->columns(4);
     }
 }

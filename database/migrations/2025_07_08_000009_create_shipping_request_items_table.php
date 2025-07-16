@@ -17,13 +17,11 @@ return new class extends Migration
             $table->foreignId('crate_id')->constrained('crates');
             $table->integer('quantity_requested')->default(1);
             $table->integer('quantity_shipped')->default(0);
-            $table->enum('status', ['pending', 'allocated', 'picked', 'shipped'])->default('pending');
             $table->text('notes')->nullable();
             $table->timestamps();
             
             $table->index(['shipping_request_id']);
             $table->index(['crate_id']);
-            $table->index(['status']);
         });
     }
 
