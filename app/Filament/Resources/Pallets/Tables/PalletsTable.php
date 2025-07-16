@@ -116,37 +116,6 @@ class PalletsTable
                 EditAction::make()->label('Sửa'),
             ])
             ->headerActions([
-                BulkAction::make('switch_status')
-                    ->label('Cập nhật trạng thái')
-                    ->icon('heroicon-o-arrow-path')
-                    ->button()
-                    ->outlined()
-                    ->modalWidth(Width::Small)
-                    ->schema([
-                        Select::make('status')
-                            ->label('Trạng thái mới')
-                            ->options(\App\Enums\PalletStatus::getOptions())
-                            ->required()
-                            ->native(false),
-                    ])
-                    ->action(function (Collection $records, array $data) {
-                        try{
-                            foreach ($records as $record) {
-                                $record->update(['status' => $data['status']]);
-                            }
-                            \Filament\Notifications\Notification::make()
-                                ->title('Trạng thái đã được cập nhật')
-                                ->success()
-                                ->send();
-                        }
-                        catch (\Exception $e) {
-                            \Filament\Notifications\Notification::make()
-                                ->title('Lỗi cập nhật trạng thái')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    }),
                 BulkAction::make('choose_crate_export_warehouse')
                     ->label('Chọn thùng hàng để xuất kho')
                     ->icon('heroicon-o-check')
@@ -211,6 +180,10 @@ class PalletsTable
                     DeleteBulkAction::make()->label('Xóa đã chọn'),
                 ])->label('Hành động hàng loạt'),
             ])
+            ->checkIfRecordIsSelectableUsing(fn($record) =>
+                ($record->status instanceof \App\Enums\PalletStatus && $record->status === \App\Enums\PalletStatus::STORED)
+                || $record->status === \App\Enums\PalletStatus::STORED->value
+            )
             ->defaultSort('created_at', 'desc')
             ->reorderableColumns();
     }

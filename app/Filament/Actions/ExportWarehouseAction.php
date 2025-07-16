@@ -18,8 +18,6 @@ use Filament\Forms\Components\Repeater\TableColumn;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Pallet;
 use Filament\Forms\Components\Hidden;
-use App\Enums\ShipmentItemStatus;
-use App\Enums\ShippingRequestItemStatus;
 use App\States\ShippingState;
 
 class ExportWarehouseAction extends Action
@@ -29,7 +27,6 @@ class ExportWarehouseAction extends Action
         return parent::make($name)
             ->icon('heroicon-o-arrow-down-tray')
             ->label('Xuất kho')
-
             ->modal('export_warehouse_modal')
             ->modalHeading('Xuất kho yêu cầu vận chuyển')
             ->fillForm(function (Model $record) {

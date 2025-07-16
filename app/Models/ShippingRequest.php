@@ -176,7 +176,7 @@ class ShippingRequest extends Model
      */
     public function scopeShipped($query)
     {
-        return $query->where('status', 'shipped');
+        return $query->where('status', 'shipping');
     }
 
     /**
@@ -249,7 +249,7 @@ class ShippingRequest extends Model
      */
     public function isOverdue()
     {
-        return $this->requested_date->isPast() && !in_array($this->status, ['shipped', 'delivered']);
+        return $this->requested_date->isPast() && !in_array($this->status, ['shipping', 'delivered']);
     }
 
     /**

@@ -3,16 +3,12 @@
 namespace App\Filament\Resources\ShippingRequests\RelationManagers;
 
 use App\Filament\Resources\Shipments\Schemas\ShippingRequestItemForm;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
+use Filament\Actions\ViewAction;
 
 class ItemsRelationManager extends RelationManager
 {
@@ -65,19 +61,25 @@ class ItemsRelationManager extends RelationManager
         
             ])
              ->recordActions([
-                EditAction::make()
-                    ->label('Chỉnh sửa')
-                    ->modalHeading('Chỉnh sửa kiện hàng')
-                    ->modalSubmitActionLabel('Cập nhật kiện hàng')
-                    ->successNotificationTitle('Kiện hàng đã được cập nhật thành công')
+                ViewAction::make()
+                    ->label('Xem')
+                    ->modalHeading('Xem kiện hàng')
+                    ->modalSubmitActionLabel('Xem kiện hàng')
+                    ->successNotificationTitle('Kiện hàng đã được xem thành công')
                     ->schema(fn (Schema $schema) => ShippingRequestItemForm::configure($schema)),
-                DeleteAction::make()
-                    ->label('Xóa')
-                    ->modalHeading('Xác nhận xóa kiện hàng')
-                    ->modalSubmitActionLabel('Xóa kiện hàng')
-                    ->successNotificationTitle('Kiện hàng đã được xóa thành công')
-                    ->requiresConfirmation()
-                    ->color('danger'),  
+                // EditAction::make()
+                //     ->label('Chỉnh sửa')
+                //     ->modalHeading('Chỉnh sửa kiện hàng')
+                //     ->modalSubmitActionLabel('Cập nhật kiện hàng')
+                //     ->successNotificationTitle('Kiện hàng đã được cập nhật thành công')
+                //     ->schema(fn (Schema $schema) => ShippingRequestItemForm::configure($schema)),
+                // DeleteAction::make()
+                //     ->label('Xóa')
+                //     ->modalHeading('Xác nhận xóa kiện hàng')
+                //     ->modalSubmitActionLabel('Xóa kiện hàng')
+                //     ->successNotificationTitle('Kiện hàng đã được xóa thành công')
+                //     ->requiresConfirmation()
+                //     ->color('danger'),  
             ])
             ->defaultSort('created_at', 'desc')
             ->striped()

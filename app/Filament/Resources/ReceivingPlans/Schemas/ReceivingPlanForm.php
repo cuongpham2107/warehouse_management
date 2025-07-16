@@ -9,7 +9,7 @@ use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use App\Enums\ReceivingPlanStatus;
-use App\Filament\Resources\Vehicles\Schemas\VehicleForm;
+use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\Vendors\Schemas\VendorForm;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ReceivingPlan;
@@ -35,7 +35,11 @@ class ReceivingPlanForm
                         Select::make('vendor_id')
                             ->label('Nhà cung cấp')
                             ->required()
-                            ->relationship('vendor', 'vendor_name')
+                            ->relationship(
+                                name: 'vendor', 
+                                titleAttribute: 'vendor_name',
+                                modifyQueryUsing: fn (Builder $query) => $query->where('status', 'active')
+                            )
                             ->searchable()
                             ->preload()
                             ->placeholder('Chọn nhà cung cấp')

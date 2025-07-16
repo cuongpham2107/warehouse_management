@@ -45,6 +45,8 @@ class ShipmentForm
                                 Select::make('status')
                                     ->label('Trạng thái')
                                     ->required()
+                                    ->disabled()
+                                    ->dehydrated()
                                     ->options(ShipmentStatus::getOptions())
                                     ->default(ShipmentStatus::LOADING)
                                     ->native(false),
@@ -54,6 +56,17 @@ class ShipmentForm
                             ->icon(\Filament\Support\Icons\Heroicon::Clock)
                             ->iconPosition(\Filament\Support\Enums\IconPosition::Before)
                             ->schema([
+                                Select::make('driver_id')
+                                    ->label('Tên tài xế')
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->relationship('vehicle', 'driver_name')
+                                    ->placeholder('Chọn tài xế'),
+                                    Select::make('driver_phone')
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->relationship('vehicle', 'driver_phone')
+                                    ->label('SĐT tài xế'),
                                 DateTimePicker::make('departure_time')
                                     ->label('Thời gian khởi hành')
                                     ->placeholder('Chọn thời gian khởi hành'),
@@ -62,34 +75,8 @@ class ShipmentForm
                                     ->placeholder('Chọn thời gian đến'),
                             ])
                             ->columns(2),
-                        \Filament\Schemas\Components\Tabs\Tab::make('Thông tin hàng hóa')
-                            ->icon(\Filament\Support\Icons\Heroicon::Cube)
-                            ->iconPosition(\Filament\Support\Enums\IconPosition::Before)
-                            ->schema([
-                                TextInput::make('vehicle.driver_name')
-                                    ->label('Tên tài xế')
-                                    ->readOnly(),
-                                TextInput::make('vehicle.driver_phone')
-                                    ->label('SĐT tài xế')
-                                    ->readOnly(),
-                            ])
-                            ->columns(2),
-                        \Filament\Schemas\Components\Tabs\Tab::make('Thông tin bổ sung')
-                            ->icon(\Filament\Support\Icons\Heroicon::DocumentText)
-                            ->iconPosition(\Filament\Support\Enums\IconPosition::Before)
-                            ->schema([
-                                Textarea::make('notes')
-                                    ->label('Ghi chú')
-                                    ->rows(3)
-                                    ->placeholder('Nhập ghi chú về lô hàng'),
-                                Select::make('created_by')
-                                    ->label('Người tạo')
-                                    ->relationship('createdBy', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->placeholder('Chọn người tạo lô hàng'),
-                            ])
-                            ->columns(1),
+                       
+                       
                         \Filament\Schemas\Components\Tabs\Tab::make('Thông tin chi tiết')
                             ->icon(\Filament\Support\Icons\Heroicon::Scale)
                             ->iconPosition(\Filament\Support\Enums\IconPosition::Before)
@@ -109,6 +96,22 @@ class ShipmentForm
                                     ->suffix('kg'),
                             ])
                             ->columns(3),
+                            \Filament\Schemas\Components\Tabs\Tab::make('Thông tin bổ sung')
+                            ->icon(\Filament\Support\Icons\Heroicon::DocumentText)
+                            ->iconPosition(\Filament\Support\Enums\IconPosition::Before)
+                            ->schema([
+                                Textarea::make('notes')
+                                    ->label('Ghi chú')
+                                    ->rows(3)
+                                    ->placeholder('Nhập ghi chú về lô hàng'),
+                                Select::make('created_by')
+                                    ->label('Người tạo')
+                                    ->relationship('createdBy', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->placeholder('Chọn người tạo lô hàng'),
+                            ])
+                            ->columns(1),
                     ]),
             ]);
     }

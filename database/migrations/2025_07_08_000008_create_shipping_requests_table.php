@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('delivery_address')->nullable();
             $table->date('requested_date');
             $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
-            $table->enum('status', ['pending', 'processing', 'ready', 'shipped', 'delivered', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'processing', 'ready', 'shipping', 'delivered', 'cancelled'])->default('pending');
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->timestamps();

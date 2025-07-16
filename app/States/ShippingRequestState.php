@@ -20,7 +20,7 @@ abstract class ShippingRequestState extends State
             'pending' => (new PendingState('pending'))->label(),
             'processing' => (new ProcessingState('processing'))->label(),
             'ready' => (new ReadyState('ready'))->label(),
-            'shipped' => (new ShippingState('shipped'))->label(),
+            'shipping' => (new ShippingState('shipping'))->label(),
             'delivered' => (new DeliveredState('delivered'))->label(),
             'cancelled' => (new CancelledState('cancelled'))->label(),
         ];
@@ -35,7 +35,7 @@ abstract class ShippingRequestState extends State
             'pending' => PendingState::class,
             'processing' => ProcessingState::class,
             'ready' => ReadyState::class,
-            'shipped' => ShippingState::class,
+            'shipping' => ShippingState::class,
             'delivered' => DeliveredState::class,
             'cancelled' => CancelledState::class,
             default => PendingState::class,
