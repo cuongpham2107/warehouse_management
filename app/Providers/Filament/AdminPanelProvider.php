@@ -19,6 +19,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Support\Enums\Platform;
+use Filament\Support\Enums\Width;
+use Filament\Pages\Enums\SubNavigationPosition;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -26,8 +28,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('admin')
-            ->path('admin')
+            ->id('')
+            ->path('')
             ->login()
             ->colors([
                 'danger' => Color::Rose,
@@ -38,8 +40,10 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
             ])
             ->unsavedChangesAlerts()
-            // ->topNavigation()
-            
+            ->topNavigation()
+            ->maxContentWidth(Width::Full)
+            ->subNavigationPosition(SubNavigationPosition::End)
+            ->brandName('ASGL')
             ->globalSearch(true)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {

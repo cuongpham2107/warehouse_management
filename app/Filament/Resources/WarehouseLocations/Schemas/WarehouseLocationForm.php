@@ -45,7 +45,7 @@ class WarehouseLocationForm
                             ->required()
                             ->placeholder('Nhập vị trí cụ thể'),
                     ])
-                    ->columns(3)
+                    ->columns(5)
                     ->collapsible(),
                     
                 Section::make('Thông số kỹ thuật')
@@ -71,7 +71,7 @@ class WarehouseLocationForm
                             ->label('Trạng thái')
                             ->required()
                             ->options(WarehouseLocationStatus::getOptions())
-                            ->default(WarehouseLocationStatus::AVAILABLE->value)
+                            ->default(WarehouseLocationStatus::OCCUPIED->value)
                             ->native(false),
                     ])
                     ->columns(3)

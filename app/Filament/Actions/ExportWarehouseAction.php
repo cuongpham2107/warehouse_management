@@ -208,7 +208,7 @@ class ExportWarehouseAction extends Action
                         ->actions([
                             Action::make('view')
                                 ->label('Xem yêu cầu vận chuyển')
-                                ->url(route('filament.admin.resources.shipments.view', ['record' => $shipment->id]))
+                                ->url(route('filament..resources.shipments.view', ['record' => $shipment->id]))
                                 ->openUrlInNewTab()
                                 ->icon('heroicon-o-eye')
                                 ->color('primary'),

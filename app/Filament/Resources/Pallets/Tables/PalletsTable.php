@@ -16,6 +16,8 @@ use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
 use App\Models\ShippingRequest;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PalletExport;
 
 class PalletsTable
 {
@@ -173,6 +175,13 @@ class PalletsTable
                             return;
                         }
                        
+                    }),
+                BulkAction::make('export_excel')
+                    ->label('Xuất Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function (Collection $records) {
+                        return Excel::download(new PalletExport($records), 'pallets_export.xlsx');
                     }),
             ])
             ->toolbarActions([

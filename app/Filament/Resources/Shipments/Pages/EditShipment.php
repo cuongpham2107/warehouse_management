@@ -12,6 +12,7 @@ use App\Enums\ShipmentStatus;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use App\States\DeliveredState;
+use App\Filament\Resources\Shipments\Actions\ExportInvoiceShipment;
 
 class EditShipment extends EditRecord
 {
@@ -20,6 +21,7 @@ class EditShipment extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ExportInvoiceShipment::make('export_invoice_shipment'),
             ActionGroup::make([
                 Action::make('switch_status_ready')
                     ->label('Sẵn sàng')

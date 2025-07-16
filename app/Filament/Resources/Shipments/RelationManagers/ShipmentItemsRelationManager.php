@@ -23,13 +23,18 @@ class ShipmentItemsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Danh sách kiện hàng')
+            ->description('Quản lý các kiện hàng thuộc đơn hàng này')
             // ->recordTitleAttribute('pallet_id')
             ->columns([
                 TextColumn::make('pallet.pallet_id')
+                    ->label('Pallet ID')
                     ->searchable(),
                 TextColumn::make('crate.crate_id')
+                    ->label('Crate ID')
                     ->searchable(),
                 TextColumn::make('quantity')
+                    ->label('Số lượng')
                     ->searchable(),
             ])
             ->filters([

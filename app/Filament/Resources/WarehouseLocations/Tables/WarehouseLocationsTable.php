@@ -48,6 +48,7 @@ class WarehouseLocationsTable
                     ->color(fn($record) => $record->status->getColor())
                     ->formatStateUsing(fn($state) => $state->getLabel())
                     ->label('Trạng thái')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->label('Ngày tạo')

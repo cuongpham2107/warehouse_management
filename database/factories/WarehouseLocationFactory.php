@@ -11,7 +11,7 @@ class WarehouseLocationFactory extends Factory
 
     public function definition(): array
     {
-        $statuses = ['available', 'occupied', 'maintenance'];
+        $statuses = [ 'occupied', 'maintenance'];
         return [
             'location_code' => $this->faker->unique()->bothify('LOC-###'),
             'zone' => $this->faker->randomElement(['A', 'B', 'C', 'D']),

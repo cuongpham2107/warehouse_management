@@ -32,7 +32,7 @@ class StatsOverviewWidget extends BaseWidget
                 ->color('warning'),
 
             Stat::make('Yêu cầu vận chuyển', ShippingRequest::pending()->orWhere(function($query) {
-                $query->whereState('status', \App\States\ShippingRequest\ProcessingState::class);
+                $query->whereState('status', \App\States\ProcessingState::class);
             })->count())
                 ->description('Tổng yêu cầu: ' . ShippingRequest::count())
                 ->descriptionIcon('heroicon-m-paper-airplane')

@@ -54,13 +54,7 @@ class WarehouseLocation extends Model
         return $this->hasMany(InventoryMovement::class, 'to_location_id');
     }
 
-    /**
-     * Scope a query to only include available locations.
-     */
-    public function scopeAvailable($query)
-    {
-        return $query->where('status', 'available');
-    }
+   
 
     /**
      * Scope a query to only include occupied locations.
@@ -78,13 +72,6 @@ class WarehouseLocation extends Model
         return $query->where('zone', $zone);
     }
 
-    /**
-     * Check if location is available for storage.
-     */
-    public function isAvailable()
-    {
-        return $this->status === 'available';
-    }
 
     /**
      * Get the full location path (Zone-Rack-Level-Position).
