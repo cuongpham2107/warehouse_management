@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use App\Filament\Resources\Shipments\RelationManagers\ShipmentItemsRelationManager;
 
 class ShipmentResource extends Resource
 {
@@ -67,7 +68,7 @@ class ShipmentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ShipmentItemsRelationManager::class,
         ];
     }
 

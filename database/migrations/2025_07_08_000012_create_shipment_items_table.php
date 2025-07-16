@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('pallet_id')->constrained('pallets');
             $table->timestamp('loaded_at')->nullable();
             $table->foreignId('loaded_by')->nullable()->constrained('users');
-            $table->enum('status', ['loaded', 'shipped', 'delivered'])->default('loaded');
+            $table->enum('status', ['loading', 'loaded', 'shipped', 'delivered'])->default('loading');
             $table->timestamps();
             
             $table->index(['shipment_id']);
