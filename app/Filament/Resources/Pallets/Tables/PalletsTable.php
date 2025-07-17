@@ -24,6 +24,8 @@ class PalletsTable
     public static function configure(Table $table): Table
     {
         return $table
+            // ->heading('Danh sách pallet')
+            ->description('Trạng thái của các pallet phải là "Đã lưu kho" để có thể xuất kho.')
             ->columns([
                 TextColumn::make('pallet_id')
                     ->label('Mã pallet')
@@ -118,6 +120,29 @@ class PalletsTable
                 EditAction::make()->label('Sửa'),
             ])
             ->headerActions([
+                BulkAction::make('switch_status')
+                    ->label('Chuyển trạng thái')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->modalHeading('Chuyển trạng thái pallet')
+                    ->modalDescription('Vui lòng chọn trạng thái mới cho pallet.')
+                    ->schema([
+                        Select::make('status')
+                            ->label('Trạng thái mới')
+                            ->options(\App\Enums\PalletStatus::getOptions())
+                            ->required()
+                            ->native(false),
+                    ])
+                    ->action(function (Collection $records, array $data) {
+                        foreach ($records as $record) {
+                            $record->update(['status' => $data['status']]);
+                        }
+                        \Filament\Notifications\Notification::make()
+                            ->title('Cập nhật trạng thái thành công')
+                            ->body('Trạng thái của các pallet đã được cập nhật.')
+                            ->success()
+                            ->send();
+                    }),
                 BulkAction::make('choose_crate_export_warehouse')
                     ->label('Chọn thùng hàng để xuất kho')
                     ->icon('heroicon-o-check')
@@ -125,6 +150,14 @@ class PalletsTable
                     ->modalHeading('Chi tiết yêu cầu xuất kho')
                     ->modalDescription('Vui lòng nhập các thông tin cần thiết để xuất kho các kiện hàng.')
                     ->schema(fn ($schema) => ShippingRequestForm::configure($schema))
+                    ->visible(fn($records) =>
+                        $records && $records->every(fn ($record) => 
+                            $record && (
+                                ($record->status instanceof \App\Enums\PalletStatus && $record->status === \App\Enums\PalletStatus::STORED)
+                                || $record->status === \App\Enums\PalletStatus::STORED->value
+                            )
+                        )
+                    )
                     ->fillForm(function (Collection $records) {})
                     ->action(function (Collection $records, array $data) {
                         
@@ -176,23 +209,19 @@ class PalletsTable
                         }
                        
                     }),
-                BulkAction::make('export_excel')
-                    ->label('Xuất Excel')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->color('success')
-                    ->action(function (Collection $records) {
-                        return Excel::download(new PalletExport($records), 'pallets_export.xlsx');
-                    }),
+                // BulkAction::make('export_excel')
+                //     ->label('Xuất Excel')
+                //     ->icon('heroicon-o-arrow-down-tray')
+                //     ->color('success')
+                //     ->action(function (Collection $records) {
+                //         return Excel::download(new PalletExport($records), 'pallets_export.xlsx');
+                //     }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()->label('Xóa đã chọn'),
                 ])->label('Hành động hàng loạt'),
             ])
-            ->checkIfRecordIsSelectableUsing(fn($record) =>
-                ($record->status instanceof \App\Enums\PalletStatus && $record->status === \App\Enums\PalletStatus::STORED)
-                || $record->status === \App\Enums\PalletStatus::STORED->value
-            )
             ->defaultSort('created_at', 'desc')
             ->reorderableColumns();
     }
