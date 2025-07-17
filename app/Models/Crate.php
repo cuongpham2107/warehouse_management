@@ -37,7 +37,10 @@ class Crate extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
-   
+    public function pallet()
+    {
+        return $this->hasOne(Pallet::class, 'crate_id');
+    }
     /**
      * Get the receiving plan for this crate.
      */

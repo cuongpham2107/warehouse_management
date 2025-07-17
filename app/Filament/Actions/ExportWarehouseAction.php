@@ -3,6 +3,7 @@
 namespace App\Filament\Actions;
 
 use App\Enums\ShipmentStatus;
+use App\Enums\VehicleStatus;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -10,15 +11,16 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use App\Models\Shipment;
-use App\States\ShippedState;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Pallet;
+use App\Models\Vehicle;
 use Filament\Forms\Components\Hidden;
 use App\States\ShippingState;
+use Livewire\Component;
+use Illuminate\Support\Facades\DB;
 
 class ExportWarehouseAction extends Action
 {
@@ -30,22 +32,26 @@ class ExportWarehouseAction extends Action
             ->modal('export_warehouse_modal')
             ->modalHeading('Xuất kho yêu cầu vận chuyển')
             ->fillForm(function (Model $record) {
-                        $crateData['shipment_code'] = 'DH-' . now()->format('YmdHis');
-                        foreach ($record->items as $item) {
-                            $pallet = Pallet::select('id','pallet_id','crate_id','location_id')->where('crate_id', $item->crate_id)->first();
-                            $crateData['items'][] = [
-                                'crate_id' => $item->crate->id,
-                                'crate_code' => $item->crate->crate_id,
-                                'pallet_id'=> $pallet->id,
-                                'pallet_code' => $pallet->pallet_id,
-                                'location_code' => $pallet->location->location_code ?? 'Chưa xác định',
-                                'departure_time' => null,
-                                'arrival_time' => null,
-                                'quantity_requested' => $item->quantity_requested ?? 0,
-                            ];
-                        }
-                        return $crateData;
-                    })
+                // Eager load các quan hệ cần thiết cho items
+                $items = $record->items()->with(['crate', 'crate.pallet.location'])->get();
+                $crateData['shipment_code'] = 'DH-' . now()->format('YmdHis');
+                foreach ($items as $item) {
+                    $crate = $item->crate;
+                    $pallet = $crate?->pallet;
+                    $location = $pallet?->location;
+                    $crateData['items'][] = [
+                        'crate_id' => $crate?->id,
+                        'crate_code' => $crate?->crate_id,
+                        'pallet_id' => $pallet?->id,
+                        'pallet_code' => $pallet?->pallet_id,
+                        'location_code' => $location?->location_code ?? 'Chưa xác định',
+                        'departure_time' => null,
+                        'arrival_time' => null,
+                        'quantity_requested' => $item->quantity_requested ?? 0,
+                    ];
+                }
+                return $crateData;
+            })
             ->schema(
                 fn(Schema $schema) =>
                 $schema->columns(2)->components([
@@ -59,9 +65,9 @@ class ExportWarehouseAction extends Action
                         ->columnSpanFull(),
                     Select::make('vehicle_id')
                         ->label('Xe tải')
-                        ->options(fn() => \App\Models\Vehicle::all()->mapWithKeys(function ($vehicle) {
+                        ->options(fn() => \App\Models\Vehicle::where('status', VehicleStatus::AVAILABLE->value)->get()->mapWithKeys(function ($vehicle) {
                             $label = sprintf(
-                                'Mã xe: %s | Biển số: %s | Tải trọng: %s kg | Trạn thái: %s',
+                                'Mã xe: %s | Biển số: %s | Tải trọng: %s kg | Trạng thái: %s',
                                 $vehicle->vehicle_code,
                                 $vehicle->license_plate ?? '-',
                                 $vehicle->capacity_weight ?? '-',
@@ -143,9 +149,10 @@ class ExportWarehouseAction extends Action
                         ->columnSpanFull()
                 ])
             )
-            ->action(function ($record, array $data) {
-
-                if ($record->items->isEmpty()) {
+            ->action(function ($record, array $data, Component $livewire) {
+                // Eager load các quan hệ cần thiết cho items
+                $items = $record->items()->with(['crate'])->get();
+                if ($items->isEmpty()) {
                     Notification::make()
                         ->title('Không có kiện hàng để xuất kho')
                         ->body('Yêu cầu vận chuyển này không có kiện hàng nào để xuất kho.')
@@ -153,7 +160,6 @@ class ExportWarehouseAction extends Action
                         ->send();
                     return;
                 }
-
                 if (!$record->canExport()) {
                     Notification::make()
                         ->title('Không thể xuất kho yêu cầu vận chuyển')
@@ -162,7 +168,7 @@ class ExportWarehouseAction extends Action
                         ->send();
                     return;
                 }
-
+                DB::beginTransaction();
                 try {
                     $shipment = Shipment::create([
                         'shipment_code' =>  'DH-' . now()->format('YmdHis'),
@@ -171,9 +177,9 @@ class ExportWarehouseAction extends Action
                         'shipping_request_id' => $record->id,
                         'departure_time' => $data['departure_time'],
                         'arrival_time' => $data['arrival_time'],
-                        'total_crates' => $record->items->count(),
-                        'total_pieces' => $record->items->sum(fn($item) => $item->crate?->pieces ?? 0),
-                        'total_weight' => $record->items->sum(fn($item) => $item->crate?->gross_weight ?? 0),
+                        'total_crates' => $items->count(),
+                        'total_pieces' => $items->sum(fn($item) => $item->crate?->pieces ?? 0),
+                        'total_weight' => $items->sum(fn($item) => $item->crate?->gross_weight ?? 0),
                         'status' => ShipmentStatus::LOADING->value, 
                         'created_by' => Auth::user()->id,
                     ]);
@@ -187,17 +193,17 @@ class ExportWarehouseAction extends Action
                             'loaded_by' => Auth::user()->id,
                         ]);
                     });
-
                     //Cập nhập trạng thái yêu cầu vận chuyển
                     $record->update(['status' => ShippingState::class]);
-
                     //Cập nhập trạng thái cho các item
-                    $record->items->each(fn($item) => $item->update([
+                    $items->each(fn($item) => $item->update([
                         'quantity_shipped' => $item->quantity_requested,
                     ]));
-
-
-
+                    //cập nhập trạng thái cho vehicle
+                    $vehicle = Vehicle::find($data['vehicle_id']);
+                    $vehicle->update(['status' => VehicleStatus::LOADING->value]);
+                    DB::commit();
+                    $livewire->dispatch('shippingRequest.refresh');
                     Notification::make()
                         ->title('Xuất kho yêu cầu vận chuyển thành công')
                         ->body('Yêu cầu xuất kho đã được tạo thành công.')
@@ -215,6 +221,7 @@ class ExportWarehouseAction extends Action
                         ])
                         ->send();
                 } catch (\Exception $e) {
+                    DB::rollBack();
                     Notification::make()
                         ->title('Lỗi khi xuất kho yêu cầu vận chuyển')
                         ->body($e->getMessage())

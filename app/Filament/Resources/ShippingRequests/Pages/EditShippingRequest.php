@@ -8,7 +8,7 @@ use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
-use Filament\Support\Enums\Size;
+use Livewire\Attributes\On;
 use App\Filament\Actions\ExportWarehouseAction;
 
 class EditShippingRequest extends EditRecord
@@ -92,5 +92,14 @@ class EditShippingRequest extends EditRecord
     protected function getFormActions(): array
     {
         return [];
+    }
+
+    
+     #[On('shippingRequest.refresh')]
+    public function refreshShippingRequest(): void
+    {
+        $this->refreshFormData([
+            'status',
+        ]);
     }
 }

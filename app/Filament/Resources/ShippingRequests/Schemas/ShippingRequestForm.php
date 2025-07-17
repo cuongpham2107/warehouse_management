@@ -51,8 +51,8 @@ class ShippingRequestForm
 
                         Select::make('status')
                             ->label('Trạng thái')
-                            ->disabled()
-                            ->dehydrated()
+                            // ->disabled()
+                            // ->dehydrated()
                             ->required()
                             ->options(fn () => \App\States\ShippingRequestState::getStateOptions())
                             ->default('pending')

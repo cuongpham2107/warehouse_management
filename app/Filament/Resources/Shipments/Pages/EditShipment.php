@@ -9,10 +9,12 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\Action;
 use App\Enums\ShipmentStatus;
+use App\Enums\VehicleStatus;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use App\States\DeliveredState;
 use App\Filament\Resources\Shipments\Actions\ExportInvoiceShipment;
+use App\Models\Vehicle;
 
 class EditShipment extends EditRecord
 {
@@ -42,6 +44,9 @@ class EditShipment extends EditRecord
                     ->label('Đã khởi hành')
                     ->action(function (Component $livewire) {
                         $this->record->status = ShipmentStatus::DEPARTED;
+                        //update status vehicle 
+                        $this->record->vehicle->status = VehicleStatus::IN_TRANSIT;
+                        $this->record->vehicle->save();
                         $this->record->save();
                         \Filament\Notifications\Notification::make()
                             ->title('Chuyển trạng thái thành công')
@@ -59,6 +64,8 @@ class EditShipment extends EditRecord
                         $this->record->status = ShipmentStatus::DELIVERED;  
                         $this->record->shippingRequest->status = DeliveredState::class; 
                         $this->record->shippingRequest->save();
+                        $this->record->vehicle->status = VehicleStatus::AVAILABLE;
+                        $this->record->vehicle->save();
                         $this->record->save();
                         \Filament\Notifications\Notification::make()
                             ->title('Chuyển trạng thái thành công')
