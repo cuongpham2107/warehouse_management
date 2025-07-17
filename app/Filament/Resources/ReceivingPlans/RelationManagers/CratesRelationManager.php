@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 
-
+use Illuminate\Database\Eloquent\Model;
 
 class CratesRelationManager extends RelationManager
 {
@@ -217,7 +217,7 @@ class CratesRelationManager extends RelationManager
                         return $crateData;
                     })
                     ->action(function (array $data, Component $livewire): void {
-                        
+                           
                         try {
                             $pallets = $data['pallets'];
                             if (!$pallets || !is_array($pallets)) {
@@ -240,6 +240,8 @@ class CratesRelationManager extends RelationManager
                                         ->send();
                                     continue;
                                 }
+
+
                                 $pallet['crate']->update(['status' => 'stored']);
                                 Pallet::create([
                                     'pallet_id' => $pallet['pallet_id'],
@@ -250,6 +252,11 @@ class CratesRelationManager extends RelationManager
                                     'checked_in_by' => Auth::id(),
                                 ]);
                             }
+
+                            //Cập nhập trạng thái kế hoạch nhập kho
+                            $receivingPlan = $this->getOwnerRecord();
+                            $receivingPlan->update(['status' => ReceivingPlanStatus::COMPLETED->value]);
+                            $livewire->dispatch('receivingPlan.refresh');
                             Notification::make()
                                 ->success()
                                 ->title('Nhập kho thành công')
