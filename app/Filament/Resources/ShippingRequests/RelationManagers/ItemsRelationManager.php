@@ -38,10 +38,6 @@ class ItemsRelationManager extends RelationManager
                     ->color('warning')
                     ->badge()
                     ->alignCenter(),
-                TextColumn::make('quantity_requested')
-                    ->label('Số kiện yêu cầu')
-                    ->color('primary')
-                    ->alignCenter(),
                 TextColumn::make('quantity_shipped')
                     ->label('Số kiện đã xuất kho')
                     ->color('success')
@@ -67,19 +63,7 @@ class ItemsRelationManager extends RelationManager
                     ->modalSubmitActionLabel('Xem kiện hàng')
                     ->successNotificationTitle('Kiện hàng đã được xem thành công')
                     ->schema(fn (Schema $schema) => ShippingRequestItemForm::configure($schema)),
-                // EditAction::make()
-                //     ->label('Chỉnh sửa')
-                //     ->modalHeading('Chỉnh sửa kiện hàng')
-                //     ->modalSubmitActionLabel('Cập nhật kiện hàng')
-                //     ->successNotificationTitle('Kiện hàng đã được cập nhật thành công')
-                //     ->schema(fn (Schema $schema) => ShippingRequestItemForm::configure($schema)),
-                // DeleteAction::make()
-                //     ->label('Xóa')
-                //     ->modalHeading('Xác nhận xóa kiện hàng')
-                //     ->modalSubmitActionLabel('Xóa kiện hàng')
-                //     ->successNotificationTitle('Kiện hàng đã được xóa thành công')
-                //     ->requiresConfirmation()
-                //     ->color('danger'),  
+                
             ])
             ->defaultSort('created_at', 'desc')
             ->striped()

@@ -58,14 +58,6 @@ class Crate extends Model
     }
 
     /**
-     * Get all shipment items for this crate.
-     */
-    public function shipmentItems()
-    {
-        return $this->hasMany(ShipmentItem::class);
-    }
-
-    /**
      * Scope a query to only include planned crates.
      */
     public function scopePlanned($query)

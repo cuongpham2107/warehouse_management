@@ -11,13 +11,13 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Grouping\Group;
-use Filament\Forms\Components\Select;
-use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
 use App\Models\ShippingRequest;
+use Filament\Actions\Action;
+use App\Exports\ShippingRequestInvoiceExport;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\PalletExport;
+
 
 class PalletsTable
 {
@@ -44,7 +44,7 @@ class PalletsTable
                     ->sortable()
                     ->toggleable(),
                     
-                TextColumn::make('location.location_code')
+                TextColumn::make('location_code')
                     ->label('Vị trí')
                     ->searchable()
                     ->sortable()
@@ -101,13 +101,10 @@ class PalletsTable
                         'damaged' => 'Bị hư hỏng',
                     ])
                     ->native(false),
+                SelectFilter::make('receivingPlan')
+                    ->label('Thuộc kế hoạch nhập kho')
+                    ->relationship('crate.receivingPlan', 'id')
                     
-                SelectFilter::make('location_id')
-                    ->label('Vị trí')
-                    ->relationship('location', 'location_code')
-                    ->searchable()
-                    ->preload()
-                    ->native(false),
             ])
             ->defaultGroup('crate.receivingPlan.plan_code')
             ->groups([
@@ -120,31 +117,9 @@ class PalletsTable
                 EditAction::make()->label('Sửa'),
             ])
             ->headerActions([
-                BulkAction::make('switch_status')
-                    ->label('Chuyển trạng thái')
-                    ->icon('heroicon-o-arrow-path')
-                    ->color('warning')
-                    ->modalHeading('Chuyển trạng thái pallet')
-                    ->modalDescription('Vui lòng chọn trạng thái mới cho pallet.')
-                    ->schema([
-                        Select::make('status')
-                            ->label('Trạng thái mới')
-                            ->options(\App\Enums\PalletStatus::getOptions())
-                            ->required()
-                            ->native(false),
-                    ])
-                    ->action(function (Collection $records, array $data) {
-                        foreach ($records as $record) {
-                            $record->update(['status' => $data['status']]);
-                        }
-                        \Filament\Notifications\Notification::make()
-                            ->title('Cập nhật trạng thái thành công')
-                            ->body('Trạng thái của các pallet đã được cập nhật.')
-                            ->success()
-                            ->send();
-                    }),
+                
                 BulkAction::make('choose_crate_export_warehouse')
-                    ->label('Chọn thùng hàng để xuất kho')
+                    ->label('Xuất kho')
                     ->icon('heroicon-o-check')
                     ->color('primary')
                     ->modalHeading('Chi tiết yêu cầu xuất kho')
@@ -159,7 +134,7 @@ class PalletsTable
                         )
                     )
                     ->fillForm(function (Collection $records) {})
-                    ->action(function (Collection $records, array $data) {
+                    ->action(function (Collection $records, array $data, array $arguments) {
                         
                         $records = $records->load('crate')->map(function ($record) {
                             return [
@@ -189,14 +164,34 @@ class PalletsTable
                             foreach ($records as $record) {
                                 $shippingRequest->items()->create([
                                     'crate_id' => $record['id'],
-                                    'quantity_requested' => $record['pieces'],
+                                    'quantity_shipped' => $record['pieces'],
                                     'status' => 'pending', // Đã tạo yêu cầu xuất kho, chưa xử lý
                                 ]);
+                            }
+                            if (data_get($arguments, 'export')) {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Xuất kho kèm file excel thành công')
+                                    ->body("Đã tạo yêu cầu xuất {$shippingRequest->items()->count()} thùng hàng.")
+                                    ->success()
+                                    ->actions([
+                                        \Filament\Actions\Action::make('edit_shipping_request')
+                                            ->label('Xem yêu cầu xuất kho')
+                                            ->url(route('filament..resources.shipping-requests.edit', $shippingRequest->id))
+                                            ->icon('heroicon-o-eye'),
+                                    ])
+                                    ->send();
+                                return Excel::download(new ShippingRequestInvoiceExport($shippingRequest), 'shipping_request_invoice.xlsx');
                             }
                             \Filament\Notifications\Notification::make()
                             ->title('Xuất kho thành công')
                             ->body("Đã tạo yêu cầu xuất {$shippingRequest->items()->count()} thùng hàng.")
                             ->success()
+                            ->actions([
+                                \Filament\Actions\Action::make('edit_shipping_request')
+                                    ->label('Xem yêu cầu xuất kho')
+                                    ->url(route('filament..resources.shipping-requests.edit', $shippingRequest->id))
+                                    ->icon('heroicon-o-eye'),
+                            ])
                             ->send();
                         }
                         catch (\Exception $e) {
@@ -208,14 +203,13 @@ class PalletsTable
                             return;
                         }
                        
-                    }),
-                // BulkAction::make('export_excel')
-                //     ->label('Xuất Excel')
-                //     ->icon('heroicon-o-arrow-down-tray')
-                //     ->color('success')
-                //     ->action(function (Collection $records) {
-                //         return Excel::download(new PalletExport($records), 'pallets_export.xlsx');
-                //     }),
+                    })
+                    ->modalSubmitAction(fn(Action $action) => $action->label('Tạo yêu cầu xuất kho'))
+                    ->extraModalFooterActions(fn (Action $action): array => [
+                       $action->makeModalSubmitAction('createAndExport', arguments: ['export' => true])->label('Tạo và xuất file Excel')->color('success')
+                        
+                    ])
+
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

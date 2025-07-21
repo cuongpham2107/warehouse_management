@@ -39,11 +39,7 @@ class PalletResource extends Resource
         return 'Pallet';
     }
 
-    // public static function getNavigationBadge(): ?string
-    // {
-    //     return static::getModel()::count();
-    // }
-
+ 
     public static function getPluralModelLabel(): string
     {
         return 'Pallet';
@@ -55,11 +51,7 @@ class PalletResource extends Resource
         return PalletForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return PalletInfolist::configure($schema);
-    }
-
+   
     public static function table(Table $table): Table
     {
         return PalletsTable::configure($table);
@@ -77,7 +69,6 @@ class PalletResource extends Resource
         return [
             'index' => ListPallets::route('/'),
             'create' => CreatePallet::route('/create'),
-            'view' => ViewPallet::route('/{record}'),
             'edit' => EditPallet::route('/{record}/edit'),
         ];
     }

@@ -33,22 +33,6 @@ class ShippingRequestsTable
                     ->label('Ngày yêu cầu')
                     ->date()
                     ->sortable(),
-                TextColumn::make('priority')
-                    ->badge()
-                    ->alignCenter()
-                    ->label('Mức độ ưu tiên')
-                    ->formatStateUsing(fn($state) => $state->getLabel())
-                    ->color(fn($state) => $state->getColor())
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->badge()
-                    ->alignCenter()
-                    ->label('Trạng thái')
-                    ->formatStateUsing(fn($state) => $state instanceof ShippingRequestState ? $state->label() : $state)
-                    ->color(fn($state) => $state instanceof ShippingRequestState ? $state->color() : 'gray')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('creator.name')
                     ->label('Người tạo')
                     ->numeric()
@@ -65,22 +49,9 @@ class ShippingRequestsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('priority')
-                    ->label('Mức độ ưu tiên')
-                    ->options(ShippingRequestPriority::getOptions())
-                    ->placeholder('Tất cả mức độ'),
+                
                     
-                SelectFilter::make('status')
-                    ->label('Trạng thái')
-                    ->options([
-                        'pending' => 'Chờ xử lý',
-                        'processing' => 'Đang xử lý',
-                        'ready' => 'Sẵn sàng',
-                        'shipped' => 'Đã vận chuyển',
-                        'delivered' => 'Đã giao hàng',
-                        'cancelled' => 'Đã hủy',
-                    ])
-                    ->placeholder('Tất cả trạng thái'),
+             
                 SelectFilter::make('created_by')
                     ->label('Người tạo')
                     ->relationship('creator', 'name'),

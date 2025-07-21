@@ -7,19 +7,18 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Events\AfterSheet;
 use App\Models\Shipment;
+use App\Models\ShippingRequest;
 
-class ShipmentInvoiceExport implements FromArray, WithHeadings, WithEvents
+class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvents
 {
-    protected $shipment;
+    protected $shippingRequest;
 
-    public function __construct(Shipment $shipment)
+    public function __construct(ShippingRequest $shippingRequest)
     {
-        $this->shipment = $shipment->load([
-            'vehicle',
-            'shippingRequest',
-            'shipmentItems.crate',
-            'shipmentItems.pallet',
-            'shipmentItems.loadedBy',
+        $this->shippingRequest = $shippingRequest->load([
+            'creator',
+            'items.crate',
+            'items.crate.pallet'
         ]);
     }
 
@@ -28,19 +27,18 @@ class ShipmentInvoiceExport implements FromArray, WithHeadings, WithEvents
         $rows = [];
         // Các dòng detail
         $detailRows = [
-            ['Mã vận chuyển', $this->shipment->shipment_code],
-            ['Trạng thái', $this->shipment->status instanceof \App\Enums\ShipmentStatus ? $this->shipment->status->getLabel() : $this->shipment->status],
-            ['Xe', $this->shipment->vehicle->vehicle_code ?? ''],
-            ['Biển số', $this->shipment->vehicle->license_plate ?? ''],
-            ['Tài xế', $this->shipment->vehicle->driver_name ?? ''],
-            ['SĐT tài xế', $this->shipment->vehicle->driver_phone ?? ''],
-            ['Tổng số thùng', $this->shipment->total_crates],
-            ['Tổng số pallet', $this->shipment->total_pallets],
-            ['Tổng số lượng', $this->shipment->total_pieces],
-            ['Tổng khối lượng', $this->shipment->total_weight],
-            ['Ghi chú', $this->shipment->notes ?? ''],
-            ['Ngày tạo', $this->shipment->created_at],
-            ['Ngày cập nhật', $this->shipment->updated_at],
+            ['Mã yêu cầu', $this->shippingRequest->request_code],
+            ['Tên khách hàng', $this->shippingRequest->customer_name],
+            ['SĐT khách hàng', $this->shippingRequest->customer_contact],
+            ['Địa chỉ giao hàng', $this->shippingRequest->delivery_address],
+            ['Ngày yêu cầu', $this->shippingRequest->requested_date],
+            ['Biển số xe', $this->shippingRequest->license_plate],
+            ['Tài xế', $this->shippingRequest->driver_name],
+            ['SĐT tài xế', $this->shippingRequest->driver_phone],
+            ['Số seal', $this->shippingRequest->seal_number],
+            ['Ghi chú', $this->shippingRequest->notes ?? ''],
+            ['Ngày tạo', $this->shippingRequest->created_at],
+            ['Ngày cập nhật', $this->shippingRequest->updated_at],
         ];
         foreach ($detailRows as $row) {
             $rows[] = $row;
@@ -51,17 +49,19 @@ class ShipmentInvoiceExport implements FromArray, WithHeadings, WithEvents
         }
         $headerRowIndex = count($rows) + 1; // Excel bắt đầu từ 1
         $rows[] = [
-            'STT', 'Thùng hàng', 'Pallet', 'Số lượng', 'Ghi chú', 'Người xếp', 'Thời gian xếp'
+            'STT', 'Crate_ID', 'Pallet_ID', 'Số lượng', 'Trọng lượng', 'Ghi chú', 'Thời gian xuất'
         ];
-        foreach ($this->shipment->shipmentItems as $i => $item) {
+        foreach ($this->shippingRequest->items as $i => $item) {
+            $crate = $item->crate;
+            $pallet = $crate ? $crate->pallet : null;
             $rows[] = [
                 $i + 1,
-                $item->crate->crate_id ?? '',
-                $item->pallet->pallet_id ?? '',
-                $item->quantity ?? '',
+                $crate ? $crate->crate_id : '',
+                $pallet ? $pallet->pallet_id : '',
+                $crate->pieces ?? '',
+                $crate->gross_weight ?? '',
                 $item->notes ?? '',
-                $item->loadedBy->name ?? '',
-                $item->loaded_at ?? '',
+                $item->updated_at ?? '',
             ];
         }
         return $rows;
@@ -78,24 +78,23 @@ class ShipmentInvoiceExport implements FromArray, WithHeadings, WithEvents
             AfterSheet::class => function(AfterSheet $event) {
                 // Định nghĩa lại $detailRows để đếm số dòng detail động
                 $detailRows = [
-                    ['Mã vận chuyển', $this->shipment->shipment_code],
-                    ['Trạng thái', $this->shipment->status instanceof \App\Enums\ShipmentStatus ? $this->shipment->status->getLabel() : $this->shipment->status],
-                    ['Xe', $this->shipment->vehicle->vehicle_code ?? ''],
-                    ['Biển số', $this->shipment->vehicle->license_plate ?? ''],
-                    ['Tài xế', $this->shipment->vehicle->driver_name ?? ''],
-                    ['SĐT tài xế', $this->shipment->vehicle->driver_phone ?? ''],
-                    ['Tổng số thùng', $this->shipment->total_crates],
-                    ['Tổng số pallet', $this->shipment->total_pallets],
-                    ['Tổng số lượng', $this->shipment->total_pieces],
-                    ['Tổng khối lượng', $this->shipment->total_weight],
-                    ['Ghi chú', $this->shipment->notes ?? ''],
-                    ['Ngày tạo', $this->shipment->created_at],
-                    ['Ngày cập nhật', $this->shipment->updated_at],
+                    ['Mã yêu cầu', $this->shippingRequest->request_code],
+                    ['Tên khách hàng', $this->shippingRequest->customer_name],
+                    ['SĐT khách hàng', $this->shippingRequest->customer_contact],
+                    ['Địa chỉ giao hàng', $this->shippingRequest->delivery_address],
+                    ['Ngày yêu cầu', $this->shippingRequest->requested_date],
+                    ['Biển số xe', $this->shippingRequest->license_plate],
+                    ['Tài xế', $this->shippingRequest->driver_name],
+                    ['SĐT tài xế', $this->shippingRequest->driver_phone],
+                    ['Số seal', $this->shippingRequest->seal_number],
+                    ['Ghi chú', $this->shippingRequest->notes ?? ''],
+                    ['Ngày tạo', $this->shippingRequest->created_at],
+                    ['Ngày cập nhật', $this->shippingRequest->updated_at],
                 ];
                 $detailRowsCount = count($detailRows);
                 $emptyRows = 3;
                 $headerRowIndex = count($detailRows) + $emptyRows + 1;
-                $itemCount = $this->shipment->shipmentItems->count();
+                $itemCount = $this->shippingRequest->items->count();
                 $startRow = $headerRowIndex;
                 $endRow = $startRow + $itemCount;
                 // Vẽ border cho bảng danh sách (in đậm, rõ nét)
@@ -130,10 +129,11 @@ class ShipmentInvoiceExport implements FromArray, WithHeadings, WithEvents
                 $event->sheet->getDelegate()->getColumnDimension('A')->setWidth(25);
                 $event->sheet->getDelegate()->getColumnDimension('B')->setWidth(25);
                 $event->sheet->getDelegate()->getColumnDimension('C')->setWidth(25);
-                $event->sheet->getDelegate()->getColumnDimension('D')->setWidth(15);
-                $event->sheet->getDelegate()->getColumnDimension('E')->setWidth(15);
-                $event->sheet->getDelegate()->getColumnDimension('F')->setWidth(15);
+                $event->sheet->getDelegate()->getColumnDimension('D')->setWidth(25);
+                $event->sheet->getDelegate()->getColumnDimension('E')->setWidth(25);
+                $event->sheet->getDelegate()->getColumnDimension('F')->setWidth(25);
                 $event->sheet->getDelegate()->getColumnDimension('G')->setWidth(25);
+
                 // Thiết lập cỡ chữ 16 cho toàn bộ sheet
                 $event->sheet->getDelegate()->getStyle(
                     'A1:G' . $event->sheet->getDelegate()->getHighestRow()

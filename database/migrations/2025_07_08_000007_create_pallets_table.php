@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('pallet_id', 100)->unique();
             $table->foreignId('crate_id')->constrained('crates');
-            $table->foreignId('location_id')->nullable()->constrained('warehouse_locations');
+            $table->string('location_code')->nullable();
             $table->enum('status', ['in_transit', 'stored', 'staging', 'shipped'])->default('in_transit');
             $table->timestamp('checked_in_at')->nullable();
             $table->foreignId('checked_in_by')->nullable()->constrained('users');
@@ -25,7 +25,6 @@ return new class extends Migration
             
             $table->index(['pallet_id']);
             $table->index(['crate_id']);
-            $table->index(['location_id']);
             $table->index(['status']);
             $table->index(['checked_in_at']);
             $table->index(['checked_out_at']);

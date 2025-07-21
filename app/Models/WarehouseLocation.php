@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\WarehouseLocationStatus;
 
 class WarehouseLocation extends Model
 {
@@ -12,22 +11,9 @@ class WarehouseLocation extends Model
 
     protected $fillable = [
         'location_code',
-        'zone',
-        'rack',
-        'level',
-        'position',
-        'max_weight',
-        'max_volume',
-        'status',
     ];
 
     protected $casts = [
-        'level' => 'integer',
-        'max_weight' => 'decimal:2',
-        'max_volume' => 'decimal:2',
-        'status' => WarehouseLocationStatus::class,
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
     ];
 
     /**
@@ -52,32 +38,5 @@ class WarehouseLocation extends Model
     public function movementsTo()
     {
         return $this->hasMany(InventoryMovement::class, 'to_location_id');
-    }
-
-   
-
-    /**
-     * Scope a query to only include occupied locations.
-     */
-    public function scopeOccupied($query)
-    {
-        return $query->where('status', 'occupied');
-    }
-
-    /**
-     * Scope a query to filter by zone.
-     */
-    public function scopeInZone($query, $zone)
-    {
-        return $query->where('zone', $zone);
-    }
-
-
-    /**
-     * Get the full location path (Zone-Rack-Level-Position).
-     */
-    public function getFullLocationAttribute()
-    {
-        return "{$this->zone}-{$this->rack}-{$this->level}-{$this->position}";
     }
 }

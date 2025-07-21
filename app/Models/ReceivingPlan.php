@@ -13,6 +13,7 @@ class ReceivingPlan extends Model
     protected $fillable = [
         'plan_code',
         'vendor_id',
+        'license_plate',
         'plan_date',
         'total_crates',
         'total_pieces',

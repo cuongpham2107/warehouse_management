@@ -2,17 +2,13 @@
 
 namespace App\Filament\Resources\ReceivingPlans;
 
-use App\Filament\Resources\ReceivingPlans\Pages\CreateReceivingPlan;
-use App\Filament\Resources\ReceivingPlans\Pages\EditReceivingPlan;
 use App\Filament\Resources\ReceivingPlans\Pages\ListReceivingPlans;
-use App\Filament\Resources\ReceivingPlans\Pages\ViewReceivingPlan;
+use App\Filament\Resources\ReceivingPlans\Pages\EditReceivingPlan;
 use App\Filament\Resources\ReceivingPlans\RelationManagers\CratesRelationManager;
 use App\Filament\Resources\ReceivingPlans\Schemas\ReceivingPlanForm;
-use App\Filament\Resources\ReceivingPlans\Schemas\ReceivingPlanInfolist;
 use App\Filament\Resources\ReceivingPlans\Tables\ReceivingPlansTable;
 use App\Models\ReceivingPlan;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -23,10 +19,6 @@ class ReceivingPlanResource extends Resource
     protected static ?string $model = ReceivingPlan::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
-
-    protected static string|UnitEnum|null $navigationGroup = '📥 Nhập kho';
-
-    protected static ?int $navigationGroupSort = 1;
 
     protected static ?int $navigationSort = 1;
 
@@ -57,11 +49,6 @@ class ReceivingPlanResource extends Resource
         return ReceivingPlanForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return ReceivingPlanInfolist::configure($schema);
-    }
-
     public static function table(Table $table): Table
     {
         return ReceivingPlansTable::configure($table);
@@ -78,8 +65,7 @@ class ReceivingPlanResource extends Resource
     {
         return [
             'index' => ListReceivingPlans::route('/'),
-            'create' => CreateReceivingPlan::route('/create'),
-            'view' => ViewReceivingPlan::route('/{record}'),
+            // 'create' => CreateReceivingPlan::route('/create'),
             'edit' => EditReceivingPlan::route('/{record}/edit'),
         ];
     }

@@ -54,11 +54,6 @@ class WarehouseLocationResource extends Resource
         return WarehouseLocationForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return WarehouseLocationInfolist::configure($schema);
-    }
-
     public static function table(Table $table): Table
     {
         return WarehouseLocationsTable::configure($table);
@@ -76,7 +71,6 @@ class WarehouseLocationResource extends Resource
         return [
             'index' => ListWarehouseLocations::route('/'),
             'create' => CreateWarehouseLocation::route('/create'),
-            'view' => ViewWarehouseLocation::route('/{record}'),
             'edit' => EditWarehouseLocation::route('/{record}/edit'),
         ];
     }

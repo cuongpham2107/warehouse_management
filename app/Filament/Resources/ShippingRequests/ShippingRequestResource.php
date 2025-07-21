@@ -22,11 +22,11 @@ class ShippingRequestResource extends Resource
 {
     protected static ?string $model = ShippingRequest::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUpTray;
 
-    protected static string|UnitEnum|null $navigationGroup = '📤 Xuất kho';
+    // protected static string|UnitEnum|null $navigationGroup = '📤 Xuất kho';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'request_code';
 
@@ -55,10 +55,6 @@ class ShippingRequestResource extends Resource
         return ShippingRequestForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return ShippingRequestInfolist::configure($schema);
-    }
 
     public static function table(Table $table): Table
     {
@@ -77,7 +73,6 @@ class ShippingRequestResource extends Resource
         return [
             'index' => ListShippingRequests::route('/'),
             'create' => CreateShippingRequest::route('/create'),
-            'view' => ViewShippingRequest::route('/{record}'),
             'edit' => EditShippingRequest::route('/{record}/edit'),
         ];
     }

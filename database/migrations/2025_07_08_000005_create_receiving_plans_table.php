@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('plan_code', 50)->unique();
             $table->foreignId('vendor_id')->constrained('vendors');
             $table->date('plan_date');
+            $table->string('license_plate')->nullable();
             $table->integer('total_crates')->default(0);
             $table->integer('total_pieces')->default(0);
             $table->decimal('total_weight', 10, 2)->default(0);

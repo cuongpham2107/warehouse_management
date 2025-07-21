@@ -2,10 +2,8 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Resources\ReceivingPlans\Schemas\ReceivingPlanForm;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Actions\Action;
-use Filament\Schemas\Schema;
 
 class Dashboard extends BaseDashboard
 {
@@ -14,9 +12,11 @@ class Dashboard extends BaseDashboard
     public function getWidgets(): array
     {
         return [
+            // Tổng quan hệ thống
             \App\Filament\Widgets\StatsOverviewWidget::class,
-            \App\Filament\Widgets\VehicleStatusChartWidget::class,
+            // Hoạt động nhập/xuất pallet
             \App\Filament\Widgets\WarehouseActivityWidget::class,
+            // Yêu cầu vận chuyển gần đây
             \App\Filament\Widgets\RecentShippingRequestsWidget::class,
         ];
     }

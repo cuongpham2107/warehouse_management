@@ -18,8 +18,10 @@ return new class extends Migration
             $table->string('customer_contact', 255)->nullable();
             $table->text('delivery_address')->nullable();
             $table->date('requested_date');
-            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
-            $table->enum('status', ['pending', 'processing', 'ready', 'shipping', 'delivered', 'cancelled'])->default('pending');
+            $table->string('license_plate', 20);
+            $table->string('driver_name', 255)->nullable();
+            $table->string('driver_phone', 20)->nullable();
+            $table->string('seal_number');
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->timestamps();

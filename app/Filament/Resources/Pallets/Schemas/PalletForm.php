@@ -34,12 +34,11 @@ class PalletForm
                             ->preload()
                             ->placeholder('Chọn thùng hàng'),
 
-                        Select::make('location_id')
-                            ->label('Vị trí')
-                            ->relationship('location', 'location_code')
-                            ->searchable()
-                            ->preload()
-                            ->placeholder('Chọn vị trí kho'),
+                        TextInput::make('location_code')
+                            ->label('Mã vị trí')
+                            ->maxLength(50)
+                            ->required()
+                            ->placeholder('Nhập mã vị trí'),
 
                         Select::make('status')
                             ->label('Trạng thái')

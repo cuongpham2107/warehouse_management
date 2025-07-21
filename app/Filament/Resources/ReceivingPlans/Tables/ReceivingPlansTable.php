@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ReceivingPlans\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -89,10 +90,11 @@ class ReceivingPlansTable
                     }),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->label('Xem'),
                 EditAction::make()
-                    ->label('Chỉnh sửa'),
+                    ->label('Chỉnh sửa')
+                    ->modal('edit_receiving_plan'),
+                DeleteAction::make()
+                    ->label('Xoá'),
                 \Filament\Actions\Action::make('activate')
                     ->label('Kích hoạt')
                     ->icon('heroicon-o-bolt')
@@ -111,19 +113,7 @@ class ReceivingPlansTable
                         $record->status = \App\Enums\ReceivingPlanStatus::COMPLETED;
                         $record->save();
                     }),
-                \Filament\Actions\Action::make('duplicate')
-                    ->label('Nhân bản')
-                    ->icon('heroicon-o-document-duplicate')
-                    ->requiresConfirmation()
-                    ->action(function($record) {
-                        $new = $record->replicate(['status','plan_code','created_at','updated_at','total_crates','total_pieces','total_weight']);
-                        $new->status = \App\Enums\ReceivingPlanStatus::PENDING;
-                        $new->plan_code = 'RP' . now()->format('Ymd') . '-' . str_pad((string) (\App\Models\ReceivingPlan::max('id') + 1), 4, '0', STR_PAD_LEFT);
-                        $new->total_crates = 0;
-                        $new->total_pieces = 0;
-                        $new->total_weight = 0;
-                        $new->save();
-                    }),
+
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

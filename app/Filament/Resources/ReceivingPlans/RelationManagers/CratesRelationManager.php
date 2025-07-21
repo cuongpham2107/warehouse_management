@@ -65,7 +65,7 @@ class CratesRelationManager extends RelationManager
             ->description('Quản lý các kiện hàng thuộc kế hoạch nhập kho này')
             ->headerActions([
                 Action::make('ImportXlsx')
-                    ->label('Import Excel')
+                    ->label('Nhập danh sách Crate ID từ Excel')
                     ->icon('heroicon-o-arrow-up-tray')
                     ->modalHeading('Import kiện hàng từ file Excel (.xlsx)')
                     ->modalDescription('Chọn file Excel để import kiện hàng vào kế hoạch nhập kho này')
@@ -160,21 +160,6 @@ class CratesRelationManager extends RelationManager
                     ->modalDescription('Chọn vị trí kho để gán cho các kiện hàng đã chọn')
                     ->modalWidth(Width::SevenExtraLarge)
                     ->schema([
-                        Select::make('location_id')
-                            ->label('Áp dụng vị trí kho cho tất cả kiện hàng đã chọn')
-                            ->options(WarehouseLocation::query()->pluck('location_code', 'id'))
-                            ->searchable()
-                            ->live()
-                            ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
-                                $pallets = $get('pallets');
-                                if ($pallets && is_array($pallets)) {
-                                    foreach ($pallets as &$pallet) {
-                                        $pallet['location_id'] = $state;
-                                    }
-                                    $set('pallets', $pallets);
-                                }
-                            }),
-
                         Repeater::make('pallets')
                             ->label("Thông tin kiện hàng")
                             ->table([
@@ -185,16 +170,15 @@ class CratesRelationManager extends RelationManager
                             ])
                             ->schema([
                                 TextInput::make('pallet_id')
-                                    ->readOnly()
                                     ->required(),
                                 TextInput::make('crate_code')
                                     ->readOnly()
                                     ->required(),
-
-                                Select::make('location_id')
-                                    ->options(WarehouseLocation::query()->pluck('location_code', 'id'))
-                                    ->searchable()
-                                    ->required(),
+                                TextInput::make('location_code')
+                                    ->required()
+                                    ->datalist(
+                                        fn () => WarehouseLocation::query()->pluck('location_code')->all()
+                                    ),
                                 DateTimePicker::make('checked_in_at')
                                     ->seconds(false)
                                     ->readOnly()
@@ -208,7 +192,7 @@ class CratesRelationManager extends RelationManager
                             $crateData['pallets'][] = [
                                 'pallet_id' => 'PALLET-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6)),
                                 'crate_code' => $crate->crate_id,
-                                'location_id' => '',
+                                'location_code' => '',
                                 'checked_in_at' => now(),
                                 'crate_id' => $crate->id,
                                 'crate' => $crate
@@ -241,13 +225,20 @@ class CratesRelationManager extends RelationManager
                                     continue;
                                 }
 
+                                $warehouseLocation = WarehouseLocation::where('location_code', $pallet['location_code'])->exists();
+                                if (!$warehouseLocation) {
+                                    WarehouseLocation::create([
+                                        'location_code' => $pallet['location_code'],
+                                    ]);
+                                }
 
                                 $pallet['crate']->update(['status' => 'stored']);
+
                                 Pallet::create([
                                     'pallet_id' => $pallet['pallet_id'],
                                     'crate_id' => $pallet['crate_id'],
-                                    'location_id' => intval($pallet['location_id']),
-                                    'status' => PalletStatus::IN_TRANSIT->value,
+                                    'location_code' => $pallet['location_code'],
+                                    'status' => PalletStatus::STORED->value,
                                     'checked_in_at' => $pallet['checked_in_at'],
                                     'checked_in_by' => Auth::id(),
                                 ]);
@@ -261,6 +252,17 @@ class CratesRelationManager extends RelationManager
                                 ->success()
                                 ->title('Nhập kho thành công')
                                 ->body('Các kiện hàng đã được nhập kho và gán vị trí thành công.')
+                                ->actions([
+                                    \Filament\Actions\Action::make('Xem')
+                                        ->button()
+                                        ->url(route('filament..resources.pallets.index', [
+                                            'tableFilters' => [
+                                                'receivingPlan' => [
+                                                    'value' => $receivingPlan->id,
+                                                ],
+                                            ],
+                                        ]))
+                                ])
                                 ->send();
                         } catch (Exception $e) {
                             Notification::make()

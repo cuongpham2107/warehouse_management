@@ -8,16 +8,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use App\Enums\ShippingRequestPriority;
-use App\Enums\ShippingRequestStatus;
-use App\States\PendingState;
-use App\States\ProcessingState;
-use App\States\ReadyState;
-use App\States\ShippedState;
-use App\States\DeliveredState;
-use App\States\CancelledState;
-use Filament\Schemas\Components\Flex;
-
 class ShippingRequestForm
 {
     public static function configure(Schema $schema): Schema
@@ -32,7 +22,6 @@ class ShippingRequestForm
                         TextInput::make('request_code')
                             ->label('Mã yêu cầu')
                             ->required()
-                            ->readOnly()
                             ->default(fn () => 'REQ-' . now()->format('YmdHis'))
                             ->placeholder('Nhập mã yêu cầu'),
 
@@ -41,23 +30,23 @@ class ShippingRequestForm
                             ->default(now())
                             ->required()
                             ->placeholder('Chọn ngày yêu cầu'),
-
-                        Select::make('priority')
-                            ->label('Mức độ ưu tiên')
+                        TextInput::make('license_plate')
+                            ->label('Biển số xe')
                             ->required()
-                            ->options(ShippingRequestPriority::getOptions())
-                            ->default(ShippingRequestPriority::MEDIUM->value)
-                            ->native(false),
-
-                        Select::make('status')
-                            ->label('Trạng thái')
-                            ->disabled()
-                            ->dehydrated()
+                            ->placeholder('Nhập biển số xe'),
+                        TextInput::make('seal_number')
+                            ->label('Số niêm phong')
                             ->required()
-                            ->options(fn () => \App\States\ShippingRequestState::getStateOptions())
-                            ->default('pending')
-                            ->native(false)
-                            ->dehydrateStateUsing(fn($state) => \App\States\ShippingRequestState::getStateClass($state)),
+                            ->placeholder('Nhập số niêm phong'),
+                        TextInput::make('driver_name')
+                            ->label('Tên tài xế')
+                            ->placeholder('Nhập tên tài xế')
+                            ->nullable(),
+                        TextInput::make('driver_phone')
+                            ->label('Số điện thoại tài xế')
+                            ->placeholder('Nhập số điện thoại tài xế')
+                            ->nullable(),
+                      
                     ])
                     ->columns(2)
                     ->collapsible(),
