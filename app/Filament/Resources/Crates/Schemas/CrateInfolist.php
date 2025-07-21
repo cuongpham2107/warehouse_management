@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Crates\Schemas;
 
 use App\Enums\CrateStatus;
-use App\Enums\PackingType;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
@@ -63,10 +62,7 @@ class CrateInfolist
                                     ->icon('heroicon-m-cube'),
                                 TextEntry::make('type')
                                     ->label('Loại thùng hàng')
-                                    ->badge()
-                                    ->color(fn ($state) => $state instanceof PackingType ? $state->getColor() : 'gray')
-                                    ->icon(fn ($state) => $state instanceof PackingType ? $state->getIcon() : 'heroicon-m-cube')
-                                    ->formatStateUsing(fn ($state) => $state instanceof PackingType ? $state->getLabel() : ($state ?? 'N/A')),
+                                    ->badge(),
                                 TextEntry::make('gross_weight')
                                     ->label('Trọng lượng')
                                     ->numeric(decimalPlaces: 2)

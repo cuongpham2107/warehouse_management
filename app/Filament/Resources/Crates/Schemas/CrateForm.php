@@ -8,7 +8,6 @@ use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use App\Enums\CrateStatus;
-use App\Enums\PackingType;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -64,11 +63,9 @@ class CrateForm
                             ->default(0)
                             ->minValue(0)
                             ->placeholder('Nhập số lượng'),
-                        Select::make('type')
+                        TextInput::make('type')
                             ->label('Loại thùng hàng')
                             ->required()
-                            ->options(PackingType::getOptions())
-                            ->default(PackingType::STANDARD->value)
                             ->native(false),
                         TextInput::make('gross_weight')
                             ->label('Trọng lượng (kg)')

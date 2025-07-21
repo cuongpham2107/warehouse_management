@@ -88,11 +88,7 @@ class CratesTable
 
                 TextColumn::make('type')
                     ->label('Loại đóng gói')
-                    ->badge()
-                    ->color(fn($state): string => $state instanceof \App\Enums\PackingType ? ($state->getColor() ?? 'gray') : 'gray')
-                    ->icon(fn($state): string => $state instanceof \App\Enums\PackingType ? ($state->getIcon() ?? 'heroicon-m-cube') : 'heroicon-m-cube')
-                    ->formatStateUsing(fn($state): string => $state instanceof \App\Enums\PackingType ? $state->getLabel() : ($state ?? 'N/A'))
-                    ->sortable(),
+                    ->badge(),
             ])
             ->filters([
                 SelectFilter::make('status')

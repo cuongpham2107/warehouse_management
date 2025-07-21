@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Crates\Imports;
 
 use App\Enums\CrateStatus;
-use App\Enums\PackingType;
 use App\Models\Crate;
 use App\Models\ReceivingPlan;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -61,7 +60,7 @@ class CratesExcelImport implements ToModel, WithHeadingRow, WithBatchInserts, Wi
                 'receiving_plan_id' => $receivingPlanId,
                 'description' => $row['description_of_goods'] ?? null,
                 'pieces' => $row['quantity'] ?? 0,
-                'type' => PackingType::from($row['packing_type'] ?? PackingType::BOX->value),
+                'type' => $row['packing_type'],
                 'gross_weight' => $row['gross_weight_kg'] ?? 0,
                 'dimensions_length' => $row['dimensions_length_cm'] ?? 0,
                 'dimensions_width' => $row['dimensions_width_cm'] ?? 0,

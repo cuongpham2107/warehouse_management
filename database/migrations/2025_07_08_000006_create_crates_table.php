@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('receiving_plan_id')->constrained('receiving_plans')->onDelete('cascade');
             $table->text('description')->nullable();
             $table->integer('pieces')->default(0);
+            $table->integer('pcs')->default(1);
             $table->string('type')->default('standard');
             $table->decimal('gross_weight', 10, 2)->default(0);
             $table->decimal('dimensions_length', 8, 2)->nullable();

@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('shipping_requests', function (Blueprint $table) {
             $table->id();
             $table->string('request_code', 50)->unique();
-            $table->string('customer_name', 255);
+            $table->string('customer_name', 255)->nullable();
             $table->string('customer_contact', 255)->nullable();
             $table->text('delivery_address')->nullable();
             $table->date('requested_date');
-            $table->string('license_plate', 20);
+            $table->string('license_plate', 20)->nullable();
             $table->string('driver_name', 255)->nullable();
             $table->string('driver_phone', 20)->nullable();
-            $table->string('seal_number');
+            $table->string('seal_number')->nullable();
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->timestamps();

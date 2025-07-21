@@ -36,9 +36,6 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
             ['Tài xế', $this->shippingRequest->driver_name],
             ['SĐT tài xế', $this->shippingRequest->driver_phone],
             ['Số seal', $this->shippingRequest->seal_number],
-            ['Ghi chú', $this->shippingRequest->notes ?? ''],
-            ['Ngày tạo', $this->shippingRequest->created_at],
-            ['Ngày cập nhật', $this->shippingRequest->updated_at],
         ];
         foreach ($detailRows as $row) {
             $rows[] = $row;
@@ -49,7 +46,7 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
         }
         $headerRowIndex = count($rows) + 1; // Excel bắt đầu từ 1
         $rows[] = [
-            'STT', 'Crate_ID', 'Pallet_ID', 'Số lượng', 'Trọng lượng', 'Ghi chú', 'Thời gian xuất'
+            'STT', 'Crate_ID', 'Pallet_ID', 'Số lượng', 'Trọng lượng', 'Ghi chú'
         ];
         foreach ($this->shippingRequest->items as $i => $item) {
             $crate = $item->crate;
@@ -61,7 +58,6 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
                 $crate->pieces ?? '',
                 $crate->gross_weight ?? '',
                 $item->notes ?? '',
-                $item->updated_at ?? '',
             ];
         }
         return $rows;
@@ -87,9 +83,6 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
                     ['Tài xế', $this->shippingRequest->driver_name],
                     ['SĐT tài xế', $this->shippingRequest->driver_phone],
                     ['Số seal', $this->shippingRequest->seal_number],
-                    ['Ghi chú', $this->shippingRequest->notes ?? ''],
-                    ['Ngày tạo', $this->shippingRequest->created_at],
-                    ['Ngày cập nhật', $this->shippingRequest->updated_at],
                 ];
                 $detailRowsCount = count($detailRows);
                 $emptyRows = 3;

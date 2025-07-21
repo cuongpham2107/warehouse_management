@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\CrateStatus;
-use App\Enums\PackingType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,6 +15,7 @@ class Crate extends Model
         'receiving_plan_id',
         'description',
         'pieces',
+        'pcs',
         'type',
         'gross_weight',
         'dimensions_length',
@@ -29,7 +29,7 @@ class Crate extends Model
         'receiving_plan_id' => 'integer',
         'pieces' => 'integer',
         'gross_weight' => 'decimal:2',
-        'type' => PackingType::class,
+        'type' => 'string',
         'dimensions_length' => 'decimal:2',
         'dimensions_width' => 'decimal:2',
         'dimensions_height' => 'decimal:2',

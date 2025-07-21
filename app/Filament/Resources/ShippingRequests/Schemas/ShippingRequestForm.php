@@ -56,7 +56,6 @@ class ShippingRequestForm
                         ->schema([
                             TextInput::make('customer_name')
                                 ->label('Tên khách hàng')
-                                ->required()
                                 ->placeholder('Nhập tên khách hàng'),
 
                             TextInput::make('customer_contact')
@@ -66,7 +65,6 @@ class ShippingRequestForm
                             Textarea::make('delivery_address')
                                 ->label('Địa chỉ giao hàng')
                                 ->rows(3)
-                                ->required()
                                 ->placeholder('Nhập địa chỉ giao hàng chi tiết')
                                 ->columnSpanFull(),
                         ])
