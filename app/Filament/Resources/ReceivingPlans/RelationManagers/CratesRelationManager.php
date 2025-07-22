@@ -277,72 +277,73 @@ class CratesRelationManager extends RelationManager
                     ->modalSubmitAction(fn (Action $action) => $action->label('Lưu thông tin')),
 
 
-                BulkAction::make('choose_crate_export_warehouse')
-                    ->label('Chọn thùng hàng để xuất kho')
-                    ->icon('heroicon-o-check')
-                    ->color('primary')
-                    ->button()
-                    ->outlined()
-                    ->modalHeading('Chi tiết yêu cầu xuất kho')
-                    ->modalDescription('Vui lòng nhập các thông tin cần thiết để xuất kho các kiện hàng.')
-                    ->schema(fn($schema) => ShippingRequestForm::configure($schema))
-                    ->action(function (Collection $records, array $data) {
-                        $records = $records->select('id', 'pieces', 'status')->toArray();
-                        $allStored = collect($records)->every(function ($record) {
-                            $status = $record['status'];
-                            return ($status instanceof \App\Enums\CrateStatus ? $status->value : $status) === 'stored';
-                        });
+                // BulkAction::make('choose_crate_export_warehouse')
+                //     ->label('Chọn thùng hàng để xuất kho')
+                //     ->icon('heroicon-o-check')
+                //     ->color('primary')
+                //     ->button()
+                //     ->outlined()
+                //     ->modalHeading('Chi tiết yêu cầu xuất kho')
+                //     ->modalDescription('Vui lòng nhập các thông tin cần thiết để xuất kho các kiện hàng.')
+                //     ->schema(fn($schema) => ShippingRequestForm::configure($schema))
+                //     ->action(function (Collection $records, array $data) {
+                //         $records = $records->select('id', 'pieces', 'status')->toArray();
+                //         $allStored = collect($records)->every(function ($record) {
+                //             $status = $record['status'];
+                //             return ($status instanceof \App\Enums\CrateStatus ? $status->value : $status) === 'stored';
+                //         });
 
-                        if (empty($records)) {
-                            Notification::make()
-                                ->title('Không có thùng hàng nào được chọn')
-                                ->body('Vui lòng chọn ít nhất một thùng hàng để xuất kho.')
-                                ->danger()
-                                ->send();
-                            return;
-                        }
+                //         if (empty($records)) {
+                //             Notification::make()
+                //                 ->title('Không có thùng hàng nào được chọn')
+                //                 ->body('Vui lòng chọn ít nhất một thùng hàng để xuất kho.')
+                //                 ->danger()
+                //                 ->send();
+                //             return;
+                //         }
 
-                        if (!$allStored) {
-                            Notification::make()
-                                ->title('Không thể xuất kho')
-                                ->body('Tất cả các kiện hàng được chọn phải ở trạng thái "Đã lưu kho" mới có thể xuất kho.')
-                                ->danger()
-                                ->send();
-                            return;
-                        }
+                //         if (!$allStored) {
+                //             Notification::make()
+                //                 ->title('Không thể xuất kho')
+                //                 ->body('Tất cả các kiện hàng được chọn phải ở trạng thái "Đã lưu kho" mới có thể xuất kho.')
+                //                 ->danger()
+                //                 ->send();
+                //             return;
+                //         }
 
-                        try {
-                            $shippingRequest = ShippingRequest::create($data);
-                            if (!$shippingRequest) {
-                                Notification::make()
-                                    ->title('Lỗi khi tạo yêu cầu xuất kho')
-                                    ->body('Không thể tạo yêu cầu xuất kho. Vui lòng thử lại sau.')
-                                    ->danger()
-                                    ->send();
-                                return;
-                            }
-                            foreach ($records as $record) {
-                                $shippingRequest->items()->create([
-                                    'crate_id' => $record['id'],
-                                    'quantity_requested' => $record['pieces'],
-                                    'status' => 'pending', // Đã tạo yêu cầu xuất kho, chưa xử lý
-                                ]);
-                            }
-                            Notification::make()
-                                ->title('Xuất kho thành công')
-                                ->body("Đã tạo yêu cầu xuất {$shippingRequest->items()->count()} thùng hàng.")
-                                ->success()
-                                ->send();
-                        } catch (Exception $e) {
-                            Notification::make()
-                                ->title('Lỗi khi xuất kho')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                            return;
-                        }
-                    })
-                    ->modalSubmitAction(fn (Action $action) => $action->label('Tạo yêu cầu xuất kho')),
+                //         try {
+                //             $shippingRequest = ShippingRequest::create($data);
+                //             if (!$shippingRequest) {
+                //                 Notification::make()
+                //                     ->title('Lỗi khi tạo yêu cầu xuất kho')
+                //                     ->body('Không thể tạo yêu cầu xuất kho. Vui lòng thử lại sau.')
+                //                     ->danger()
+                //                     ->send();
+                //                 return;
+                //             }
+                //             foreach ($records as $record) {
+                //                 $record->update(['status' => 'shipped']);
+                //                 $shippingRequest->items()->create([
+                //                     'crate_id' => $record['id'],
+                //                     'quantity_requested' => $record['pieces'],
+                //                     'status' => 'pending', // Đã tạo yêu cầu xuất kho, chưa xử lý
+                //                 ]);
+                //             }
+                //             Notification::make()
+                //                 ->title('Xuất kho thành công')
+                //                 ->body("Đã tạo yêu cầu xuất {$shippingRequest->items()->count()} thùng hàng.")
+                //                 ->success()
+                //                 ->send();
+                //         } catch (Exception $e) {
+                //             Notification::make()
+                //                 ->title('Lỗi khi xuất kho')
+                //                 ->body($e->getMessage())
+                //                 ->danger()
+                //                 ->send();
+                //             return;
+                //         }
+                //     })
+                //     ->modalSubmitAction(fn (Action $action) => $action->label('Tạo yêu cầu xuất kho')),
 
             ])
             ->recordActions([

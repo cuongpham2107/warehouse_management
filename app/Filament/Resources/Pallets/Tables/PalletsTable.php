@@ -20,6 +20,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Textarea;
+use Illuminate\Support\Facades\Auth;
 
 
 class PalletsTable
@@ -173,14 +174,9 @@ class PalletsTable
                     ->fillForm(function (Collection $records) {})
                     ->action(function (Collection $records, array $data, array $arguments) {
                         
-                        $records = $records->load('crate')->map(function ($record) {
-                            return [
-                                'id' => $record->crate->id ?? null,
-                                'pieces' => $record->crate->pieces ?? 0,
-                            ];
-                        })->toArray();
+                        $records = $records->load('crate');
                         
-                        if (empty($records)) {
+                        if ($records->isEmpty()) {
                             \Filament\Notifications\Notification::make()
                                 ->title('Không có pallet nào được chọn')
                                 ->body('Vui lòng chọn ít nhất một pallet để xuất kho.')
@@ -199,9 +195,15 @@ class PalletsTable
                                 return;
                             }
                             foreach ($records as $record) {
+                                $record->update([
+                                    'status' => \App\Enums\PalletStatus::SHIPPED->value,
+                                    'checked_out_at' => now(),
+                                    'checked_out_by' => Auth::user()->id,
+                                ]);
+                                $record->crate->update(['status' => \App\Enums\CrateStatus::SHIPPED->value]);
                                 $shippingRequest->items()->create([
-                                    'crate_id' => $record['id'],
-                                    'quantity_shipped' => $record['pieces'],
+                                    'crate_id' => $record->crate->id ?? null,
+                                    'quantity_shipped' => $record->crate->pieces ?? 0,
                                     'status' => 'pending', // Đã tạo yêu cầu xuất kho, chưa xử lý
                                 ]);
                             }

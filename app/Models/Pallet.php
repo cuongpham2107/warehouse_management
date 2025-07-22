@@ -49,13 +49,7 @@ class Pallet extends Model
         return $this->hasMany(InventoryMovement::class);
     }
 
-    /**
-     * Get all shipment items for this pallet.
-     */
-    public function shipmentItems()
-    {
-        return $this->hasMany(ShipmentItem::class);
-    }
+  
 
     /**
      * Get the user who checked in this pallet.
