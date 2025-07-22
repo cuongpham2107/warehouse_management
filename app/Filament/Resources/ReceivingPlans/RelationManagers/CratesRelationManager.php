@@ -136,7 +136,8 @@ class CratesRelationManager extends RelationManager
                                 ->body('Có lỗi xảy ra: ' . $e->getMessage())
                                 ->send();
                         }
-                    }),
+                    })
+                    ->modalSubmitAction(fn (Action $action) => $action->label('Tải lên')),
 
 
                 CreateAction::make()
@@ -155,7 +156,7 @@ class CratesRelationManager extends RelationManager
                     ->icon('heroicon-o-arrow-right-circle')
                     ->button()
                     ->outlined()
-                    ->color('success')
+                    ->color('primary')
                     ->modalHeading('Nhập kho và gán vị trí cho kiện hàng')
                     ->modalDescription('Chọn vị trí kho để gán cho các kiện hàng đã chọn')
                     ->modalWidth(Width::SevenExtraLarge)
@@ -214,10 +215,10 @@ class CratesRelationManager extends RelationManager
                             }
                             foreach ($pallets as $pallet) {
                                 // Kiểm tra crate_id đã tồn tại trong pallet chưa
-                                $exists = \App\Models\Pallet::where('crate_id', $pallet['crate_id'])->exists();
+                                $exists = Pallet::where('crate_id', $pallet['crate_id'])->exists();
                                 if ($exists) {
                                     // Có thể bỏ qua hoặc thông báo, ở đây sẽ bỏ qua
-                                    \Filament\Notifications\Notification::make()
+                                    Notification::make()
                                         ->warning()
                                         ->title('Cảnh báo')
                                         ->body('Kiện hàng ' . $pallet['crate_code'] . ' đã tồn tại trong pallet, bỏ qua.')
@@ -253,7 +254,7 @@ class CratesRelationManager extends RelationManager
                                 ->title('Nhập kho thành công')
                                 ->body('Các kiện hàng đã được nhập kho và gán vị trí thành công.')
                                 ->actions([
-                                    \Filament\Actions\Action::make('Xem')
+                                    Action::make('Xem')
                                         ->button()
                                         ->url(route('filament..resources.pallets.index', [
                                             'tableFilters' => [
@@ -272,7 +273,8 @@ class CratesRelationManager extends RelationManager
                                 ->send();
                             return;
                         }
-                    }),
+                    })
+                    ->modalSubmitAction(fn (Action $action) => $action->label('Lưu thông tin')),
 
 
                 BulkAction::make('choose_crate_export_warehouse')
@@ -292,7 +294,7 @@ class CratesRelationManager extends RelationManager
                         });
 
                         if (empty($records)) {
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Không có thùng hàng nào được chọn')
                                 ->body('Vui lòng chọn ít nhất một thùng hàng để xuất kho.')
                                 ->danger()
@@ -301,7 +303,7 @@ class CratesRelationManager extends RelationManager
                         }
 
                         if (!$allStored) {
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Không thể xuất kho')
                                 ->body('Tất cả các kiện hàng được chọn phải ở trạng thái "Đã lưu kho" mới có thể xuất kho.')
                                 ->danger()
@@ -312,7 +314,7 @@ class CratesRelationManager extends RelationManager
                         try {
                             $shippingRequest = ShippingRequest::create($data);
                             if (!$shippingRequest) {
-                                \Filament\Notifications\Notification::make()
+                                Notification::make()
                                     ->title('Lỗi khi tạo yêu cầu xuất kho')
                                     ->body('Không thể tạo yêu cầu xuất kho. Vui lòng thử lại sau.')
                                     ->danger()
@@ -326,20 +328,21 @@ class CratesRelationManager extends RelationManager
                                     'status' => 'pending', // Đã tạo yêu cầu xuất kho, chưa xử lý
                                 ]);
                             }
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Xuất kho thành công')
                                 ->body("Đã tạo yêu cầu xuất {$shippingRequest->items()->count()} thùng hàng.")
                                 ->success()
                                 ->send();
-                        } catch (\Exception $e) {
-                            \Filament\Notifications\Notification::make()
+                        } catch (Exception $e) {
+                            Notification::make()
                                 ->title('Lỗi khi xuất kho')
                                 ->body($e->getMessage())
                                 ->danger()
                                 ->send();
                             return;
                         }
-                    }),
+                    })
+                    ->modalSubmitAction(fn (Action $action) => $action->label('Tạo yêu cầu xuất kho')),
 
             ])
             ->recordActions([

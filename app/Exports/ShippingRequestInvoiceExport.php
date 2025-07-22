@@ -27,15 +27,15 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
         $rows = [];
         // Các dòng detail
         $detailRows = [
-            ['Mã yêu cầu', $this->shippingRequest->request_code],
-            ['Tên khách hàng', $this->shippingRequest->customer_name],
-            ['SĐT khách hàng', $this->shippingRequest->customer_contact],
-            ['Địa chỉ giao hàng', $this->shippingRequest->delivery_address],
-            ['Ngày yêu cầu', $this->shippingRequest->requested_date],
-            ['Biển số xe', $this->shippingRequest->license_plate],
-            ['Tài xế', $this->shippingRequest->driver_name],
-            ['SĐT tài xế', $this->shippingRequest->driver_phone],
-            ['Số seal', $this->shippingRequest->seal_number],
+            ['', 'Mã yêu cầu', $this->shippingRequest->request_code],
+            ['', 'Tên khách hàng', $this->shippingRequest->customer_name],
+            ['', 'SĐT khách hàng', $this->shippingRequest->customer_contact],
+            ['', 'Địa chỉ giao hàng', $this->shippingRequest->delivery_address],
+            ['', 'Ngày yêu cầu', $this->shippingRequest->requested_date],
+            ['', 'Biển số xe', $this->shippingRequest->license_plate],
+            ['', 'Tài xế', $this->shippingRequest->driver_name],
+            ['', 'SĐT tài xế', $this->shippingRequest->driver_phone],
+            ['', 'Số seal', $this->shippingRequest->seal_number],
         ];
         foreach ($detailRows as $row) {
             $rows[] = $row;
@@ -74,15 +74,15 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
             AfterSheet::class => function(AfterSheet $event) {
                 // Định nghĩa lại $detailRows để đếm số dòng detail động
                 $detailRows = [
-                    ['Mã yêu cầu', $this->shippingRequest->request_code],
-                    ['Tên khách hàng', $this->shippingRequest->customer_name],
-                    ['SĐT khách hàng', $this->shippingRequest->customer_contact],
-                    ['Địa chỉ giao hàng', $this->shippingRequest->delivery_address],
-                    ['Ngày yêu cầu', $this->shippingRequest->requested_date],
-                    ['Biển số xe', $this->shippingRequest->license_plate],
-                    ['Tài xế', $this->shippingRequest->driver_name],
-                    ['SĐT tài xế', $this->shippingRequest->driver_phone],
-                    ['Số seal', $this->shippingRequest->seal_number],
+                    ['', 'Mã yêu cầu', $this->shippingRequest->request_code],
+                    ['', 'Tên khách hàng', $this->shippingRequest->customer_name],
+                    ['', 'SĐT khách hàng', $this->shippingRequest->customer_contact],
+                    ['', 'Địa chỉ giao hàng', $this->shippingRequest->delivery_address],
+                    ['', 'Ngày yêu cầu', $this->shippingRequest->requested_date],
+                    ['', 'Biển số xe', $this->shippingRequest->license_plate],
+                    ['', 'Tài xế', $this->shippingRequest->driver_name],
+                    ['', 'SĐT tài xế', $this->shippingRequest->driver_phone],
+                    ['', 'Số seal', $this->shippingRequest->seal_number],
                 ];
                 $detailRowsCount = count($detailRows);
                 $emptyRows = 3;
@@ -91,7 +91,7 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
                 $startRow = $headerRowIndex;
                 $endRow = $startRow + $itemCount;
                 // Vẽ border cho bảng danh sách (in đậm, rõ nét)
-                $cellRange = "A{$startRow}:G{$endRow}";
+                $cellRange = "A{$startRow}:F{$endRow}";
                 $event->sheet->getStyle($cellRange)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
@@ -101,7 +101,7 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
                     ],
                 ]);
                 // Đặt màu nền header danh sách (blue-500), chữ trắng, in đậm
-                $headerRange = "A{$startRow}:G{$startRow}";
+                $headerRange = "A{$startRow}:F{$startRow}";
                 $event->sheet->getStyle($headerRange)->applyFromArray([
                     'font' => [
                         'bold' => true,
@@ -119,17 +119,17 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
                     ],
                 ]);
                 // Đặt lại width cột như bạn đã chỉnh
-                $event->sheet->getDelegate()->getColumnDimension('A')->setWidth(25);
+                $event->sheet->getDelegate()->getColumnDimension('A')->setWidth(5);
                 $event->sheet->getDelegate()->getColumnDimension('B')->setWidth(25);
                 $event->sheet->getDelegate()->getColumnDimension('C')->setWidth(25);
                 $event->sheet->getDelegate()->getColumnDimension('D')->setWidth(25);
                 $event->sheet->getDelegate()->getColumnDimension('E')->setWidth(25);
                 $event->sheet->getDelegate()->getColumnDimension('F')->setWidth(25);
-                $event->sheet->getDelegate()->getColumnDimension('G')->setWidth(25);
+                // $event->sheet->getDelegate()->getColumnDimension('G')->setWidth(25);
 
                 // Thiết lập cỡ chữ 16 cho toàn bộ sheet
                 $event->sheet->getDelegate()->getStyle(
-                    'A1:G' . $event->sheet->getDelegate()->getHighestRow()
+                    'A1:F' . $event->sheet->getDelegate()->getHighestRow()
                 )->getFont()->setSize(16);
             },
         ];

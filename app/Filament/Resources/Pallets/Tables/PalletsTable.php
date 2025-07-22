@@ -17,6 +17,9 @@ use App\Models\ShippingRequest;
 use Filament\Actions\Action;
 use App\Exports\ShippingRequestInvoiceExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\Textarea;
 
 
 class PalletsTable
@@ -103,7 +106,41 @@ class PalletsTable
                     ->native(false),
                 SelectFilter::make('receivingPlan')
                     ->label('Thuộc kế hoạch nhập kho')
-                    ->relationship('crate.receivingPlan', 'id')
+                    ->relationship('crate.receivingPlan', 'plan_code'),
+                Filter::make('list_pallets')
+                    ->schema(schema: [
+                        Textarea::make('pallet_ids')
+                            ->label('Danh sách mã pallet')
+                            ->helperText('Nhập mã pallet, mỗi mã trên một dòng')
+                            ->placeholder('Nhập mã pallet để lọc')
+                            ->rows(5)
+                            ->columnSpanFull(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['pallet_ids'])) {
+                            return $query;
+                        }
+                        return $query->whereIn('pallet_id', explode("\n", trim($data['pallet_ids'] ?? '')));
+                    }),
+                Filter::make('list_crates')
+                    ->schema(schema: [
+                         Textarea::make('crate_ids')
+                            ->label('Danh sách mã kiện hàng')
+                            ->helperText('Nhập mã kiện hàng, mỗi mã trên một dòng')
+                            ->placeholder('Nhập mã kiện hàng để lọc')
+                            ->rows(5)
+                            ->columnSpanFull(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['crate_ids'])) {
+                            return $query;
+                        }
+                        $crateIds = array_map('trim', explode("\n", trim($data['crate_ids'])));
+                        return $query->whereHas('crate', function ($q) use ($crateIds) {
+                            $q->whereIn('crate_id', $crateIds);
+                        });
+                    }),
+                
                     
             ])
             ->defaultGroup('crate.receivingPlan.plan_code')
@@ -174,7 +211,7 @@ class PalletsTable
                                     ->body("Đã tạo yêu cầu xuất {$shippingRequest->items()->count()} thùng hàng.")
                                     ->success()
                                     ->actions([
-                                        \Filament\Actions\Action::make('edit_shipping_request')
+                                        Action::make('edit_shipping_request')
                                             ->label('Xem yêu cầu xuất kho')
                                             ->url(route('filament..resources.shipping-requests.edit', $shippingRequest->id))
                                             ->icon('heroicon-o-eye'),
@@ -187,7 +224,7 @@ class PalletsTable
                             ->body("Đã tạo yêu cầu xuất {$shippingRequest->items()->count()} thùng hàng.")
                             ->success()
                             ->actions([
-                                \Filament\Actions\Action::make('edit_shipping_request')
+                                Action::make('edit_shipping_request')
                                     ->label('Xem yêu cầu xuất kho')
                                     ->url(route('filament..resources.shipping-requests.edit', $shippingRequest->id))
                                     ->icon('heroicon-o-eye'),

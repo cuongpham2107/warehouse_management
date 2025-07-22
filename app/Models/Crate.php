@@ -29,6 +29,7 @@ class Crate extends Model
         'receiving_plan_id' => 'integer',
         'pieces' => 'integer',
         'gross_weight' => 'decimal:2',
+        'pcs' => 'integer',
         'type' => 'string',
         'dimensions_length' => 'decimal:2',
         'dimensions_width' => 'decimal:2',

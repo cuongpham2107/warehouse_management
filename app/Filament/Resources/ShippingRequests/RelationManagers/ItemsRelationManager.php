@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\ShippingRequests\RelationManagers;
 
-use App\Filament\Resources\Shipments\Schemas\ShippingRequestItemForm;
+use App\Filament\Resources\ShippingRequestItems\Schemas\ShippingRequestItemForm;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Schemas\Schema;

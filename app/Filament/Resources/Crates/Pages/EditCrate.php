@@ -14,7 +14,7 @@ class EditCrate extends EditRecord
 
     public function getTitle(): string
     {
-        return 'Sửa thùng hàng';
+        return 'Sửa kiện hàng';
     }
 
     protected function getHeaderActions(): array

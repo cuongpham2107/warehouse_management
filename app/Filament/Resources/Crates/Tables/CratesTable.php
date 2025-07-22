@@ -14,10 +14,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Actions\BulkAction;
-use Illuminate\Database\Eloquent\Collection;
-use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
-use App\Models\ShippingRequest;
 
 class CratesTable
 {
@@ -42,6 +38,13 @@ class CratesTable
                     ->alignCenter(true)
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('pcs')
+                    ->label('PCS')
+                    ->searchable(),
+                TextColumn::make('type')
+                    ->label('Loại đóng gói')
+                    ->badge()
+                    ->searchable(),
 
                 TextColumn::make('gross_weight')
                     ->label('Trọng lượng')
@@ -86,9 +89,7 @@ class CratesTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('type')
-                    ->label('Loại đóng gói')
-                    ->badge(),
+               
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -133,6 +134,7 @@ class CratesTable
                     DeleteBulkAction::make()->label('Xóa đã chọn'),
                 ])->label('Hành động hàng loạt'),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('created_at', 'desc')
+            ->reorderableColumns();
     }
 }

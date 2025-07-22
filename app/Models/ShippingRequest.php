@@ -31,6 +31,7 @@ class ShippingRequest extends Model
         'notes',
         'created_by',
     ];
+    protected $primaryKey = 'id';
 
     protected $casts = [
         'requested_date' => 'date',

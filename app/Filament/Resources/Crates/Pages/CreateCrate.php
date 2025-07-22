@@ -12,7 +12,7 @@ class CreateCrate extends CreateRecord
 
     public function getTitle(): string
     {
-        return 'Tạo thùng hàng';
+        return 'Tạo kiện hàng';
     }
     
 

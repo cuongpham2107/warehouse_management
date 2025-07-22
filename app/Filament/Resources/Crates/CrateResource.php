@@ -54,11 +54,7 @@ class CrateResource extends Resource
         return CrateForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return CrateInfolist::configure($schema);
-    }
-
+   
     public static function table(Table $table): Table
     {
         return CratesTable::configure($table);
@@ -76,7 +72,6 @@ class CrateResource extends Resource
         return [
             'index' => ListCrates::route('/'),
             'create' => CreateCrate::route('/create'),
-            'view' => ViewCrate::route('/{record}'),
             'edit' => EditCrate::route('/{record}/edit'),
         ];
     }

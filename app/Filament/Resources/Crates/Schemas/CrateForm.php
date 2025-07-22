@@ -65,8 +65,7 @@ class CrateForm
                             ->placeholder('Nhập số lượng'),
                         TextInput::make('type')
                             ->label('Loại thùng hàng')
-                            ->required()
-                            ->native(false),
+                            ->required(),
                         TextInput::make('gross_weight')
                             ->label('Trọng lượng (kg)')
                             ->required()
@@ -81,8 +80,7 @@ class CrateForm
                             ->label('Trạng thái')
                             ->required()
                             ->options(CrateStatus::getOptions())
-                            ->default(CrateStatus::PLANNED->value)
-                            ->native(false),
+                            ->default(CrateStatus::PLANNED->value),
                     ])
                     ->columns(4)
                     ->collapsible(),

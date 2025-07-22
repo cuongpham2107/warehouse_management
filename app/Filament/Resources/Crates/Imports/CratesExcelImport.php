@@ -37,7 +37,6 @@ class CratesExcelImport implements ToModel, WithHeadingRow, WithBatchInserts, Wi
      */
     public function model(array $row)
     {
-        
         // Nếu đang import từ RelationManager, sử dụng receiving_plan_id đã đặt
         if ($this->receivingPlanId) {
             $receivingPlanId = $this->receivingPlanId;
@@ -60,6 +59,7 @@ class CratesExcelImport implements ToModel, WithHeadingRow, WithBatchInserts, Wi
                 'receiving_plan_id' => $receivingPlanId,
                 'description' => $row['description_of_goods'] ?? null,
                 'pieces' => $row['quantity'] ?? 0,
+                'pcs' => $row['pcs'] ?? 0,
                 'type' => $row['packing_type'],
                 'gross_weight' => $row['gross_weight_kg'] ?? 0,
                 'dimensions_length' => $row['dimensions_length_cm'] ?? 0,

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Shipments\Schemas;
+namespace App\Filament\Resources\ShippingRequestItems\Schemas;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;

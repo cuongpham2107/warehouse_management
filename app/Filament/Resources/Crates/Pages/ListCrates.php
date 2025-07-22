@@ -13,7 +13,7 @@ class ListCrates extends ListRecords
 
     public function getTitle(): string
     {
-        return 'Danh sách thùng hàng';
+        return 'Danh sách kiện hàng';
     }
 
     protected function getHeaderActions(): array
