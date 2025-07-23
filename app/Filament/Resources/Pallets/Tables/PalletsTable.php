@@ -219,6 +219,7 @@ class PalletsTable
                                             ->icon('heroicon-o-eye'),
                                     ])
                                     ->send();
+                               
                                 return Excel::download(new ShippingRequestInvoiceExport($shippingRequest), 'shipping_request_invoice.xlsx');
                             }
                             \Filament\Notifications\Notification::make()
