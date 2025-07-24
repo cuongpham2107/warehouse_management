@@ -10,22 +10,26 @@ use Maatwebsite\Excel\Concerns\FromView;
 use Illuminate\Contracts\View\View;
 use App\Models\ShippingRequest;
 use Maatwebsite\Excel\Concerns\WithDrawings;
-
+use Illuminate\Support\Facades\Storage;
+use ZipArchive;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ExportInvoiceShipping implements FromView, WithEvents, WithDrawings
 {
-    protected $shippingRequest;
+   protected $shippingRequest;
+    protected $items;
     protected $totalPcs = 0;
     protected $totalGrossWeight = 0;
-    protected $totalPieces = 0;
 
-    public function __construct(ShippingRequest $shippingRequest)
+    public function __construct(ShippingRequest $shippingRequest, $items = null)
     {
         $this->shippingRequest = $shippingRequest->load([
             'creator',
             'items.crate',
             'items.crate.pallet'
         ]);
+
+        $this->items = $items ?? $this->shippingRequest->items; 
         $this->calculateTotals();
     }
 
@@ -33,19 +37,18 @@ class ExportInvoiceShipping implements FromView, WithEvents, WithDrawings
     {
         return view('exports.invoices', [
             'shippingRequest' => $this->shippingRequest,
+            'items' => $this->items,
             'totalPcs' => $this->totalPcs,
             'totalGrossWeight' => $this->totalGrossWeight,
-            'totalPieces' => $this->totalPieces,
         ]);
     }
 
     protected function calculateTotals()
     {
-        foreach ($this->shippingRequest->items as $item) {
+        foreach ($this->items as $item) {
             if ($item->crate) {
                 $this->totalPcs += $item->crate->pcs ?? 0;
                 $this->totalGrossWeight += $item->crate->gross_weight ?? 0;
-                $this->totalPieces += $item->crate->pieces ?? 0;
             }
         }
     }
@@ -69,14 +72,6 @@ class ExportInvoiceShipping implements FromView, WithEvents, WithDrawings
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
-
-               
-               
-
-
-                
-
-
                 $sheet->getStyle('C5:E14')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle('C5:E14')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $sheet->getStyle('H5:J14')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -92,4 +87,6 @@ class ExportInvoiceShipping implements FromView, WithEvents, WithDrawings
             },
         ];
     }
+
+    
 }

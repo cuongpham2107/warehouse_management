@@ -15,12 +15,11 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
 use App\Models\ShippingRequest;
 use Filament\Actions\Action;
-use App\Exports\ShippingRequestInvoiceExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Textarea;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ShippingInvoiceExportController;
 
 
 class PalletsTable
@@ -233,8 +232,15 @@ class PalletsTable
                                             ->icon('heroicon-o-eye'),
                                     ])
                                     ->send();
-                               
-                                return Excel::download(new ShippingRequestInvoiceExport($shippingRequest), 'shipping_request_invoice.xlsx');
+                                        
+                                if($shippingRequest->items()->count() == 0) {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Không có items để xuất kho')
+                                        ->danger()
+                                        ->send();
+                                    return;
+                                }
+                                return (new ShippingInvoiceExportController())->export($shippingRequest->id);
                             }
                             \Filament\Notifications\Notification::make()
                             ->title('Xuất kho thành công')

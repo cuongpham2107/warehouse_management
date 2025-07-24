@@ -30,6 +30,7 @@ class ShippingRequestPreviewController extends Controller
             'totalPcs' => $totalPcs,
             'totalGrossWeight' => $totalGrossWeight,
             'totalPieces' => $totalPieces,
+            'preview' => true, // Thêm biến này để xác định là xem trước
         ]);
     }
 }

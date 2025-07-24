@@ -94,7 +94,15 @@ class ReceivingPlansTable
                     ->label('Chỉnh sửa')
                     ->modal('edit_receiving_plan'),
                 DeleteAction::make()
-                    ->label('Xoá'),
+                    ->label('Xoá')
+                    ->action(function ($record) {
+                        //Xóa các bản ghi con trong crate
+                        $record->crates()->each(function ($crate) {
+                            $crate->delete();
+                        });
+                        // Xoá bản ghi
+                        $record->delete();
+                    }),
                 \Filament\Actions\Action::make('activate')
                     ->label('Kích hoạt')
                     ->icon('heroicon-o-bolt')
@@ -118,7 +126,8 @@ class ReceivingPlansTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('Xóa'),
+                        ->label('Xóa')
+                       
                 ]),
             ]);
     }

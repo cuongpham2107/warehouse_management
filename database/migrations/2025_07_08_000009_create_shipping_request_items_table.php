@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('shipping_request_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('shipping_request_id')->constrained('shipping_requests')->onDelete('cascade');
-            $table->foreignId('crate_id')->constrained('crates');
+            $table->foreignId('crate_id')->constrained('crates')->onDelete('cascade');
             $table->integer('quantity_requested')->default(1);
             $table->integer('quantity_shipped')->default(0);
             $table->text('notes')->nullable();
