@@ -33,6 +33,11 @@ class ShippingRequestsTable
                     ->label('Ngày yêu cầu')
                     ->date()
                     ->sortable(),
+                TextColumn::make('departure_time')
+                    ->label('Thời gian xuất phát')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('creator.name')
                     ->label('Người tạo')
                     ->numeric()

@@ -81,12 +81,12 @@ class ReceivingPlanForm
                         ->schema([
 
                             TextInput::make('total_crates')
-                                ->label('Tổng số thùng')
+                                ->label('Tổng số kiện')
                                 ->numeric()
                                 ->readOnly()
                                 ->default(0)
                                 ->minValue(0)
-                                ->placeholder('Nhập tổng số thùng')
+                                ->placeholder('Nhập tổng số kiện')
                                 ->suffixIcon('heroicon-o-cube')
                                 ->readOnly(),
 

@@ -42,6 +42,16 @@ class PalletsTable
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('crate.pcs')
+                    ->label('PCS')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('crate.gross_weight')
+                    ->label('Trọng lượng')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('crate.receivingPlan.plan_code')
                     ->label('Kế hoạch nhập kho')
                     ->searchable()
@@ -104,7 +114,10 @@ class PalletsTable
                         'shipped' => 'Đã xuất kho',
                         'damaged' => 'Bị hư hỏng',
                     ])
-                    ->native(false),
+                    ->native(false)
+                    ->modifyFormFieldUsing(fn ($field) => $field->default('stored'))
+                    ->default(),
+
                 SelectFilter::make('receivingPlan')
                     ->label('Thuộc kế hoạch nhập kho')
                     ->relationship('crate.receivingPlan', 'plan_code'),
@@ -149,6 +162,7 @@ class PalletsTable
                 Group::make('crate.receivingPlan.plan_code')
                     ->label('Thuộc kế hoạch nhập kho')
                     ->collapsible(),
+                
             ])
             ->recordActions([
                 ViewAction::make()->label('Xem'),

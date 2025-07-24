@@ -31,7 +31,7 @@ class ReceivingPlansTable
                     ->sortable(),
                 TextColumn::make('total_crates')
                     ->alignCenter(true)
-                    ->label('Tổng số thùng')
+                    ->label('Tổng số kiện')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('total_pieces')

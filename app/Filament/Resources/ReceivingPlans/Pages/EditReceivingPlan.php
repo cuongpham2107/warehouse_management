@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 use Livewire\Attributes\On;
+use Illuminate\Database\Eloquent\Model;
 
 
 class EditReceivingPlan extends EditRecord
@@ -52,4 +53,19 @@ class EditReceivingPlan extends EditRecord
             'total_weight',
         ]);
     }
+  
+
+    protected function handleRecordUpdate(Model $record, array $data): Model
+    {
+        
+        $data['total_crates'] = $record->crates->count();
+        $data['total_pieces'] = $record->crates->sum('pieces');
+        $data['total_weight'] = $record->crates->sum('gross_weight');
+
+        $record->update($data);
+
+        return $record;
+    }
+
+
 }
