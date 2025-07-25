@@ -19,6 +19,7 @@ class ShippingRequestsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
             ->columns([
                 TextColumn::make('request_code')
                     ->label('Mã yêu cầu')
@@ -98,8 +99,6 @@ class ShippingRequestsTable
                     }),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->label('Xem'),
                 EditAction::make()
                     ->label('Chỉnh sửa'),
                 \Filament\Actions\Action::make('approve')

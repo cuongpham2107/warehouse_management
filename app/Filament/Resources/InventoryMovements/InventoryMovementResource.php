@@ -23,7 +23,7 @@ class InventoryMovementResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
 
-    protected static string|UnitEnum|null $navigationGroup = '📦 Hàng hóa';
+    protected static string|UnitEnum|null $navigationGroup = 'Hàng hóa';
 
     protected static ?int $navigationSort = 3;
 

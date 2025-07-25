@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('plan_date');
             $table->string('license_plate')->nullable();
             $table->integer('total_crates')->default(0);
-            $table->integer('total_pieces')->default(0);
+            $table->integer('total_pcs')->default(0);
             $table->decimal('total_weight', 10, 2)->default(0);
             $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled'])->default('pending');
             $table->text('notes')->nullable();

@@ -81,6 +81,7 @@ class ExportInvoiceShipping implements FromView, WithEvents, WithDrawings
                 $sheet->getColumnDimension('B')->setWidth(20);
                 $sheet->getColumnDimension('C')->setWidth(10);
                 $sheet->getColumnDimension('D')->setWidth(12);
+                $sheet->getColumnDimension('E')->setWidth(12);
                 $sheet->getColumnDimension('F')->setWidth(12);
                 $sheet->getColumnDimension('G')->setWidth(12);
 

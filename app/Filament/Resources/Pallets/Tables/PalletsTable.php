@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Textarea;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ShippingInvoiceExportController;
-
+use Filament\Actions\DeleteAction;
 
 class PalletsTable
 {
@@ -164,9 +164,11 @@ class PalletsTable
                 
             ])
             ->recordActions([
-                ViewAction::make()->label('Xem'),
                 EditAction::make()->label('Sửa'),
+                DeleteAction::make()
+                    ->label('Xoá')
             ])
+             ->recordUrl(null)
             ->headerActions([
                 
                 BulkAction::make('choose_crate_export_warehouse')
@@ -228,7 +230,7 @@ class PalletsTable
                                     ->actions([
                                         Action::make('edit_shipping_request')
                                             ->label('Xem yêu cầu xuất kho')
-                                            ->url(route('filament..resources.shipping-requests.edit', $shippingRequest->id))
+                                            ->url(route('filament.admin.resources.shipping-requests.edit', $shippingRequest->id))
                                             ->icon('heroicon-o-eye'),
                                     ])
                                     ->send();
@@ -249,7 +251,7 @@ class PalletsTable
                             ->actions([
                                 Action::make('edit_shipping_request')
                                     ->label('Xem yêu cầu xuất kho')
-                                    ->url(route('filament..resources.shipping-requests.edit', $shippingRequest->id))
+                                    ->url(route('filament.admin.resources.shipping-requests.edit', $shippingRequest->id))
                                     ->icon('heroicon-o-eye'),
                             ])
                             ->send();

@@ -49,7 +49,7 @@ class EditReceivingPlan extends EditRecord
         $this->refreshFormData([
             'status',
             'total_crates',
-            'total_pieces',
+            'total_pcs',
             'total_weight',
         ]);
     }
@@ -59,7 +59,7 @@ class EditReceivingPlan extends EditRecord
     {
         
         $data['total_crates'] = $record->crates->count();
-        $data['total_pieces'] = $record->crates->sum('pieces');
+        $data['total_pcs'] = $record->crates->sum('pcs');
         $data['total_weight'] = $record->crates->sum('gross_weight');
 
         $record->update($data);

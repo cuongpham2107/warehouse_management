@@ -18,18 +18,18 @@ class ShippingRequestPreviewController extends Controller
         // Tính tổng
         $totalPcs = 0;
         $totalGrossWeight = 0;
-        $totalPieces = 0;
+        $totalPcs = 0;
         foreach ($shippingRequest->items as $item) {
             $totalPcs += $item->crate->pcs ?? 0;
             $totalGrossWeight += $item->crate->gross_weight ?? 0;
-            $totalPieces += $item->crate->pieces ?? 0;
+            $totalPcs += $item->crate->pcs ?? 0;
         }
 
         return view('exports.invoices', [
             'shippingRequest' => $shippingRequest,
             'totalPcs' => $totalPcs,
             'totalGrossWeight' => $totalGrossWeight,
-            'totalPieces' => $totalPieces,
+            'totalPcs' => $totalPcs,
             'preview' => true, // Thêm biến này để xác định là xem trước
         ]);
     }

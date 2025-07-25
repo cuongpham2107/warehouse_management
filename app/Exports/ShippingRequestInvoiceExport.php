@@ -65,7 +65,7 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
         $rows[] = array_fill(0, 10, ''); // Dòng trống cho merge
         $totalPcs = 0;
         $totalGrossWeight = 0;
-        $totalPieces = 0; 
+        $totalPcs = 0; 
 
         // Dữ liệu bảng
         foreach ($this->shippingRequest->items as $i => $item) {
@@ -73,7 +73,7 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
             $pallet = $crate ? $crate->pallet : null;
             $totalPcs += $crate->pcs ?? 0; // Cộng dồn số kiện
             $totalGrossWeight += $crate->gross_weight ?? 0; // Cộng dồn trọng lượng
-            $totalPieces += $crate->pieces ?? 0; // Cộng dồn số lượng
+            $totalPcs += $crate->pieces ?? 0; // Cộng dồn số lượng
             $rows[] = [
                 $i + 1,
                 $crate ? $crate->crate_id : '',
@@ -97,7 +97,7 @@ class ShippingRequestInvoiceExport implements FromArray, WithHeadings, WithEvent
 
         // Dòng TOTAL
         $rows[] = [
-            '', 'TOTAL', $totalPcs, $totalGrossWeight, '', '', $totalPieces, '', '', ''
+            '', 'TOTAL', $totalPcs, $totalGrossWeight, '', '', $totalPcs, '', '', ''
         ];
 
         // Phần ký tên

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Crates\Tables;
 
 use App\Enums\CrateStatus;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -20,6 +21,7 @@ class CratesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
             ->columns([
                 TextColumn::make('crate_id')
                     ->label('Mã thùng hàng')
@@ -123,8 +125,9 @@ class CratesTable
                     ->collapsible(),
             ])
             ->recordActions([
-                ViewAction::make()->label('Xem'),
                 EditAction::make()->label('Sửa'),
+                DeleteAction::make()
+                    ->label('Xoá')
             ])
             ->headerActions([
                 

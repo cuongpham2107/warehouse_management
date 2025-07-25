@@ -90,7 +90,7 @@ class ReceivingPlanForm
                                 ->suffixIcon('heroicon-o-cube')
                                 ->readOnly(),
 
-                            TextInput::make('total_pieces')
+                            TextInput::make('total_pcs')
                                 ->label('Tổng số sản phẩm')
                                 ->numeric()
                                 ->readOnly()
