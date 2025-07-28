@@ -54,10 +54,7 @@ class InventoryMovementResource extends Resource
         return InventoryMovementForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return InventoryMovementInfolist::configure($schema);
-    }
+
 
     public static function table(Table $table): Table
     {
@@ -76,7 +73,6 @@ class InventoryMovementResource extends Resource
         return [
             'index' => ListInventoryMovements::route('/'),
             'create' => CreateInventoryMovement::route('/create'),
-            'view' => ViewInventoryMovement::route('/{record}'),
             'edit' => EditInventoryMovement::route('/{record}/edit'),
         ];
     }
