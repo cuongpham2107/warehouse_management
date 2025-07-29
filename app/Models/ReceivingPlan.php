@@ -16,7 +16,7 @@ class ReceivingPlan extends Model
         'license_plate',
         'plan_date',
         'total_crates',
-        'total_pieces',
+        'total_pcs',
         'total_weight',
         'status',
         'notes',
@@ -26,7 +26,7 @@ class ReceivingPlan extends Model
     protected $casts = [
         'plan_date' => 'date',
         'total_crates' => 'integer',
-        'total_pieces' => 'integer',
+        'total_pcs' => 'integer',
         'total_weight' => 'decimal:2',
         'status' => ReceivingPlanStatus::class,
         'created_by' => 'integer',
@@ -121,13 +121,13 @@ class ReceivingPlan extends Model
     {
         $totals = $this->crates()->selectRaw('
             COUNT(*) as total_crates,
-            COALESCE(SUM(pieces), 0) as total_pieces,
+            COALESCE(SUM(pcs), 0) as total_pcs,
             COALESCE(SUM(gross_weight), 0) as total_weight
         ')->first();
 
         $this->update([
             'total_crates' => $totals->total_crates,
-            'total_pieces' => $totals->total_pieces,
+            'total_pcs' => $totals->total_pcs,
             'total_weight' => $totals->total_weight,
         ]);
     }

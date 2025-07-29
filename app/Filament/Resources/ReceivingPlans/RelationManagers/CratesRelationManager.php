@@ -6,11 +6,7 @@ use Exception;
 use Livewire\Component;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\DissociateBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -18,30 +14,23 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Width;
 use App\Filament\Resources\Crates\Imports\CratesExcelImport;
-use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
 use App\Filament\Resources\Crates\CrateResource;
 use App\Enums\PalletStatus;
 use App\Enums\ReceivingPlanStatus;
 use App\Models\Pallet;
 use App\Models\WarehouseLocation;
 use App\Models\ReceivingPlan;
-use App\Models\ShippingRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
 use Maatwebsite\Excel\Facades\Excel;
-
-use Illuminate\Database\Eloquent\Model;
 
 class CratesRelationManager extends RelationManager
 {
@@ -109,13 +98,13 @@ class CratesRelationManager extends RelationManager
 
                             //Tính tổng số lượng kiện hàng đã import
                             $totalCrates = $import->getTotalCrates();
-                            $totalPieces = $import->getTotalPieces();
+                            $totalPcs = $import->getTotalPcs();
                             $totalWeight = $import->getTotalWeight();
 
                             $receivingPlan->update([
                                 'status' => ReceivingPlanStatus::IN_PROGRESS->value,
                                 'total_crates' => $totalCrates,
-                                'total_pieces' => $totalPieces,
+                                'total_pcs' => $totalPcs,
                                 'total_weight' => $totalWeight,
                             ]);
                             $livewire->dispatch('receivingPlan.refresh');
@@ -125,7 +114,7 @@ class CratesRelationManager extends RelationManager
                                 ->title('Import thành công')
                                 ->body('
                                     Dữ liệu kiện hàng đã được import thành công. Đổi trạng thái kế hoạch sang "Đang thực hiện".
-                                    Tính tổng số kiện hàng: ' . $totalCrates . ', sản phẩm: ' . $totalPieces . ', khối lượng: ' . $totalWeight . 'kg.
+                                    Tính tổng số kiện hàng: ' . $totalCrates . ', sản phẩm: ' . $totalPcs . ', khối lượng: ' . $totalWeight . 'kg.
                                     ')
                                 ->send();
                         } catch (Exception $e) {
@@ -256,7 +245,7 @@ class CratesRelationManager extends RelationManager
                                 ->actions([
                                     Action::make('Xem')
                                         ->button()
-                                        ->url(route('filament..resources.pallets.index', [
+                                        ->url(route('filament.admin.resources.pallets.index', [
                                             'tableFilters' => [
                                                 'receivingPlan' => [
                                                     'value' => $receivingPlan->id,
@@ -346,49 +335,9 @@ class CratesRelationManager extends RelationManager
                 //     ->modalSubmitAction(fn (Action $action) => $action->label('Tạo yêu cầu xuất kho')),
 
             ])
-            ->recordActions([
-                ViewAction::make()
-                    ->label('Xem')
-                    ->icon('heroicon-o-eye')
-                    ->color('info')
-                    ->modal()
-                    ->modalWidth(Width::SevenExtraLarge)
-                    ->schema(fn(Schema $schema) => CrateResource::infolist($schema)),
-
-                EditAction::make()
-                    ->label('Sửa')
-                    ->icon('heroicon-o-pencil')
-                    ->color('warning')
-                    ->modal()
-                    ->modalWidth(Width::SevenExtraLarge),
-                // DissociateAction::make()
-                //     ->label('Hủy liên kết')
-                //     ->icon('heroicon-o-x-mark')
-                //     ->color('danger')
-                //     ->requiresConfirmation()
-                //     ->modalHeading('Hủy liên kết kiện hàng')
-                //     ->modalDescription('Bạn có chắc muốn hủy liên kết kiện hàng này khỏi kế hoạch?')
-                //     ->modalSubmitActionLabel('Hủy liên kết'),
-
-                DeleteAction::make()
-                    ->label('Xóa')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('Xóa kiện hàng')
-                    ->modalDescription('Bạn có chắc muốn xóa kiện hàng này? Hành động này không thể hoàn tác.')
-                    ->modalSubmitActionLabel('Xóa'),
-            ])
+            ->recordAction(null)
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DissociateBulkAction::make()
-                        ->label('Hủy liên kết đã chọn')
-                        ->icon('heroicon-o-x-mark')
-                        ->color('warning')
-                        ->requiresConfirmation()
-                        ->modalHeading('Hủy liên kết các kiện hàng đã chọn')
-                        ->modalDescription('Bạn có chắc muốn hủy liên kết tất cả kiện hàng đã chọn?'),
-
                     DeleteBulkAction::make()
                         ->label('Xóa đã chọn')
                         ->icon('heroicon-o-trash')
@@ -400,7 +349,6 @@ class CratesRelationManager extends RelationManager
 
             ])
             ->defaultSort('created_at', 'desc')
-            ->striped()
             ->paginated([10, 25, 50, 100]);
     }
 }

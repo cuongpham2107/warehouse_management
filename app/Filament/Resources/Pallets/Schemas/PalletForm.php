@@ -9,6 +9,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use App\Enums\PalletStatus;
 use Filament\Schemas\Components\Flex;
+use App\Models\WarehouseLocation;
 
 class PalletForm
 {
@@ -37,6 +38,9 @@ class PalletForm
                         TextInput::make('location_code')
                             ->label('Mã vị trí')
                             ->maxLength(50)
+                            ->datalist(
+                                fn () => WarehouseLocation::query()->pluck('location_code')->all()
+                            )
                             ->required()
                             ->placeholder('Nhập mã vị trí'),
 

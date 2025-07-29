@@ -15,13 +15,12 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
 use App\Models\ShippingRequest;
 use Filament\Actions\Action;
-use App\Exports\ShippingRequestInvoiceExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Textarea;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\ShippingInvoiceExportController;
+use Filament\Actions\DeleteAction;
 
 class PalletsTable
 {
@@ -39,6 +38,16 @@ class PalletsTable
                     
                 TextColumn::make('crate.crate_id')
                     ->label('Thùng hàng')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('crate.pcs')
+                    ->label('PCS')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('crate.gross_weight')
+                    ->label('Trọng lượng')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
@@ -104,7 +113,10 @@ class PalletsTable
                         'shipped' => 'Đã xuất kho',
                         'damaged' => 'Bị hư hỏng',
                     ])
-                    ->native(false),
+                    ->native(false)
+                    ->modifyFormFieldUsing(fn ($field) => $field->default('stored'))
+                    ->default(),
+
                 SelectFilter::make('receivingPlan')
                     ->label('Thuộc kế hoạch nhập kho')
                     ->relationship('crate.receivingPlan', 'plan_code'),
@@ -149,11 +161,14 @@ class PalletsTable
                 Group::make('crate.receivingPlan.plan_code')
                     ->label('Thuộc kế hoạch nhập kho')
                     ->collapsible(),
+                
             ])
             ->recordActions([
-                ViewAction::make()->label('Xem'),
                 EditAction::make()->label('Sửa'),
+                DeleteAction::make()
+                    ->label('Xoá')
             ])
+             ->recordUrl(null)
             ->headerActions([
                 
                 BulkAction::make('choose_crate_export_warehouse')
@@ -215,12 +230,19 @@ class PalletsTable
                                     ->actions([
                                         Action::make('edit_shipping_request')
                                             ->label('Xem yêu cầu xuất kho')
-                                            ->url(route('filament..resources.shipping-requests.edit', $shippingRequest->id))
+                                            ->url(route('filament.admin.resources.shipping-requests.edit', $shippingRequest->id))
                                             ->icon('heroicon-o-eye'),
                                     ])
                                     ->send();
-                               
-                                return Excel::download(new ShippingRequestInvoiceExport($shippingRequest), 'shipping_request_invoice.xlsx');
+                                        
+                                if($shippingRequest->items()->count() == 0) {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Không có items để xuất kho')
+                                        ->danger()
+                                        ->send();
+                                    return;
+                                }
+                                return (new ShippingInvoiceExportController())->export($shippingRequest->id);
                             }
                             \Filament\Notifications\Notification::make()
                             ->title('Xuất kho thành công')
@@ -229,7 +251,7 @@ class PalletsTable
                             ->actions([
                                 Action::make('edit_shipping_request')
                                     ->label('Xem yêu cầu xuất kho')
-                                    ->url(route('filament..resources.shipping-requests.edit', $shippingRequest->id))
+                                    ->url(route('filament.admin.resources.shipping-requests.edit', $shippingRequest->id))
                                     ->icon('heroicon-o-eye'),
                             ])
                             ->send();

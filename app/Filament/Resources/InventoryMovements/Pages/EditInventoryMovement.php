@@ -33,10 +33,10 @@ class EditInventoryMovement extends EditRecord
         $record->update($data);
 
         // Nếu có pallet_id và to_location_id, cập nhật luôn vị trí pallet
-        if (!empty($data['pallet_id']) && !empty($data['to_location_id'])) {
+        if (!empty($data['pallet_id']) && !empty($data['to_location_code'])) {
             $pallet = Pallet::find($data['pallet_id']);
             if ($pallet) {
-                $pallet->update(['location_id' => $data['to_location_id']]);
+                $pallet->update(['location_code' => $data['to_location_code']]);
             }
         }
 

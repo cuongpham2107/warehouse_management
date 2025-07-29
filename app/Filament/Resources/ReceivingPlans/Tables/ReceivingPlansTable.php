@@ -6,12 +6,12 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\DateFilter;
+use Filament\Tables\Columns\Summarizers\Count;
+use Illuminate\Database\Query\Builder;
 
 class ReceivingPlansTable
 {
@@ -27,19 +27,22 @@ class ReceivingPlansTable
                     ->sortable(),
                 TextColumn::make('plan_date')
                     ->label('Ngày kế hoạch')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('total_crates')
+                    ->badge()
                     ->alignCenter(true)
-                    ->label('Tổng số thùng')
+                    ->label('Tổng số kiện')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('total_pieces')
+                TextColumn::make('total_pcs')
+                    ->badge()
                     ->alignCenter(true)
                     ->label('Tổng số sản phẩm')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('total_weight')
+                    ->badge()
                     ->alignCenter(true)
                     ->label('Tổng khối lượng')
                     ->numeric()
@@ -55,12 +58,12 @@ class ReceivingPlansTable
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Ngày tạo')
-                    ->dateTime()
+                    ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->label('Ngày cập nhật')
-                    ->dateTime()
+                    ->date('d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -94,7 +97,15 @@ class ReceivingPlansTable
                     ->label('Chỉnh sửa')
                     ->modal('edit_receiving_plan'),
                 DeleteAction::make()
-                    ->label('Xoá'),
+                    ->label('Xoá')
+                    ->action(function ($record) {
+                        //Xóa các bản ghi con trong crate
+                        $record->crates()->each(function ($crate) {
+                            $crate->delete();
+                        });
+                        // Xoá bản ghi
+                        $record->delete();
+                    }),
                 \Filament\Actions\Action::make('activate')
                     ->label('Kích hoạt')
                     ->icon('heroicon-o-bolt')
@@ -118,8 +129,10 @@ class ReceivingPlansTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('Xóa'),
+                        ->label('Xóa')
+                       
                 ]),
-            ]);
+            ])
+            ->recordUrl(null);
     }
 }

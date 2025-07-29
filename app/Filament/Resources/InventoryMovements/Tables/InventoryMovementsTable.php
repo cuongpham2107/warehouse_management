@@ -26,28 +26,24 @@ class InventoryMovementsTable
                     ->badge()
                     ->label('Loại di chuyển')
                     ->formatStateUsing(fn($state) => match($state) {
-                        'check_in' => 'Nhập kho',
-                        'check_out' => 'Xuất kho',
-                        'move' => 'Di chuyển',
-                        'adjust' => 'Điều chỉnh',
+                        'transfer' => 'Di chuyển',
+                        'relocate' => 'Điều chỉnh',
                         default => ucfirst($state),
                     })
                     ->color(fn($state) => match($state) {
-                        'check_in' => 'success',
-                        'check_out' => 'danger',
-                        'move' => 'info',
-                        'adjust' => 'warning',
+                        'transfer' => 'primary',
+                        'relocate' => 'warning',
                         default => 'gray',
                     })
                     ->searchable(),
                     
-                TextColumn::make('fromLocation.location_code')
+                TextColumn::make('from_location_code')
                     ->label('Từ vị trí')
                     ->searchable()
                     ->sortable()
                     ->placeholder('N/A'),
                     
-                TextColumn::make('toLocation.location_code')
+                TextColumn::make('to_location_code')
                     ->label('Đến vị trí')
                     ->searchable()
                     ->sortable()
@@ -58,29 +54,7 @@ class InventoryMovementsTable
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
                     
-                TextColumn::make('reference_type')
-                    ->badge()
-                    ->label('Loại tham chiếu')
-                    ->formatStateUsing(fn($state) => match($state) {
-                        'receiving_plan' => 'Kế hoạch nhập kho',
-                        'shipping_request' => 'Yêu cầu vận chuyển',
-                        'manual' => 'Thủ công',
-                        default => ucfirst($state),
-                    })
-                    ->color(fn($state) => match($state) {
-                        'receiving_plan' => 'info',
-                        'shipping_request' => 'warning',
-                        'manual' => 'gray',
-                        default => 'gray',
-                    })
-                    ->searchable(),
-                    
-                TextColumn::make('reference_id')
-                    ->label('ID tham chiếu')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('N/A'),
-                    
+                
                 TextColumn::make('performer.name')
                     ->label('Thực hiện bởi')
                     ->searchable()
@@ -91,24 +65,17 @@ class InventoryMovementsTable
                     ->badge()
                     ->label('Loại thiết bị')
                     ->formatStateUsing(fn($state) => match($state) {
-                        'web' => 'Web',
-                        'pda' => 'PDA',
-                        'forklift_computer' => 'Máy tính xe nâng',
+                        'scanner' => 'Máy quét',
+                        'manual' => 'Thủ công',
                         default => ucfirst($state),
                     })
                     ->color(fn($state) => match($state) {
-                        'web' => 'primary',
-                        'pda' => 'success',
-                        'forklift_computer' => 'warning',
+                        'scanner' => 'primary',
+                        'manual' => 'success',
                         default => 'gray',
                     })
                     ->searchable(),
-                    
-                TextColumn::make('device.device_name')
-                    ->label('Thiết bị')
-                    ->searchable()
-                    ->placeholder('N/A')
-                    ->toggleable(),
+               
                 TextColumn::make('created_at')
                     ->label('Ngày tạo')
                     ->dateTime()
@@ -124,28 +91,18 @@ class InventoryMovementsTable
                 SelectFilter::make('movement_type')
                     ->label('Loại di chuyển')
                     ->options([
-                        'check_in' => 'Nhập kho',
-                        'check_out' => 'Xuất kho',
-                        'move' => 'Di chuyển',
-                        'adjust' => 'Điều chỉnh',
+                        'transfer' => 'Chuyển kho',
+                        'relocate' => 'Di chuyển vị trí',
                     ])
                     ->placeholder('Tất cả loại'),
                     
-                SelectFilter::make('reference_type')
-                    ->label('Loại tham chiếu')
-                    ->options([
-                        'receiving_plan' => 'Kế hoạch nhập kho',
-                        'shipping_request' => 'Yêu cầu vận chuyển',
-                        'manual' => 'Thủ công',
-                    ])
-                    ->placeholder('Tất cả loại tham chiếu'),
+               
                     
                 SelectFilter::make('device_type')
                     ->label('Loại thiết bị')
                     ->options([
-                        'web' => 'Web',
-                        'pda' => 'PDA',
-                        'forklift_computer' => 'Máy tính xe nâng',
+                        'scanner' => 'Máy quét',
+                        'manual' => 'Thủ công',
                     ])
                     ->placeholder('Tất cả thiết bị'),
             ])

@@ -4,13 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\ShippingRequestPriority;
 use Spatie\ModelStates\HasStates;
-use App\States\ShippingRequestState;
-use App\States\PendingState;
-use App\States\ProcessingState;
-use App\States\ReadyState;
-use App\States\CancelledState;
+use App\Models\User;
+use App\Models\ShippingRequestItem;
 
 class ShippingRequest extends Model
 {
@@ -22,6 +18,7 @@ class ShippingRequest extends Model
         'customer_contact',
         'delivery_address',
         'requested_date',
+        'departure_time',
         'license_plate',
         'driver_name',
         'driver_phone',
@@ -35,6 +32,7 @@ class ShippingRequest extends Model
 
     protected $casts = [
         'requested_date' => 'date',
+        'departure_time' => 'datetime',
         'created_by' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

@@ -5,11 +5,12 @@ namespace App\Filament\Resources\InventoryMovements\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use App\Models\WarehouseLocation;
 
 class InventoryMovementForm
 {
@@ -32,23 +33,20 @@ class InventoryMovementForm
                                     ->live(onBlur:true)
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         $pallet = \App\Models\Pallet::find($state);
-                                        $set('from_location_id', $pallet->location_id ?? null);
+                                        $set('from_location_code', $pallet->location_code ?? null);
                                     })
                                     ->placeholder('Chọn pallet'),
-                                Select::make('from_location_id')
+                                TextInput::make('from_location_code')
                                     ->label('Từ vị trí')
                                     ->disabled()
                                     ->dehydrated()
-                                    ->relationship('fromLocation', 'location_code')
-                                    ->searchable()
-                                    ->preload()
-                                    ->placeholder('Chọn vị trí xuất phát'),
-                                Select::make('to_location_id')
+                                    ->placeholder('Vị trí sẽ tự động điền'),
+                                TextInput::make('to_location_code')
                                     ->label('Đến vị trí')
-                                    ->relationship('toLocation', 'location_code')
-                                    ->searchable()
-                                    ->preload()
-                                    ->placeholder('Chọn vị trí đích'),
+                                    ->placeholder('Chọn vị trí đích')
+                                    ->datalist(
+                                        fn () => WarehouseLocation::query()->pluck('location_code')->all()
+                                    ),
                             ]),
                     ])
                     ->columns(1)
@@ -63,8 +61,6 @@ class InventoryMovementForm
                                     ->label('Loại di chuyển')
                                     ->required()
                                     ->options([
-                                        'in' => 'Nhập kho',
-                                        'out' => 'Xuất kho',
                                         'transfer' => 'Chuyển kho',
                                         'relocate' => 'Di chuyển vị trí',
                                     ])
@@ -72,28 +68,21 @@ class InventoryMovementForm
                                     ->placeholder('Chọn loại di chuyển'),
                                 DateTimePicker::make('movement_date')
                                     ->label('Ngày di chuyển')
+                                    ->default(now())
+                                    ->date('d/m/Y H:i')
                                     ->required()
                                     ->placeholder('Chọn ngày di chuyển'),
-                                Grid::make(2)
-                                    ->schema([
-                                        Select::make('device_type')
-                                            ->label('Loại thiết bị')
-                                            ->required()
-                                            ->options([
-                                                'handheld' => 'Máy cầm tay',
-                                                'forklift' => 'Xe nâng',
-                                                'scanner' => 'Máy quét',
-                                                'manual' => 'Thủ công',
-                                            ])
-                                            ->native(false)
-                                            ->placeholder('Chọn loại thiết bị'),
-                                        Select::make('device_id')
-                                            ->label('Thiết bị')
-                                            ->relationship('device', 'device_name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->placeholder('Chọn thiết bị'),
-                                    ]),
+                                Select::make('device_type')
+                                    ->label('Loại thiết bị')
+                                    ->required()
+                                    ->options([
+                                        'scanner' => 'Máy quét',
+                                        'manual' => 'Thủ công',
+                                    ])
+                                    ->default('manual')
+                                    ->native(false)
+                                    ->placeholder('Chọn loại thiết bị'),
+                                   
                             ]),
                         Select::make('performed_by')
                             ->label('Thực hiện bởi')
@@ -107,32 +96,6 @@ class InventoryMovementForm
                     ])
                     ->columns(1)
                     ->collapsible(),
-
-                Section::make('Tham chiếu')
-                    ->description('Thông tin liên kết')
-                    ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                Select::make('reference_type')
-                                    ->label('Loại tham chiếu')
-                                    ->required()
-                                    ->options([
-                                        'shipment' => 'Lô hàng',
-                                        'receiving_plan' => 'Kế hoạch nhập kho',
-                                        'shipping_request' => 'Yêu cầu vận chuyển',
-                                        'manual' => 'Thủ công',
-                                    ])
-                                    ->native(false)
-                                    ->placeholder('Chọn loại tham chiếu'),
-                                TextInput::make('reference_id')
-                                    ->label('ID tham chiếu')
-                                    ->numeric()
-                                    ->placeholder('Nhập ID tham chiếu'),
-                            ]),
-                    ])
-                    ->columns(1)
-                    ->collapsible(),
-
                 Section::make('Ghi chú')
                     ->description('Thông tin bổ sung về việc di chuyển')
                     ->schema([

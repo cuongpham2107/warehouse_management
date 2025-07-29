@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ShippingRequests\Schemas;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
@@ -23,32 +24,46 @@ class ShippingRequestForm
                             ->label('Mã yêu cầu')
                             ->required()
                             ->default(fn () => 'REQ-' . now()->format('YmdHis'))
-                            ->placeholder('Nhập mã yêu cầu'),
+                            ->placeholder('Nhập mã yêu cầu')
+                            ->columnSpan(2),
 
                         DatePicker::make('requested_date')
                             ->label('Ngày yêu cầu')
                             ->default(now())
                             ->required()
-                            ->placeholder('Chọn ngày yêu cầu'),
+                            ->placeholder('Chọn ngày yêu cầu')
+                            ->columnSpan(2),
+                        DateTimePicker::make('departure_time')
+                            ->label('Thời gian xuất phát')
+                            ->default(now())
+                            ->displayFormat('H:i d/m/Y')
+                            ->seconds(false)
+                            ->required()
+                            ->placeholder('Chọn thời gian xuất phát')
+                            ->columnSpan(2),
                         TextInput::make('license_plate')
                             ->label('Biển số xe')
                             ->required()
-                            ->placeholder('Nhập biển số xe'),
+                            ->placeholder('Nhập biển số xe')
+                            ->columnSpan(3),
                         TextInput::make('seal_number')
                             ->label('Số niêm phong')
                             ->required()
-                            ->placeholder('Nhập số niêm phong'),
+                            ->placeholder('Nhập số niêm phong')
+                            ->columnSpan(3),
                         TextInput::make('driver_name')
                             ->label('Tên tài xế')
                             ->placeholder('Nhập tên tài xế')
-                            ->nullable(),
+                            ->nullable()
+                            ->columnSpan(3),
                         TextInput::make('driver_phone')
                             ->label('Số điện thoại tài xế')
                             ->placeholder('Nhập số điện thoại tài xế')
-                            ->nullable(),
-                      
+                            ->nullable()
+                            ->columnSpan(3),
+
                     ])
-                    ->columns(2)
+                    ->columns(6)
                     ->collapsible(),
                     Section::make('Thông tin khách hàng')
                         ->icon('heroicon-o-user')

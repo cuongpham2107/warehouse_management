@@ -18,7 +18,7 @@ class CratesExcelImport implements ToModel, WithHeadingRow, WithBatchInserts, Wi
     protected ?int $receivingPlanId = null;
 
     public ?int $totalCrates = null;
-    public ?int $totalPieces = null;
+    public ?int $totalPcs = null;
     public ?float $totalWeight = null;
     
     /**
@@ -49,7 +49,7 @@ class CratesExcelImport implements ToModel, WithHeadingRow, WithBatchInserts, Wi
             $receivingPlanId = $receivingPlan->id;
         }
         $this->totalCrates += 1;
-        $this->totalPieces += $row['quantity'] ?? 0;
+        $this->totalPcs += $row['pcs'] ?? 0;
         $this->totalWeight += $row['gross_weight_kg'] ?? 0.0;
 
         // FirstOrNew to handle updates for existing crates
@@ -75,9 +75,9 @@ class CratesExcelImport implements ToModel, WithHeadingRow, WithBatchInserts, Wi
     {
         return $this->totalCrates ?? 0;
     }
-    public function getTotalPieces(): int
+    public function getTotalPcs(): int
     {
-        return $this->totalPieces ?? 0;
+        return $this->totalPcs ?? 0;
     }
     public function getTotalWeight(): float
     {

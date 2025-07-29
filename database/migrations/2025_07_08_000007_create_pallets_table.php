@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('pallets', function (Blueprint $table) {
             $table->id();
             $table->string('pallet_id', 100)->unique();
-            $table->foreignId('crate_id')->constrained('crates');
+            $table->foreignId('crate_id')->constrained('crates')->onDelete('cascade');
             $table->string('location_code')->nullable();
             $table->enum('status', ['in_transit', 'stored', 'staging', 'shipped'])->default('in_transit');
             $table->timestamp('checked_in_at')->nullable();
-            $table->foreignId('checked_in_by')->nullable()->constrained('users');
+            $table->foreignId('checked_in_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamp('checked_out_at')->nullable();
-            $table->foreignId('checked_out_by')->nullable()->constrained('users');
+            $table->foreignId('checked_out_by')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();
             
             $table->index(['pallet_id']);

@@ -28,20 +28,21 @@ class ItemsRelationManager extends RelationManager
                 TextColumn::make('crate.crate_id')
                     ->label('Mã kiện hàng')
                     ->searchable(),
-                TextColumn::make('crate.pieces')
-                    ->label('Số kiện')
+                TextColumn::make('crate.pcs')
+                    ->label('PCS')
                     ->color('info')
                     ->badge()
+                    ->alignCenter(),
+                 TextColumn::make('crate.pieces')
+                    ->label('Số kiện')
+                    ->color('success')
                     ->alignCenter(),
                 TextColumn::make('crate.gross_weight')
                     ->label('Tổng trọng lượng kiện hàng (kg)')
                     ->color('warning')
                     ->badge()
                     ->alignCenter(),
-                TextColumn::make('quantity_shipped')
-                    ->label('Số kiện đã xuất kho')
-                    ->color('success')
-                    ->alignCenter(),
+               
                 
             ])
             ->reorderableColumns()
