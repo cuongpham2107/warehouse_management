@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ReceivingPlanResource;
 use App\Models\ReceivingPlan;
 use App\Enums\ReceivingPlanStatus;
+use App\Enums\CrateStatus;
+use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -58,15 +60,40 @@ class ReceivingPlansController extends Controller
      */
     public function index(Request $request): JsonResource
     {
+       /**
+         * Đây là một tham số truy vấn để tìm kiếm các chuyển động hàng tồn kho.
+         * @example 
+         * @default 
+         */
         $search = $request->query('search', '');
-        $sort = $request->query('sort', 'plan_date');
+
+        /**
+         * Đây là một tham số truy vấn để xác định trường để sắp xếp.
+         * @example created_at
+         * @default created_at
+         */
+        $sort = $request->query('sort', 'created_at');
+        /**
+         * Đây là một tham số truy vấn để xác định hướng sắp xếp.
+         * @example asc
+         * @default desc
+         */
         $direction = $request->query('direction', 'desc');
+        /**
+         * Đây là một tham số truy vấn để xác định số lượng mục trên mỗi trang.
+         * @example 15
+         * @default 15
+         */
         $perPage = $request->query('per_page', 15);
+        /**
+         * Đây là một tham số truy vấn để xác định trang hiện tại.
+         * @example 1
+         * @default 1
+         */
         $page = $request->query('page', 1);
 
         $plans = ReceivingPlan::query()
-            ->with(['vendor', 'creator'])
-            ->where('status', ReceivingPlanStatus::IN_PROGRESS->value)
+            // ->where('status', ReceivingPlanStatus::IN_PROGRESS->value)
             ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('plan_code', 'like', "%{$search}%")
@@ -227,5 +254,66 @@ class ReceivingPlansController extends Controller
         return new ReceivingPlanResource(
             $receivingPlan->load(['vendor', 'creator', 'crates'])
         );
+    }
+
+
+    /**
+     * Update receiving plan status to completed.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return JsonResource
+     * 
+     * @operationId completeReceivingPlan
+     * @tags Receiving Plans
+     * @summary Complete a receiving plan
+     * 
+     * @response 200 {
+     *     "data": {
+     *         "id": 1,
+     *         "plan_code": "RP20240728001",
+     *         "vendor": {
+     *             "id": 1,
+     *             "name": "Nhà cung cấp A"
+     *         },
+     *         "license_plate": "51A-12345", 
+     *         "plan_date": "2024-07-28",
+     *         "total_crates": 100,
+     *         "total_pcs": 1000,
+     *         "total_weight": 5000.50,
+     *         "status": "completed",
+     *         "completion_percentage": 100,
+     *         "notes": "Ghi chú",
+     *         "creator": {
+     *             "id": 1,
+     *             "name": "John Doe"
+     *         },
+     *         "created_at": "2024-07-28T10:00:00Z",
+     *         "updated_at": "2024-07-28T10:00:00Z"
+     *     }
+     * }
+     * @response 404 {
+     *     "message": "Không tìm thấy kế hoạch nhận hàng"
+     * }
+     */
+    public function update(Request $request, int $id): JsonResource 
+    {
+        $receivingPlan = ReceivingPlan::find($id);
+        if(!$receivingPlan){
+            abort(404,'Không tìm thấy kế hoạch nhận hàng');
+        }
+        $allCratesStored = $receivingPlan->crates->every(function($crate) {
+            return $crate->status === CrateStatus::STORED;
+        });
+
+        if (!$allCratesStored) {
+            abort(400, 'Danh sách các kiện hàng chưa được đưa vào kho nên chưa thể hoàn thành kế hoạch');
+        }
+        if($receivingPlan->status !== ReceivingPlanStatus::IN_PROGRESS){
+            abort(400,'Kế hoạch nhận hàng không trong trạng thái đang xử lý');
+        }
+        $receivingPlan->status = ReceivingPlanStatus::COMPLETED;
+        $receivingPlan->save();
+        return new ReceivingPlanResource($receivingPlan);
     }
 }

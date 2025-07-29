@@ -65,7 +65,7 @@ class CratesExcelImport implements ToModel, WithHeadingRow, WithBatchInserts, Wi
                 'dimensions_length' => $row['dimensions_length_cm'] ?? 0,
                 'dimensions_width' => $row['dimensions_width_cm'] ?? 0,
                 'dimensions_height' => $row['dimensions_height_cm'] ?? 0,
-                'status' => CrateStatus::from($row['status'] ?? CrateStatus::PLANNED->value),
+                'status' => CrateStatus::from($row['status'] ?? CrateStatus::CHECKED_IN->value),
                 'barcode' => $row['barcode'] ?? null,
             ]
         );

@@ -43,6 +43,12 @@ class ShippingRequestItem extends Model
     }
 
 
+    public function pallet(){
+        return $this->belongsTo(Pallet::class, 'crate_id', 'crate_id');
+    }
+
+
+
     /**
      * Get remaining quantity to ship.
      */

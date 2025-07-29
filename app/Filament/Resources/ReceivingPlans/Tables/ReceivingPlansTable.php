@@ -10,9 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Columns\Summarizers\Count;
-use Illuminate\Database\Query\Builder;
-
+use Filament\Support\Enums\FontWeight;
 class ReceivingPlansTable
 {
     public static function configure(Table $table): Table
@@ -21,6 +19,8 @@ class ReceivingPlansTable
             ->columns([
                 TextColumn::make('plan_code')
                     ->label('Mã kế hoạch')
+                    ->width('15%')
+                    ->weight(FontWeight::Bold)
                     ->searchable(),
                 TextColumn::make('vendor.vendor_name')
                     ->label('Nhà cung cấp')
@@ -31,30 +31,37 @@ class ReceivingPlansTable
                     ->sortable(),
                 TextColumn::make('total_crates')
                     ->badge()
+                    ->width('10%')
                     ->alignCenter(true)
                     ->label('Tổng số kiện')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('total_pcs')
                     ->badge()
+                    ->width('10%')
                     ->alignCenter(true)
                     ->label('Tổng số sản phẩm')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('total_weight')
                     ->badge()
+                    ->width('10%')
                     ->alignCenter(true)
                     ->label('Tổng khối lượng')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
+                    ->width('10%')
                     ->formatStateUsing(fn($state) => $state->getLabel())
                     ->color(fn($state) => $state->getColor())
                     ->label('Trạng thái')
+                    ->alignCenter(true)
                     ->searchable(),
                 TextColumn::make('creator.name')
+                    ->width('10%')
                     ->label('Người tạo')
+                    ->alignCenter(true)
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Ngày tạo')

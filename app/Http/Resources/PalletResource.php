@@ -13,6 +13,11 @@ class PalletResource extends JsonResource
             'id' => $this->id,
             'pallet_id' => $this->pallet_id,
             'crate_id' => $this->crate_id,
+            'crate' => [
+                'id' => $this->crate->id,
+                'crate_id' => $this->crate->crate_id,
+                'status' => $this->crate->status,
+            ],
             'location_code' => $this->location_code,
             'status' => $this->status,
             'checked_in_at' => $this->checked_in_at,

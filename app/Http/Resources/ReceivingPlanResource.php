@@ -12,6 +12,7 @@ class ReceivingPlanResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+
     public function toArray(Request $request): array
     {
         return [
@@ -39,8 +40,10 @@ class ReceivingPlanResource extends JsonResource
                 return $this->crates->map(function ($crate) {
                     return [
                         'id' => $crate->id,
-                        'crate_code' => $crate->crate_code,
+                        'crate_id' => $crate->crate_id,
+                        'description'=> $crate->description,
                         'pcs' => $crate->pcs,
+                        'pieces' => $crate->pieces,
                         'gross_weight' => $crate->gross_weight,
                         'status' => $crate->status->value,
                     ];

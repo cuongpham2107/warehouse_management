@@ -18,7 +18,7 @@ class ReceivingPlanResource extends Resource
 {
     protected static ?string $model = ReceivingPlan::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
+    // protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
     protected static ?int $navigationSort = 1;
 

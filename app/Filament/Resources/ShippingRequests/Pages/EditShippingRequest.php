@@ -66,4 +66,26 @@ class EditShippingRequest extends EditRecord
             'status',
         ]);
     }
+
+
+    protected function handleRecordUpdate(Model $record, array $data): Model
+    {
+        // Check if all pallets associated with items have 'shipped' status
+        $allPalletsShipped = $record->items()
+            ->with('pallet')
+            ->get()
+            ->every(function ($item): bool {
+                return $item->pallet && $item->pallet->status === \App\Enums\PalletStatus::SHIPPED;
+            });
+        if(!$allPalletsShipped && $record->status === \App\Enums\ShippingRequestStatus::PENDING)
+        {
+            $data['status'] = \App\Enums\ShippingRequestStatus::IN_PROGRESS->value;
+        }
+        if ($allPalletsShipped) {
+            $data['status'] = \App\Enums\ShippingRequestStatus::COMPLETED->value;
+        }
+       
+        $record->update($data);
+        return $record;
+    }
 }

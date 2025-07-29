@@ -5,14 +5,12 @@ namespace App\Filament\Resources\ShippingRequests\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
-use App\Enums\ShippingRequestPriority;
+use Filament\Support\Enums\FontWeight;
 use App\Enums\ShippingRequestStatus;
-use App\States\ShippingRequestState;
 
 class ShippingRequestsTable
 {
@@ -23,22 +21,44 @@ class ShippingRequestsTable
             ->columns([
                 TextColumn::make('request_code')
                     ->label('Mã yêu cầu')
+                    ->width('12%')
+                    ->weight(FontWeight::Bold)
+                    ->searchable(),
+                TextColumn::make('license_plate')
+                    ->label('Biển số xe')
+                    ->searchable(),
+                TextColumn::make('driver_name')
+                    ->label('Tên tài xế')
+                    ->searchable(),
+                TextColumn::make('driver_phone')
+                    ->label('SĐT tài xế')
+                    ->searchable(),
+                TextColumn::make('seal_number')
+                    ->label('Số niêm phong')
                     ->searchable(),
                 TextColumn::make('customer_name')
                     ->label('Tên khách hàng')
+                    ->width('15%')
                     ->searchable(),
                 TextColumn::make('customer_contact')
                     ->label('Liên hệ khách hàng')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('requested_date')
-                    ->label('Ngày yêu cầu')
-                    ->date()
+                    ->label('TG yêu cầu')
+                    ->badge()
+                    ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('departure_time')
-                    ->label('Thời gian xuất phát')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('TG xuất phát')
+                    ->badge()
+                    ->date('d/m/Y')
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->label('Trạng thái')
+                    ->badge()
+                    ->formatStateUsing(fn($state) => $state->getLabel())
+                    ->color(fn($state) => $state->getColor()),
                 TextColumn::make('creator.name')
                     ->label('Người tạo')
                     ->numeric()
@@ -55,9 +75,6 @@ class ShippingRequestsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                
-                    
-             
                 SelectFilter::make('created_by')
                     ->label('Người tạo')
                     ->relationship('creator', 'name'),
@@ -99,41 +116,49 @@ class ShippingRequestsTable
                     }),
             ])
             ->recordActions([
-                EditAction::make()
-                    ->label('Chỉnh sửa'),
+               
+                \Filament\Actions\Action::make('successfully')
+                    ->label('Hoàn thành')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn($record) => $record->status === ShippingRequestStatus::IN_PROGRESS)
+                    ->requiresConfirmation()
+                    ->action(function($record) {
+                        $record->status = 'completed';
+                        $record->items()->with('pallet','crate')->each(function ($item) {
+                            if ($item->crate) {
+                                $item->crate->status = \App\Enums\CrateStatus::SHIPPED->value;
+                                $item->crate->save();
+                            }
+                            if ($item->pallet) {
+                                $item->pallet->status = \App\Enums\PalletStatus::SHIPPED->value;
+                                $item->pallet->save();
+                            }
+                        });
+                        $record->save();
+                    }),
                 \Filament\Actions\Action::make('approve')
                     ->label('Duyệt')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn($record) => $record->status === 'pending')
+                    ->visible(fn($record) => $record->status === ShippingRequestStatus::PENDING)
                     ->requiresConfirmation()
                     ->action(function($record) {
-                        $record->status = 'ready';
+                        $record->status = 'in_progress';
                         $record->save();
                     }),
                 \Filament\Actions\Action::make('cancel')
                     ->label('Hủy')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->visible(fn($record) => in_array($record->status, ['pending','processing','ready']))
+                    ->visible(fn($record) => in_array($record->status, [ShippingRequestStatus::PENDING, ShippingRequestStatus::IN_PROGRESS]))
                     ->requiresConfirmation()
                     ->action(function($record) {
                         $record->status = 'cancelled';
                         $record->save();
                     }),
-                \Filament\Actions\Action::make('generate_pick_list')
-                    ->label('Tạo Pick List')
-                    ->icon('heroicon-o-list-bullet')
-                    ->color('primary')
-                    ->visible(fn($record) => $record->status === 'ready')
-                    ->requiresConfirmation()
-                    ->action(function($record) {
-                        // TODO: Logic tạo pick list ở đây
-                        \Filament\Notifications\Notification::make()
-                            ->title('Pick List đã được tạo!')
-                            ->success()
-                            ->send();
-                    }),
+                 EditAction::make()
+                    ->label('Chỉnh sửa'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
