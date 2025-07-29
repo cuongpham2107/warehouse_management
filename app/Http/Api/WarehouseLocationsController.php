@@ -45,10 +45,36 @@ class WarehouseLocationsController extends Controller
      */
     public function index(Request $request): JsonResource
     {
+       /**
+         * Đây là một tham số truy vấn để tìm kiếm các chuyển động hàng tồn kho.
+         * @example 
+         * @default 
+         */
         $search = $request->query('search', '');
+
+        /**
+         * Đây là một tham số truy vấn để xác định trường để sắp xếp.
+         * @example created_at
+         * @default created_at
+         */
         $sort = $request->query('sort', 'created_at');
+        /**
+         * Đây là một tham số truy vấn để xác định hướng sắp xếp.
+         * @example asc
+         * @default desc
+         */
         $direction = $request->query('direction', 'desc');
+        /**
+         * Đây là một tham số truy vấn để xác định số lượng mục trên mỗi trang.
+         * @example 15
+         * @default 15
+         */
         $perPage = $request->query('per_page', 15);
+        /**
+         * Đây là một tham số truy vấn để xác định trang hiện tại.
+         * @example 1
+         * @default 1
+         */
         $page = $request->query('page', 1);
 
         $locations = WarehouseLocation::query()

@@ -13,9 +13,9 @@ enum CrateStatus: string
     public function getLabel(): string
     {
         return match ($this) {
-            self::PLANNED => 'Đã lên kế hoạch',
+            self::PLANNED => 'Đang lên kế hoạch xuất kho',
             self::RECEIVED => 'Đã nhận',
-            self::CHECKED_IN => 'Đã kiểm tra nhập kho',
+            self::CHECKED_IN => 'Đang kiểm tra nhập kho',
             self::STORED => 'Đã lưu kho',
             self::SHIPPED => 'Đã xuất kho',
         };

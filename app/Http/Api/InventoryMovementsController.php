@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\InventoryMovementResource;
 use App\Http\Requests\StoreInventoryMovementRequest;
 use App\Models\InventoryMovement;
-use Illuminate\Http\JsonResponse;
+use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
@@ -52,28 +52,54 @@ class InventoryMovementsController extends Controller
      *     "meta": {}
      * }
      */
-    public function index(Request $request): JsonResource
-    {
-        $search = $request->query('search', '');
-        $sort = $request->query('sort', 'movement_date');
-        $direction = $request->query('direction', 'desc');
-        $perPage = $request->query('per_page', 15);
-        $page = $request->query('page', 1);
+    // public function index(Request $request): JsonResource
+    // {
+    //     /**
+    //      * Đây là một tham số truy vấn để tìm kiếm các chuyển động hàng tồn kho.
+    //      * @example 
+    //      * @default 
+    //      */
+    //     $search = $request->query('search', '');
 
-        $movements = InventoryMovement::query()
-            ->with(['pallet', 'performer'])
-            ->when($search, function ($query, $search) {
-                return $query->where(function ($q) use ($search) {
-                    $q->where('from_location_code', 'like', "%{$search}%")
-                      ->orWhere('to_location_code', 'like', "%{$search}%")
-                      ->orWhere('movement_type', 'like', "%{$search}%");
-                });
-            })
-            ->orderBy($sort, $direction)
-            ->paginate($perPage, ['*'], 'page', $page);
+    //     /**
+    //      * Đây là một tham số truy vấn để xác định trường để sắp xếp.
+    //      * @example created_at
+    //      * @default created_at
+    //      */
+    //     $sort = $request->query('sort', 'created_at');
+    //     /**
+    //      * Đây là một tham số truy vấn để xác định hướng sắp xếp.
+    //      * @example asc
+    //      * @default desc
+    //      */
+    //     $direction = $request->query('direction', 'desc');
+    //     /**
+    //      * Đây là một tham số truy vấn để xác định số lượng mục trên mỗi trang.
+    //      * @example 15
+    //      * @default 15
+    //      */
+    //     $perPage = $request->query('per_page', 15);
+    //     /**
+    //      * Đây là một tham số truy vấn để xác định trang hiện tại.
+    //      * @example 1
+    //      * @default 1
+    //      */
+    //     $page = $request->query('page', 1);
 
-        return InventoryMovementResource::collection($movements);
-    }
+    //     $movements = InventoryMovement::query()
+    //         ->with(['pallet', 'performer'])
+    //         ->when($search, function ($query, $search) {
+    //             return $query->where(function ($q) use ($search) {
+    //                 $q->where('from_location_code', 'like', "%{$search}%")
+    //                   ->orWhere('to_location_code', 'like', "%{$search}%")
+    //                   ->orWhere('movement_type', 'like', "%{$search}%");
+    //             });
+    //         })
+    //         ->orderBy($sort, $direction)
+    //         ->paginate($perPage, ['*'], 'page', $page);
+
+    //     return InventoryMovementResource::collection($movements);
+    // }
 
     /**
      * Tạo di chuyển kho mới.
@@ -163,6 +189,13 @@ class InventoryMovementsController extends Controller
             $request->validated(),
             ['performed_by' => Auth::id()]
         ));
+
+        //Update location_code cho pallet
+        $pallet = $movement->pallet;
+        if ($pallet) {
+            $pallet->location_code = $request['to_location_code'];
+            $pallet->save();
+        }
 
         return new InventoryMovementResource($movement->load(['pallet', 'performer']));
     }

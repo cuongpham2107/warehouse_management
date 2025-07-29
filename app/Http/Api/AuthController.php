@@ -7,6 +7,8 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Dedoc\Scramble\Attributes\QueryParameter;
+
 
 class AuthController extends Controller
 {
@@ -31,14 +33,20 @@ class AuthController extends Controller
      *                     "email": {
      *                         "type": "string",
      *                         "format": "email",
-     *                         "description": "Email đăng nhập"
+     *                         "description": "Email đăng nhập",
+     *                         "example": "admin@asgl.com"
      *                     },
      *                     "password": {
      *                         "type": "string",
      *                         "format": "password",
-     *                         "description": "Mật khẩu"
+     *                         "description": "Mật khẩu",
+     *                         "example": "Admin@123"
      *                     }
      *                 }
+     *             },
+     *             "example": {
+     *                 "email": "admin@asgl.com",
+     *                 "password": "Admin@123"
      *             }
      *         }
      *     }
@@ -66,6 +74,7 @@ class AuthController extends Controller
      *     }
      * }
      */
+    
     public function login(LoginRequest $request): JsonResponse
     {
         if (!Auth::attempt($request->validated())) {

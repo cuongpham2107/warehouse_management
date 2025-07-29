@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\ModelStates\HasStates;
 use App\Models\User;
 use App\Models\ShippingRequestItem;
+use App\Enums\ShippingRequestStatus;
 
 class ShippingRequest extends Model
 {
@@ -26,6 +27,7 @@ class ShippingRequest extends Model
         'priority',
         'status',
         'notes',
+        'status',
         'created_by',
     ];
     protected $primaryKey = 'id';
@@ -33,6 +35,7 @@ class ShippingRequest extends Model
     protected $casts = [
         'requested_date' => 'date',
         'departure_time' => 'datetime',
+        'status' => ShippingRequestStatus::class,
         'created_by' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

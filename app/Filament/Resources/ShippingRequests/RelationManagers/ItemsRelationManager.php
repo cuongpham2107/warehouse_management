@@ -28,22 +28,32 @@ class ItemsRelationManager extends RelationManager
                 TextColumn::make('crate.crate_id')
                     ->label('Mã kiện hàng')
                     ->searchable(),
+                TextColumn::make('pallet.pallet_id')
+                    ->label('Mã pallet')
+                    ->searchable(),
                 TextColumn::make('crate.pcs')
+                    ->width('10%')
                     ->label('PCS')
                     ->color('info')
                     ->badge()
                     ->alignCenter(),
                  TextColumn::make('crate.pieces')
-                    ->label('Số kiện')
+                    ->width('10%')
+                    ->label('Quantity')
                     ->color('success')
                     ->alignCenter(),
                 TextColumn::make('crate.gross_weight')
-                    ->label('Tổng trọng lượng kiện hàng (kg)')
+                ->width('15%')
+                    ->label('Tổng trọng lượng(kg)')
                     ->color('warning')
                     ->badge()
                     ->alignCenter(),
-               
-                
+                TextColumn::make('pallet.status')
+                    ->width('10%')
+                    ->label('Trạng thái')
+                    ->badge()
+                    ->formatStateUsing(fn($state) => $state->getLabel())
+                    ->color(fn($state) => $state->getColor()),
             ])
             ->reorderableColumns()
             ->filters([
@@ -58,12 +68,12 @@ class ItemsRelationManager extends RelationManager
         
             ])
              ->recordActions([
-                ViewAction::make()
-                    ->label('Xem')
-                    ->modalHeading('Xem kiện hàng')
-                    ->modalSubmitActionLabel('Xem kiện hàng')
-                    ->successNotificationTitle('Kiện hàng đã được xem thành công')
-                    ->schema(fn (Schema $schema) => ShippingRequestItemForm::configure($schema)),
+                // ViewAction::make()
+                //     ->label('Xem')
+                //     ->modalHeading('Xem kiện hàng')
+                //     ->modalSubmitActionLabel('Xem kiện hàng')
+                //     ->successNotificationTitle('Kiện hàng đã được xem thành công')
+                //     ->schema(fn (Schema $schema) => ShippingRequestItemForm::configure($schema)),
                 
             ])
             ->defaultSort('created_at', 'desc')
