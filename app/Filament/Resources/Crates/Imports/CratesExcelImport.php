@@ -48,7 +48,7 @@ class CratesExcelImport implements ToModel, WithHeadingRow, WithBatchInserts, Wi
             }
             $receivingPlanId = $receivingPlan->id;
         }
-        $this->totalCrates += 1;
+        $this->totalCrates += $row['quantity'] ?? 0;
         $this->totalPcs += $row['pcs'] ?? 0;
         $this->totalWeight += $row['gross_weight_kg'] ?? 0.0;
 

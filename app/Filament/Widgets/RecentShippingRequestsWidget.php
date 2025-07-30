@@ -15,7 +15,7 @@ class RecentShippingRequestsWidget extends BaseWidget
 {
     protected static ?string $heading = 'Yêu cầu vận chuyển gần đây';
 
-    // protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {

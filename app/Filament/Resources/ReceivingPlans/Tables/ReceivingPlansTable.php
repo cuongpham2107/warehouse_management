@@ -11,6 +11,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
 use Filament\Support\Enums\FontWeight;
+use Illuminate\Database\Eloquent\Model;
+
 class ReceivingPlansTable
 {
     public static function configure(Table $table): Table
@@ -33,14 +35,14 @@ class ReceivingPlansTable
                     ->badge()
                     ->width('10%')
                     ->alignCenter(true)
-                    ->label('Tổng số kiện')
+                    ->label('Tổng Quantity')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('total_pcs')
                     ->badge()
                     ->width('10%')
                     ->alignCenter(true)
-                    ->label('Tổng số sản phẩm')
+                    ->label('Tổng PCS')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('total_weight')
@@ -131,6 +133,17 @@ class ReceivingPlansTable
                         $record->status = \App\Enums\ReceivingPlanStatus::COMPLETED;
                         $record->save();
                     }),
+                // \Filament\Actions\Action::make('refresh_data')
+                //     ->label('Refresh data')
+                //     ->action(function (Model $record){
+                //         $sum_quantity = $record->crates->sum('pieces');
+                //         $sum_pcs = $record->crates->sum('pcs');
+                //         $sum_gross_weight = $record->crates->sum('gross_weight');
+                //         $record->total_crates = $sum_quantity;
+                //         $record->total_pcs = $sum_pcs;
+                //         $record->total_weight = $sum_gross_weight;
+                //         $record->save();
+                //      })
 
             ])
             ->toolbarActions([

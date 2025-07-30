@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\ReceivingPlans\Pages;
 
 use App\Filament\Resources\ReceivingPlans\ReceivingPlanResource;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Collection;
 
 class ListReceivingPlans extends ListRecords
 {
