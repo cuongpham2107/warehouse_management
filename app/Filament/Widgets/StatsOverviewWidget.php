@@ -19,8 +19,8 @@ class StatsOverviewWidget extends BaseWidget
 
         // Pallet
         $palletStats = [
-            Stat::make('Pallet trong kho', Pallet::count())
-                ->description('Tổng số PCS trong kho: ' . Pallet::with('crate')->get()->sum(function ($pallet) {
+            Stat::make('Tổng số Pallet nhập và xuất', Pallet::count())
+                ->description('Tổng số PCS nhập và xuất: ' . Pallet::with('crate')->get()->sum(function ($pallet) {
                     return $pallet->crate ? $pallet->crate->pcs : 0;
                 }))
                 ->descriptionIcon('heroicon-m-cube')
@@ -29,7 +29,7 @@ class StatsOverviewWidget extends BaseWidget
 
         // Thùng
         $crateStats = [
-            Stat::make('Tổng số pallet trong kho', Pallet::where('status', \App\Enums\PalletStatus::STORED)->count())
+            Stat::make('Tổng số Pallet trong kho', Pallet::where('status', \App\Enums\PalletStatus::STORED)->count())
                 ->description('Tổng số PCS đang lưu: ' . Pallet::where('status', \App\Enums\PalletStatus::STORED)->with('crate')->get()->sum(function ($pallet) {
                     return $pallet->crate ? $pallet->crate->pcs : 0;
                 }))

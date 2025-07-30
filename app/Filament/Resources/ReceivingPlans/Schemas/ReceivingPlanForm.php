@@ -81,7 +81,7 @@ class ReceivingPlanForm
                         ->schema([
 
                             TextInput::make('total_crates')
-                                ->label('Tổng số kiện')
+                                ->label('Tổng Quantity')
                                 ->numeric()
                                 ->readOnly()
                                 ->default(0)
@@ -91,7 +91,7 @@ class ReceivingPlanForm
                                 ->readOnly(),
 
                             TextInput::make('total_pcs')
-                                ->label('Tổng số sản phẩm')
+                                ->label('Tổng PCS')
                                 ->numeric()
                                 ->readOnly()
                                 ->default(0)

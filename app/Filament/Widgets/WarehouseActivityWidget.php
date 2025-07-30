@@ -2,43 +2,56 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Pallet;
+use App\Models\Vendor;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Carbon;
 
 class WarehouseActivityWidget extends ChartWidget
 {
-    protected ?string $heading = 'Hoạt động kho (30 ngày qua)';
+    protected ?string $heading = 'Tổng Pallet đã nhập của các Nhà cung cấp';
 
     protected function getData(): array
     {
-        $data = [];
-        $labels = [];
+        // Lấy tất cả vendors có pallet
+        $vendorData = Vendor::active()
+            ->withCount(['receivingPlans as total_pallets' => function ($query) {
+                $query->join('crates', 'receiving_plans.id', '=', 'crates.receiving_plan_id')
+                      ->join('pallets', 'crates.id', '=', 'pallets.crate_id');
+            }])
+            ->having('total_pallets', '>', 0)
+            ->orderBy('total_pallets', 'desc')
+            ->limit(10) // Giới hạn 10 vendor hàng đầu
+            ->get();
 
-        for ($i = 29; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $labels[] = $date->format('d/m');
-            
-            $checkIns = Pallet::whereDate('checked_in_at', $date)->count();
-            $checkOuts = Pallet::whereDate('checked_out_at', $date)->count();
-            
-            $data['check_ins'][] = $checkIns;
-            $data['check_outs'][] = $checkOuts;
+        $labels = [];
+        $data = [];
+        $backgroundColors = [];
+
+        // Bảng màu cho biểu đồ doughnut
+        $colors = [
+            '#fca5a5', // red-300
+            '#93c5fd', // blue-300
+            '#fde68a', // yellow-300
+            '#6ee7b7', // emerald-300
+            '#c4b5fd', // violet-300
+            '#fdba74', // orange-300
+            '#d1d5db', // gray-300
+            '#f9a8d4', // pink-300
+            '#67e8f9', // cyan-300
+            '#bef264', // lime-300
+        ];
+
+        foreach ($vendorData as $index => $vendor) {
+            $labels[] = $vendor->vendor_name ?? $vendor->vendor_code;
+            $data[] = (int) $vendor->total_pallets;
+            $backgroundColors[] = $colors[$index % count($colors)];
         }
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Nhập kho',
-                    'data' => $data['check_ins'],
-                    'borderColor' => 'rgb(34, 197, 94)',
-                    'backgroundColor' => 'rgba(34, 197, 94, 0.1)',
-                ],
-                [
-                    'label' => 'Xuất kho',
-                    'data' => $data['check_outs'],
-                    'borderColor' => 'rgb(239, 68, 68)',
-                    'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
+                    'data' => $data,
+                    'backgroundColor' => $backgroundColors,
+                    'borderWidth' => 0,
                 ],
             ],
             'labels' => $labels,
@@ -47,6 +60,22 @@ class WarehouseActivityWidget extends ChartWidget
 
     protected function getType(): string
     {
-        return 'line';
+        return 'doughnut';
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'plugins' => [
+                'legend' => [
+                    'display' => true,
+                    'position' => 'bottom',
+                ],
+                'tooltip' => [
+                    'enabled' => true,
+                ],
+            ],
+            'maintainAspectRatio' => false,
+        ];
     }
 }

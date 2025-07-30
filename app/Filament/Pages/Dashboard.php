@@ -16,11 +16,16 @@ class Dashboard extends BaseDashboard
             \App\Filament\Widgets\StatsOverviewWidget::class,
             // Hoạt động nhập/xuất pallet
             \App\Filament\Widgets\WarehouseActivityWidget::class,
+
+            \App\Filament\Widgets\ShippedPalletsWidget::class,
             // Yêu cầu vận chuyển gần đây
             \App\Filament\Widgets\RecentShippingRequestsWidget::class,
         ];
     }
-
+    public function getColumns(): int | array
+    {
+        return 2;
+    }
     public function getHeaderActions(): array
     {
         return [
@@ -87,7 +92,7 @@ class Dashboard extends BaseDashboard
                         ->actions([
                             \Filament\Actions\Action::make('view_receiving_plan')
                                 ->label('Xem kế hoạch')
-                                ->url(fn () => route('filament..resources.receiving-plans.edit', ['record' => $receivingPlan->id]))
+                                ->url(fn () => route('filament.admin.resources.receiving-plans.edit', ['record' => $receivingPlan->id]))
                                 ->icon('heroicon-o-eye'),
                         ])
                         ->send();

@@ -34,9 +34,8 @@ class CratesTable
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
-
                 TextColumn::make('pieces')
-                    ->label('Số lượng')
+                    ->label('Quantity')
                     ->alignCenter(true)
                     ->numeric()
                     ->sortable(),
