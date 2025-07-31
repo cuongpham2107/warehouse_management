@@ -17,10 +17,10 @@ class WarehouseActivityWidget extends ChartWidget
                 $query->join('crates', 'receiving_plans.id', '=', 'crates.receiving_plan_id')
                       ->join('pallets', 'crates.id', '=', 'pallets.crate_id');
             }])
-            ->having('total_pallets', '>', 0)
             ->orderBy('total_pallets', 'desc')
-            ->limit(10) // Giới hạn 10 vendor hàng đầu
-            ->get();
+            ->limit(10)
+            ->get()
+            ->filter(fn($vendor) => $vendor->total_pallets > 0);
 
         $labels = [];
         $data = [];
