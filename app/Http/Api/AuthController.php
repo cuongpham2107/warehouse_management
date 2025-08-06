@@ -7,8 +7,8 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Dedoc\Scramble\Attributes\QueryParameter;
-
+use Illuminate\Http\Request;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -93,7 +93,19 @@ class AuthController extends Controller
             ]
         ]);
     }
+    public function loginWithEmployeeCode(Request $request):JsonResponse
+    {
+        $user = User::where('name', $request->input('employee_code'))
+            ->first();
+        $token = $user->createToken('api-token')->plainTextToken;
 
+        return response()->json([
+            'data' => [
+                'user' => new UserResource($user),
+                'token' => $token
+            ]
+        ]);
+    }
     /**
      * Đăng xuất và thu hồi token.
      *

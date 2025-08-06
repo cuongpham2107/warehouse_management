@@ -93,7 +93,7 @@ class ReceivingPlansController extends Controller
         $page = $request->query('page', 1);
 
         $plans = ReceivingPlan::query()
-            // ->where('status', ReceivingPlanStatus::IN_PROGRESS->value)
+            ->where('status', ReceivingPlanStatus::IN_PROGRESS->value)
             ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('plan_code', 'like', "%{$search}%")
