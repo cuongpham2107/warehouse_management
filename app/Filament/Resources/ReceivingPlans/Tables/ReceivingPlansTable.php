@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ReceivingPlans\Tables;
 
+
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -11,7 +12,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
 use Filament\Support\Enums\FontWeight;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Tables\Grouping\Group;
 
 class ReceivingPlansTable
 {
@@ -23,35 +25,60 @@ class ReceivingPlansTable
                     ->label('Mã kế hoạch')
                     ->width('15%')
                     ->weight(FontWeight::Bold)
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('vendor.vendor_name')
                     ->label('Nhà cung cấp')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('plan_date')
-                    ->label('Ngày kế hoạch')
-                    ->date('d/m/Y')
-                    ->sortable(),
+                    ->label('Ngày lên kế hoạch')
+                    ->date('H:i d/m/Y ')
+                    ->alignEnd()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('arrival_date')
+                    ->label('Ngày nhập kho')
+                    ->date('H:i d/m/Y ')
+                    ->alignEnd()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('total_crates')
                     ->badge()
                     ->width('10%')
                     ->alignCenter(true)
                     ->label('Tổng Quantity')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('total_pcs')
                     ->badge()
                     ->width('10%')
                     ->alignCenter(true)
                     ->label('Tổng PCS')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('total_weight')
                     ->badge()
                     ->width('10%')
                     ->alignCenter(true)
                     ->label('Tổng khối lượng')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('transport_garage')
+                    ->label('Nhà xe vận chuyển')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('license_plate')
+                    ->label('Biển số xe')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('vehicle_capacity')
+                    ->label('Tải trọng xe (tấn)')
+                    ->numeric()
+                    ->toggleable(),
                 TextColumn::make('status')
                     ->badge()
                     ->width('10%')
@@ -59,12 +86,14 @@ class ReceivingPlansTable
                     ->color(fn($state) => $state->getColor())
                     ->label('Trạng thái')
                     ->alignCenter(true)
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('creator.name')
                     ->width('10%')
                     ->label('Người tạo')
                     ->alignCenter(true)
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Ngày tạo')
                     ->date('d/m/Y')
@@ -101,12 +130,21 @@ class ReceivingPlansTable
                         return $query;
                     }),
             ])
+            ->defaultGroup('vendor.vendor_name')
+            ->groups([
+                Group::make('vendor.vendor_name')
+                    ->label('Nhà cung cấp')
+                    ->collapsible(),
+            ])
+            ->defaultSort('plan_date', 'desc')
             ->recordActions([
                 EditAction::make()
-                    ->label('Chỉnh sửa')
-                    ->modal('edit_receiving_plan'),
+                    ->modal('edit_receiving_plan')
+                    ->icon('heroicon-m-pencil-square')
+                    ->iconButton(),
                 DeleteAction::make()
-                    ->label('Xoá')
+                    ->icon('heroicon-m-trash')
+                    ->iconButton()
                     ->action(function ($record) {
                         //Xóa các bản ghi con trong crate
                         $record->crates()->each(function ($crate) {
@@ -115,44 +153,33 @@ class ReceivingPlansTable
                         // Xoá bản ghi
                         $record->delete();
                     }),
-                \Filament\Actions\Action::make('activate')
-                    ->label('Kích hoạt')
-                    ->icon('heroicon-o-bolt')
-                    ->visible(fn($record) => $record->status === \App\Enums\ReceivingPlanStatus::PENDING)
-                    ->requiresConfirmation()
-                    ->action(function($record) {
-                        $record->status = \App\Enums\ReceivingPlanStatus::IN_PROGRESS;
-                        $record->save();
-                    }),
-                \Filament\Actions\Action::make('close')
-                    ->label('Đóng kế hoạch')
-                    ->icon('heroicon-o-lock-closed')
-                    ->visible(fn($record) => $record->status === \App\Enums\ReceivingPlanStatus::IN_PROGRESS)
-                    ->requiresConfirmation()
-                    ->action(function($record) {
-                        $record->status = \App\Enums\ReceivingPlanStatus::COMPLETED;
-                        $record->save();
-                    }),
-                // \Filament\Actions\Action::make('refresh_data')
-                //     ->label('Refresh data')
-                //     ->action(function (Model $record){
-                //         $sum_quantity = $record->crates->sum('pieces');
-                //         $sum_pcs = $record->crates->sum('pcs');
-                //         $sum_gross_weight = $record->crates->sum('gross_weight');
-                //         $record->total_crates = $sum_quantity;
-                //         $record->total_pcs = $sum_pcs;
-                //         $record->total_weight = $sum_gross_weight;
+                // \Filament\Actions\Action::make('activate')
+                //     ->icon('heroicon-o-bolt')
+                //     ->iconButton()
+                //     ->visible(fn($record) => $record->status === \App\Enums\ReceivingPlanStatus::PENDING)
+                //     ->requiresConfirmation()
+                //     ->action(function($record) {
+                //         $record->status = \App\Enums\ReceivingPlanStatus::IN_PROGRESS;
                 //         $record->save();
-                //      })
+                //     }),
+                // \Filament\Actions\Action::make('close')
+                //     ->iconButton()
+                //     ->icon('heroicon-o-lock-closed')
+                //     ->visible(fn($record) => $record->status === \App\Enums\ReceivingPlanStatus::IN_PROGRESS)
+                //     ->requiresConfirmation()
+                //     ->action(function($record) {
+                //         $record->status = \App\Enums\ReceivingPlanStatus::COMPLETED;
+                //         $record->save();
+                //     }),
 
-            ])
+                ],position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label('Xóa')
                        
                 ]),
-            ])
-            ->recordUrl(null);
+            ])->striped()
+            ->reorderableColumns();
     }
 }

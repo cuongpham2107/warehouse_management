@@ -16,5 +16,7 @@ class CreateReceivingPlan extends CreateRecord
         return 'Tạo kế hoạch nhập kho';
     }
 
+    
+
    
 }
