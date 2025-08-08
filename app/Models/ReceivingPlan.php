@@ -14,7 +14,10 @@ class ReceivingPlan extends Model
         'plan_code',
         'vendor_id',
         'license_plate',
+        'transport_garage',
+        'vehicle_capacity',
         'plan_date',
+        'arrival_date',
         'total_crates',
         'total_pcs',
         'total_weight',
@@ -25,6 +28,7 @@ class ReceivingPlan extends Model
 
     protected $casts = [
         'plan_date' => 'date',
+        'arrival_date' => 'date',
         'total_crates' => 'integer',
         'total_pcs' => 'integer',
         'total_weight' => 'decimal:2',

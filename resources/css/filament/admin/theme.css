@@ -3,3 +3,97 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
+.fi-topbar-start {
+    & .fi-logo {
+        color: white;
+    }
+}
+.fi-topbar{
+    background-color: rgb(14 165 233 / 95%);
+}
+.fi-topbar .fi-topbar-item-label{
+    color: white;
+    font-weight: 600;
+}
+.fi-topbar .fi-topbar-item .fi-topbar-item-icon{
+    color: white;
+}
+.fi-topbar .fi-topbar-item .fi-topbar-group-toggle-icon {
+    color: white;
+}
+.fi-topbar-item-btn {
+    transition: all 0.2s ease-in-out;
+    border-radius: 8px;
+    
+    &:hover {
+        @media (hover: hover) {
+            background-color: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+    }
+}
+
+.fi-topbar-item {
+    &.fi-active {
+        & .fi-topbar-item-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            
+            &:hover {
+                @media (hover: hover) {
+                    background-color: rgba(255, 255, 255, 0.25);
+                    border: 1px solid rgba(255, 255, 255, 0.5);
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+                }
+            }
+        }
+    }
+}
+
+.fi-ta-table {
+    & > thead {
+        & > tr {
+            background-color: rgb(14 165 233 / 95%);
+        }
+    }
+}
+
+.fi-ta-header-cell{
+    color: white;
+}
+
+
+
+.fi-ta-table {
+    & > tbody {
+        :where(& > :not(:last-child)) {
+            border-bottom-color: black;
+            border-top-color: black;
+        }
+    }
+}
+
+.fi-ta-table {
+    :where(& > :not(:last-child)) {
+        border-bottom-color: black;
+        border-top-color: black;
+    }
+}
+
+.fi-ta-ctn {
+    border: 1px solid black;
+    :where(& > :not(:last-child)) {
+        border-bottom-color: black;
+        border-top-color: black;
+    }
+}
+
+
+
+.fi-input-wrp {
+    border: 1px solid rgb(0, 0, 0);
+}

@@ -6,6 +6,7 @@ use App\Filament\Resources\ReceivingPlans\ReceivingPlanResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Collection;
 
 class ListReceivingPlans extends ListRecords
@@ -23,7 +24,8 @@ class ListReceivingPlans extends ListRecords
             CreateAction::make()
                 ->label('Tạo kế hoạch nhập kho mới')
                 ->icon('heroicon-o-plus')
-                ->modal('create_receiving_plan'),
+                ->modal('create_receiving_plan')
+                ->modalWidth(Width::SevenExtraLarge),
         ];
     }
 }

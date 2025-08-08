@@ -11,13 +11,14 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Filament\Support\Enums\FontWeight;
 use App\Enums\ShippingRequestStatus;
+use Filament\Tables\Grouping\Group;
+use Filament\Tables\Enums\RecordActionsPosition;
 
 class ShippingRequestsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->recordUrl(null)
             ->columns([
                 TextColumn::make('request_code')
                     ->label('Mã yêu cầu')
@@ -115,51 +116,57 @@ class ShippingRequestsTable
                         return $query;
                     }),
             ])
-            ->recordActions([
-               
-                \Filament\Actions\Action::make('successfully')
-                    ->label('Hoàn thành')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
-                    ->visible(fn($record) => $record->status === ShippingRequestStatus::IN_PROGRESS)
-                    ->requiresConfirmation()
-                    ->action(function($record) {
-                        $record->status = 'completed';
-                        $record->items()->with('pallet','crate')->each(function ($item) {
-                            if ($item->crate) {
-                                $item->crate->status = \App\Enums\CrateStatus::SHIPPED->value;
-                                $item->crate->save();
-                            }
-                            if ($item->pallet) {
-                                $item->pallet->status = \App\Enums\PalletStatus::SHIPPED->value;
-                                $item->pallet->save();
-                            }
-                        });
-                        $record->save();
-                    }),
-                \Filament\Actions\Action::make('approve')
-                    ->label('Duyệt')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
-                    ->visible(fn($record) => $record->status === ShippingRequestStatus::PENDING)
-                    ->requiresConfirmation()
-                    ->action(function($record) {
-                        $record->status = 'in_progress';
-                        $record->save();
-                    }),
-                \Filament\Actions\Action::make('cancel')
-                    ->label('Hủy')
-                    ->icon('heroicon-o-x-circle')
-                    ->color('danger')
-                    ->visible(fn($record) => in_array($record->status, [ShippingRequestStatus::PENDING, ShippingRequestStatus::IN_PROGRESS]))
-                    ->requiresConfirmation()
-                    ->action(function($record) {
-                        $record->status = 'cancelled';
-                        $record->save();
-                    }),
-                 EditAction::make()
-                    ->label('Chỉnh sửa'),
+            ->groups([
+                Group::make('driver_name')
+                    ->label('Tài xế'),
+                    
             ])
+            ->defaultSort('requested_date', 'desc')
+            ->recordActions([
+                // \Filament\Actions\Action::make('successfully')
+                //     ->label('Hoàn thành')
+                //     ->icon('heroicon-o-check-circle')
+                //     ->color('success')
+                //     ->visible(fn($record) => $record->status === ShippingRequestStatus::IN_PROGRESS)
+                //     ->requiresConfirmation()
+                //     ->action(function($record) {
+                //         $record->status = 'completed';
+                //         $record->items()->with('pallet','crate')->each(function ($item) {
+                //             if ($item->crate) {
+                //                 $item->crate->status = \App\Enums\CrateStatus::SHIPPED->value;
+                //                 $item->crate->save();
+                //             }
+                //             if ($item->pallet) {
+                //                 $item->pallet->status = \App\Enums\PalletStatus::SHIPPED->value;
+                //                 $item->pallet->save();
+                //             }
+                //         });
+                //         $record->save();
+                //     }),
+                // \Filament\Actions\Action::make('approve')
+                //     ->label('Duyệt')
+                //     ->icon('heroicon-o-check-circle')
+                //     ->color('success')
+                //     ->visible(fn($record) => $record->status === ShippingRequestStatus::PENDING)
+                //     ->requiresConfirmation()
+                //     ->action(function($record) {
+                //         $record->status = 'in_progress';
+                //         $record->save();
+                //     }),
+                // \Filament\Actions\Action::make('cancel')
+                //     ->label('Hủy')
+                //     ->icon('heroicon-o-x-circle')
+                //     ->color('danger')
+                //     ->visible(fn($record) => in_array($record->status, [ShippingRequestStatus::PENDING, ShippingRequestStatus::IN_PROGRESS]))
+                //     ->requiresConfirmation()
+                //     ->action(function($record) {
+                //         $record->status = 'cancelled';
+                //         $record->save();
+                //     }),
+                 EditAction::make()
+                    ->icon('heroicon-m-pencil-square')
+                    ->iconButton(),
+                ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()

@@ -3,15 +3,14 @@
 namespace App\Filament\Resources\ReceivingPlans;
 
 use App\Filament\Resources\ReceivingPlans\Pages\ListReceivingPlans;
+// use App\Filament\Resources\ReceivingPlans\Pages\CreateReceivingPlan;
 use App\Filament\Resources\ReceivingPlans\Pages\EditReceivingPlan;
 use App\Filament\Resources\ReceivingPlans\RelationManagers\CratesRelationManager;
 use App\Filament\Resources\ReceivingPlans\Schemas\ReceivingPlanForm;
 use App\Filament\Resources\ReceivingPlans\Tables\ReceivingPlansTable;
 use App\Models\ReceivingPlan;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class ReceivingPlanResource extends Resource
@@ -26,12 +25,12 @@ class ReceivingPlanResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'Kế hoạch nhập kho';
+        return '1. Kế hoạch nhập kho';
     }
 
     public static function getModelLabel(): string
     {
-        return 'Kế hoạch nhập kho';
+        return '1. Kế hoạch nhập kho';
     }
 
     // public static function getNavigationBadge(): ?string
@@ -41,7 +40,7 @@ class ReceivingPlanResource extends Resource
 
     public static function getPluralModelLabel(): string
     {
-        return 'Kế hoạch nhập kho';
+        return '1. Kế hoạch nhập kho';
     }
 
     public static function form(Schema $schema): Schema
