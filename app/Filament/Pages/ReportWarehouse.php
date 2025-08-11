@@ -25,9 +25,22 @@ class ReportWarehouse extends Page implements HasTable
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-printer';
 
-    protected static ?string $navigationLabel = '3. Báo cáo kho';
-
     protected static ?int $navigationSort = 4;
+
+      public static function getNavigationLabel(): string
+    {
+        return '3. Báo cáo kho';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return '3. Báo cáo kho';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return '3. Báo cáo kho';
+    }
 
      public function table(Table $table): Table
     {
