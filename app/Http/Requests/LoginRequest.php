@@ -22,18 +22,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            /**
-             * The email example is admin@admin.com
-             * @var string
-             * @example admin@admin.com
-             */
-            'email' => ['required', 'string', 'email'],
-            /**
-             * The password example is password
-             * @var string
-             * @example password
-             */
-            'password' => ['required', 'string'],
+            'employee_code' => 'required|string',
         ];
     }
 
@@ -45,9 +34,8 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email không được để trống',
-            'email.email' => 'Email không đúng định dạng',
-            'password.required' => 'Mật khẩu không được để trống',
+            'employee_code.required' => 'Mã nhân viên không được để trống',
+            'employee_code.string' => 'Mã nhân viên phải là một chuỗi',
         ];
     }
 }

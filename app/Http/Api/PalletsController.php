@@ -131,89 +131,36 @@ class PalletsController extends Controller
     /**
      * Tạo mới một pallet cho kiện hàng.
      *
-     * @param StorePalletRequest $request
-     * @return JsonResource
-     *
-     * @operationId createPallet
-     * @tags Pallets
-     * @summary Tạo mới một pallet
-     *
-     * @requestBody {
-     *     "required": true,
-     *     "content": {
-     *         "application/json": {
-     *             "schema": {
-     *                 "type": "object",
-     *                 "required": ["pallet_id", "crate_id", "location_code", "status"],
-     *                 "properties": {
-     *                     "pallet_id": {
-     *                         "type": "string",
-     *                         "maxLength": 255
-     *                     },
-     *                     "crate_id": {
-     *                         "type": "string",
-     *                         "maxLength": 255
-     *                     },
-     *                     "location_code": {
-     *                         "type": "string",
-     *                         "maxLength": 255
-     *                     },
-     *                     "status": {
-     *                         "type": "string",
-     *                         "maxLength": 50
-     *                     },
-     *                     "checked_in_at": {
-     *                         "type": "string",
-     *                         "format": "date-time",
-     *                         "nullable": true
-     *                     },
-     *                     "checked_in_by": {
-     *                         "type": "string",
-     *                         "maxLength": 255,
-     *                         "nullable": true
-     *                     }
-     *                 }
-     *             }
-     *         }
-     *     }
-     * }
-     *
-     * @response 201 {
-     *     "data": {
-     *         "id": 1,
-     *         "pallet_id": "PLT001",
-     *         "crate_id": "CRT001",
-     *         "location_code": "A1-01",
-     *         "status": "active",
-     *         "checked_in_at": "2024-07-26T10:00:00Z",
-     *         "checked_in_by": "John Doe",
-     *         "checked_out_at": null,
-     *         "checked_out_by": null,
-     *         "created_at": "2024-07-26T10:00:00Z",
-     *         "updated_at": "2024-07-26T10:00:00Z"
-     *     }
-     * }
-     * @response 422 {
-     *     "message": "Dữ liệu không hợp lệ.",
-     *     "errors": {
-     *         "pallet_id": ["Mã pallet là bắt buộc."]
-     *     }
-     * }
+     * @response PalletResource
+     * @response 422 array{message: string, errors: array<string, string[]>}
      */
     public function store(StorePalletRequest $request): JsonResource
     {
         $validated = $request->validated();
         
         // Thêm các giá trị mặc định
+       
+        
+        $crate = Crate::where('crate_id',$validated['crate_id'])->first();
+        if (!$crate) {
+            return new JsonResource([
+                'message' => 'Crate not found.',
+                'errors' => [
+                    'crate_id' => ['Crate không tồn tại.']
+                ]
+            ]);
+        }
+        $crate->status = CrateStatus::STORED->value;
+        $crate->save();
         $data = array_merge($validated, [
+            'crate_id' => $crate->id,
             'checked_in_at' => now(),
             'checked_in_by' => Auth::id(),
             'status' => PalletStatus::IN_TRANSIT->value,
         ]);
-        $crate = Crate::find($validated['crate_id']);
-        $crate->status = CrateStatus::STORED->value;
-        $crate->save();
         $pallet = Pallet::create($data);
+        // Tạo pallet thành công với status 201
+        /** @status 201 */
         return new PalletResource($pallet);
     }
 

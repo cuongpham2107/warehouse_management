@@ -75,29 +75,69 @@
 .fi-ta-table {
     & > tbody {
         :where(& > :not(:last-child)) {
-            border-bottom-color: black;
-            border-top-color: black;
+            border-bottom-color: rgb(180, 180, 180);
+            border-top-color: rgb(180, 180, 180);
         }
     }
 }
 
 .fi-ta-table {
     :where(& > :not(:last-child)) {
-        border-bottom-color: black;
-        border-top-color: black;
+        border-bottom-color: rgb(180, 180, 180);
+        border-top-color: rgb(180, 180, 180);
     }
 }
 
 .fi-ta-ctn {
-    border: 1px solid black;
+    border: 1px solid rgb(180, 180, 180);
     :where(& > :not(:last-child)) {
-        border-bottom-color: black;
-        border-top-color: black;
+        border-bottom-color: rgb(180, 180, 180);
+        border-top-color: rgb(180, 180, 180);
     }
 }
 
 
 
 .fi-input-wrp {
-    border: 1px solid rgb(0, 0, 0);
+    border: 1px solid rgb(180, 180, 180);
+}
+
+
+.fi-ta-text {
+    &:not(.fi-inline) {
+        padding-block: calc(var(--spacing)* 2);
+    }
+}
+.fi-ta-row {
+    & .fi-ta-group-header {
+        padding-block: calc(var(--spacing)* 1.5);
+    }
+}
+
+.fi-ta-header-cell {
+    padding-block: calc(var(--spacing)* 2);
+}
+.fi-ta-header-group-cell {
+    padding-block: calc(var(--spacing)* 1.5);
+}
+
+.fi-ta-cell {
+    &.fi-ta-selection-cell {
+        padding-block: calc(var(--spacing)* 2);
+    }
+}
+
+.fi-ta-cell {
+    &:has(.fi-ta-actions) {
+        padding-block: calc(var(--spacing)* 2);
+    }
+}
+
+.fi-ta-cell {
+    border-left: 1px solid rgb(180, 180, 180);
+    border-right: 1px solid rgb(180, 180, 180);
+}
+.fi-ta-header-cell {
+     border-left: 1px solid rgb(180, 180, 180);
+    border-right: 1px solid rgb(180, 180, 180);
 }

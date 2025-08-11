@@ -30,29 +30,7 @@ return [
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
         'description' => '
-            # Warehouse Management System API
-
-            ## Overview
-            REST API cho hệ thống quản lý kho, bao gồm các chức năng:
-
-            ### Quản lý Nhập Kho
-            - Kế hoạch nhập kho (Receiving Plans)
-            - Quản lý pallet và vị trí
-            - Theo dõi di chuyển hàng hóa
-
-            ### Tính Năng Chính
-            - **Authentication**: Bearer token authentication
-            - **Pagination**: Mặc định 15 items/trang
-            - **Sorting**: Sắp xếp theo các trường được hỗ trợ
-            - **Filtering**: Lọc theo trạng thái, ngày tháng, và các tiêu chí khác
-
-            ### Thiết Bị Hỗ Trợ
-            - PDA (Barcode scanner)
-            - Máy tính xe nâng
-            - Web interface
-
-            ## Liên Hệ
-            Để được hỗ trợ, vui lòng liên hệ team phát triển.
+           
         ',
     ],
 

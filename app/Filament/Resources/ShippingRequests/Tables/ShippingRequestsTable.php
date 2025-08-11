@@ -24,23 +24,37 @@ class ShippingRequestsTable
                     ->label('Mã yêu cầu')
                     ->width('12%')
                     ->weight(FontWeight::Bold)
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('transport_garage')
+                    ->label('Nhà xe vận chuyển')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('vehicle_capacity')
+                    ->label('Trọng tải xe (tấn)')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('license_plate')
                     ->label('Biển số xe')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('driver_name')
                     ->label('Tên tài xế')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('driver_phone')
                     ->label('SĐT tài xế')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('seal_number')
                     ->label('Số niêm phong')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('customer_name')
                     ->label('Tên khách hàng')
                     ->width('15%')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('customer_contact')
                     ->label('Liên hệ khách hàng')
                     ->searchable()
