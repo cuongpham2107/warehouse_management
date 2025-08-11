@@ -8,12 +8,13 @@ use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use App\Models\User;
 
 class AuthController extends Controller
 {
     /**
-     * Đăng nhập và lấy token.
+     * Đăng nhập và tạo token cho người dùng.
      *
      * @param LoginRequest $request
      * @return JsonResponse
@@ -22,89 +23,62 @@ class AuthController extends Controller
      * @tags Authentication
      * @summary Đăng nhập vào hệ thống
      *
-     * @requestBody {
-     *     "required": true,
-     *     "content": {
-     *         "application/json": {
-     *             "schema": {
-     *                 "type": "object",
-     *                 "required": ["email", "password"],
-     *                 "properties": {
-     *                     "email": {
-     *                         "type": "string",
-     *                         "format": "email",
-     *                         "description": "Email đăng nhập",
-     *                         "example": "admin@asgl.com"
-     *                     },
-     *                     "password": {
-     *                         "type": "string",
-     *                         "format": "password",
-     *                         "description": "Mật khẩu",
-     *                         "example": "Admin@123"
-     *                     }
-     *                 }
-     *             },
-     *             "example": {
-     *                 "email": "admin@asgl.com",
-     *                 "password": "Admin@123"
-     *             }
-     *         }
-     *     }
-     * }
-     *
      * @response 200 {
      *     "data": {
-     *         "user": {
-     *             "id": 1,
-     *             "name": "John Doe",
-     *             "email": "john@example.com",
-     *             "created_at": "2024-07-28T10:00:00Z"
-     *         },
-     *         "token": "1|abcdef123456..."
-     *     }
-     * }
-     * @response 401 {
-     *     "message": "Thông tin đăng nhập không chính xác"
-     * }
-     * @response 422 {
-     *     "message": "Dữ liệu không hợp lệ",
-     *     "errors": {
-     *         "email": ["Email không được để trống"],
-     *         "password": ["Mật khẩu không được để trống"]
+     *         "user": UserResource,
+     *         "token": "your_token_here"
      *     }
      * }
      */
-    
-    public function login(LoginRequest $request): JsonResponse
+    public function loginWithEmployeeCode(LoginRequest $request):JsonResponse
     {
-        if (!Auth::attempt($request->validated())) {
+        //Đăng nhập bằng mã nhân viên dựa theo api  này https://id.asgl.net.vn/api/internal/users/by-asgl-id/{{$employee_code}} header x-api-key: 76d43e23a183b85d31f140acca740976
+        $validated = $request->validated();
+        $employeeCode = $validated['employee_code'];
+
+        $response = Http::withHeaders([
+            'x-api-key' => '76d43e23a183b85d31f140acca740976',
+        ])->get("https://id.asgl.net.vn/api/internal/users/by-asgl-id/{$employeeCode}");
+       
+        if ($response->successful()) {
+            $userData = $response->json();
+            
+            // Tìm user theo asgl_id hoặc email
+            $user = User::where('asgl_id', $userData['data']['user']['username'])
+                       ->orWhere('email', $userData['data']['user']['email'])
+                       ->first();
+            
+            if (!$user) {
+                // Tạo user mới với password mặc định
+                $user = User::create([
+                    'name' => $userData['data']['user']['full_name'],
+                    'asgl_id' => $userData['data']['user']['username'],
+                    'email' => $userData['data']['user']['email'],
+                    'password' => bcrypt('asgl_user_' . $userData['data']['user']['username']),
+                ]);
+            } else {
+                // Cập nhật thông tin user nếu đã tồn tại
+                $user->update([
+                    'name' => $userData['data']['user']['full_name'],
+                    'email' => $userData['data']['user']['email'],
+                ]);
+            }
+            
+            Auth::login($user);
+
+            $token = $user->createToken('api-token')->plainTextToken;
+
             return response()->json([
-                'message' => 'Thông tin đăng nhập không chính xác'
-            ], 401);
+                'data' => [
+                    'user' => new UserResource($user),
+                    'token' => $token
+                ]
+            ]);
         }
 
-        $user = Auth::user();
-        $token = $user->createToken('api-token')->plainTextToken;
-
         return response()->json([
-            'data' => [
-                'user' => new UserResource($user),
-                'token' => $token
-            ]
-        ]);
-    }
-    public function loginWithEmployeeCode(Request $request):JsonResponse
-    {
-        $user = User::where('name', $request->input('employee_code'))
-            ->first();
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json([
-            'data' => [
-                'user' => new UserResource($user),
-                'token' => $token
-            ]
-        ]);
+            'message' => 'Đăng nhập không thành công'
+        ], 401);
     }
     /**
      * Đăng xuất và thu hồi token.

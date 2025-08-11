@@ -33,22 +33,26 @@ class PalletsTable
             ->columns([
                 TextColumn::make('pallet_id')
                     ->label('Mã pallet')
+                    ->width('15%')
                     ->searchable()
                     ->sortable()
                     ->copyable(),
 
                 TextColumn::make('crate.crate_id')
                     ->label('Thùng hàng')
+                     ->width('15%')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('crate.pcs')
                     ->label('PCS')
+                     ->alignCenter()
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('crate.gross_weight')
                     ->label('Trọng lượng')
+                     ->alignCenter()
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
@@ -66,41 +70,42 @@ class PalletsTable
 
                 TextColumn::make('status')
                     ->label('Trạng thái')
+                    ->alignCenter()
                     ->badge()
                     ->color(fn($state) => $state instanceof \App\Enums\PalletStatus ? $state->getColor() : 'gray')
                     ->icon(fn($state) => $state instanceof \App\Enums\PalletStatus ? $state->getIcon() : null)
                     ->formatStateUsing(fn($state) => $state instanceof \App\Enums\PalletStatus ? $state->getLabel() : ($state ?? 'N/A'))
                     ->sortable(),
 
-                TextColumn::make('checked_in_at')
-                    ->label('Thời gian nhập kho')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(),
+                // TextColumn::make('checked_in_at')
+                //     ->label('Thời gian nhập kho')
+                //     ->dateTime('H:i d/m/Y')
+                //     ->sortable()
+                //     ->toggleable(),
 
-                TextColumn::make('checkedInBy.name')
-                    ->label('Người nhập kho')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                // TextColumn::make('checkedInBy.name')
+                //     ->label('Người nhập kho')
+                //     ->toggleable(isToggledHiddenByDefault: true),
 
-                TextColumn::make('checked_out_at')
-                    ->label('Thời gian xuất kho')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(),
+                // TextColumn::make('checked_out_at')
+                //     ->label('Thời gian xuất kho')
+                //     ->dateTime('H:i d/m/Y')
+                //     ->sortable()
+                //     ->toggleable(),
 
-                TextColumn::make('checkedOutBy.name')
-                    ->label('Người xuất kho')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                // TextColumn::make('checkedOutBy.name')
+                //     ->label('Người xuất kho')
+                //     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                     ->label('Ngày tạo')
-                    ->dateTime('d/m/Y H:i')
+                    ->dateTime('H:i d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
                     ->label('Ngày cập nhật')
-                    ->dateTime('d/m/Y H:i')
+                    ->dateTime('H:i d/m/Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

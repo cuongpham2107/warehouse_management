@@ -20,7 +20,7 @@ class Dashboard extends BaseDashboard
 
             // \App\Filament\Widgets\ShippedPalletsWidget::class,
             // Yêu cầu vận chuyển gần đây
-            \App\Filament\Widgets\RecentShippingRequestsWidget::class,
+            \App\Filament\Widgets\ReceivingPlanStatsWidget::class,
         ];
     }
     public function getColumns(): int | array

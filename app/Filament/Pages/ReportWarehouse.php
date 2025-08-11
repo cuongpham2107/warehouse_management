@@ -15,7 +15,9 @@ use App\Models\PalletWithInfo;
 use Filament\Tables\Columns\ColumnGroup;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
+use Filament\Support\Enums\Size;
 use Filament\Tables\Grouping\Group;
+use Filament\Support\Enums\TextSize;
 
 class ReportWarehouse extends Page implements HasTable
 {
@@ -51,8 +53,8 @@ class ReportWarehouse extends Page implements HasTable
             ->columns([
                 TextColumn::make('pallet_id')
                     ->label('STT')
-                    ->sortable()
                     ->searchable()
+                    ->alignCenter()
                     ->toggleable(),
                 TextColumn::make('plan_code')
                     ->label('Mã kế hoạch nhận hàng')
@@ -120,12 +122,14 @@ class ReportWarehouse extends Page implements HasTable
                         TextColumn::make('plan_date')
                             ->label('Ngày kế hoạch')
                             ->date('d/m/Y')
+                            ->alignCenter()
                             ->sortable()
                             ->searchable()
                             ->toggleable(),
                         TextColumn::make('arrival_date')
                             ->label('Hạ hàng')
                             ->date('d/m/Y')
+                            ->alignCenter()
                             ->sortable()
                             ->searchable()
                             ->toggleable(),
@@ -170,12 +174,14 @@ class ReportWarehouse extends Page implements HasTable
                             TextColumn::make('lifting_time')
                                 ->label('Nâng hàng')
                                 ->date('d/m/Y')
+                                ->alignCenter()
                                 ->sortable()
                                 ->searchable()
                                 ->toggleable(),
                             TextColumn::make('requested_date')
                                 ->label('Ngày yêu cầu')
                                 ->date('d/m/Y')
+                                ->alignCenter()
                                 ->sortable()
                                 ->searchable()
                                 ->toggleable(),
@@ -198,7 +204,8 @@ class ReportWarehouse extends Page implements HasTable
                     
 
 
-            ])
+                    ])
+            ->striped()
             ->filters([
                 // Filter theo trạng thái pallet
                 SelectFilter::make('pallet_status')
