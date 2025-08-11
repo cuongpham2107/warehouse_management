@@ -27,19 +27,21 @@ class ReportWarehouse extends Page implements HasTable
 
     protected static ?int $navigationSort = 4;
 
-      public static function getNavigationLabel(): string
+    protected ?string $heading = 'Báo cáo tổng hợp';
+
+    public static function getNavigationLabel(): string
     {
-        return '3. Báo cáo kho';
+        return '3. Báo cáo tổng hợp';
     }
 
     public static function getModelLabel(): string
     {
-        return '3. Báo cáo kho';
+        return '3. Báo cáo tổng hợp';
     }
 
     public static function getPluralModelLabel(): string
     {
-        return '3. Báo cáo kho';
+        return '3. Báo cáo tổng hợp';
     }
 
      public function table(Table $table): Table
