@@ -23,7 +23,7 @@ class VendorResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
-    protected static string|UnitEnum|null $navigationGroup = '4. Danh mục';
+    protected static string|UnitEnum|null $navigationGroup = '5. Danh mục';
 
     protected static ?int $navigationSort = 2;
 

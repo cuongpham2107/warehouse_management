@@ -7,7 +7,6 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -22,6 +21,7 @@ use Filament\Forms\Components\Textarea;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ShippingInvoiceExportController;
 use Filament\Actions\DeleteAction;
+use Filament\Tables\Enums\RecordActionsPosition;
 
 class PalletsTable
 {
@@ -165,10 +165,13 @@ class PalletsTable
 
             ])
             ->recordActions([
-                EditAction::make()->label('Sửa'),
+                EditAction::make()
+                    ->icon('heroicon-o-pencil')
+                    ->iconButton(),
                 DeleteAction::make()
-                    ->label('Xoá')
-            ])
+                    ->icon('heroicon-o-trash')
+                    ->iconButton(),
+            ],position: RecordActionsPosition::BeforeColumns)
             ->recordUrl(null)
             ->headerActions([
 

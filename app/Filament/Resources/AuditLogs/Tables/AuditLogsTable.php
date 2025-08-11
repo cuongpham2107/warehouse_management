@@ -8,6 +8,8 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Actions\DeleteAction;
 
 class AuditLogsTable
 {
@@ -42,11 +44,13 @@ class AuditLogsTable
                 //
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->label('Xem'),
                 EditAction::make()
-                    ->label('Chỉnh sửa'),
-            ])
+                    ->icon('heroicon-o-pencil')
+                    ->iconButton(),
+                DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->iconButton(),
+            ],position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()

@@ -13,7 +13,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class RecentShippingRequestsWidget extends BaseWidget
 {
-    protected static ?string $heading = 'Yêu cầu vận chuyển gần đây';
+    protected static ?string $heading = 'Phân loại yêu cầu vận chuyển gần đây';
 
     protected int | string | array $columnSpan = 'full';
 

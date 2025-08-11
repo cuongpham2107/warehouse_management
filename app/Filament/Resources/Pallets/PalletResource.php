@@ -20,7 +20,7 @@ class PalletResource extends Resource
 {
     protected static ?string $model = Pallet::class;
 
-    protected static string|UnitEnum|null $navigationGroup = '3. Hàng hóa';
+    protected static string|UnitEnum|null $navigationGroup = '4. Hàng hóa';
 
     protected static ?int $navigationSort = 2;
 

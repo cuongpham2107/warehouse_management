@@ -5,10 +5,11 @@ namespace App\Filament\Resources\Vendors\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Actions\DeleteAction;
 
 class VendorsTable
 {
@@ -79,9 +80,13 @@ class VendorsTable
                     ->native(false),
             ])
             ->recordActions([
-                ViewAction::make()->label('Xem'),
-                EditAction::make()->label('Sửa'),
-            ])
+                EditAction::make()
+                    ->icon('heroicon-o-pencil')
+                    ->iconButton(),
+                DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->iconButton(),
+            ],position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()->label('Xóa'),

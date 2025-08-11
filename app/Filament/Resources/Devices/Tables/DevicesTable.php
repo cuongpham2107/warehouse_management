@@ -5,11 +5,12 @@ namespace App\Filament\Resources\Devices\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use App\Enums\DeviceStatus;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Actions\DeleteAction;
 
 class DevicesTable
 {
@@ -64,11 +65,13 @@ class DevicesTable
                     ->placeholder('Tất cả trạng thái'),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->label('Xem'),
                 EditAction::make()
-                    ->label('Chỉnh sửa'),
-            ])
+                    ->icon('heroicon-o-pencil')
+                    ->iconButton(),
+                DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->iconButton(),
+            ],position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()

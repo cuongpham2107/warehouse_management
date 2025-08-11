@@ -16,9 +16,9 @@ class Dashboard extends BaseDashboard
             // Tổng quan hệ thống
             \App\Filament\Widgets\StatsOverviewWidget::class,
             // Hoạt động nhập/xuất pallet
-            \App\Filament\Widgets\WarehouseActivityWidget::class,
+            // \App\Filament\Widgets\WarehouseActivityWidget::class,
 
-            \App\Filament\Widgets\ShippedPalletsWidget::class,
+            // \App\Filament\Widgets\ShippedPalletsWidget::class,
             // Yêu cầu vận chuyển gần đây
             \App\Filament\Widgets\RecentShippingRequestsWidget::class,
         ];
