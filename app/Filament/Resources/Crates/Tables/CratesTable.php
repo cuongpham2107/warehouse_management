@@ -7,7 +7,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Columns\TextColumn;
@@ -15,6 +14,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Enums\RecordActionsPosition;
 
 class CratesTable
 {
@@ -124,10 +124,13 @@ class CratesTable
                     ->collapsible(),
             ])
             ->recordActions([
-                EditAction::make()->label('Sửa'),
+                EditAction::make()
+                    ->icon('heroicon-o-pencil')
+                    ->iconButton(),
                 DeleteAction::make()
-                    ->label('Xoá')
-            ])
+                    ->icon('heroicon-o-trash')
+                    ->iconButton(),
+            ],position: RecordActionsPosition::BeforeColumns)
             ->headerActions([
                 
             ])

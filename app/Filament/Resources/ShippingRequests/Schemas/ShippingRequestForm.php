@@ -49,7 +49,6 @@ class ShippingRequestForm
                                     ->label('Thời gian nâng hạ hàng')
                                     ->prefixIcon('heroicon-o-calendar')
                                     ->default(now())
-                                    ->required()
                                     ->displayFormat('H:i d/m/Y')
                                     ->seconds(false)
                                     ->placeholder('Chọn thời gian nâng hạ hàng')

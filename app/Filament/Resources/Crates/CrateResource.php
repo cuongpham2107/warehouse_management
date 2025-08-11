@@ -23,7 +23,7 @@ class CrateResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBox;
 
-    protected static string|UnitEnum|null $navigationGroup = '3. Hàng hóa';
+    protected static string|UnitEnum|null $navigationGroup = '4. Hàng hóa';
 
     protected static ?int $navigationSort = 1;
 

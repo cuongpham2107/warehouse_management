@@ -9,7 +9,7 @@
     }
 }
 .fi-topbar{
-    background-color: rgb(14 165 233 / 95%);
+    background-color: #005a88;
 }
 .fi-topbar .fi-topbar-item-label{
     color: white;
@@ -57,12 +57,16 @@
 .fi-ta-table {
     & > thead {
         & > tr {
-            background-color: rgb(14 165 233 / 95%);
+            background-color: #005a88;
         }
     }
 }
 
 .fi-ta-header-cell{
+    color: white;
+}
+
+.fi-ta-header-group-cell{
     color: white;
 }
 

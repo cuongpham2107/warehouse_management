@@ -78,6 +78,9 @@ class ReceivingPlansTable
                 TextColumn::make('vehicle_capacity')
                     ->label('Tải trọng xe (tấn)')
                     ->numeric()
+                    ->alignCenter()
+                    ->badge()
+                    ->formatStateUsing(fn($state) => $state ? $state . ' tấn' : 'Chưa xác định')
                     ->toggleable(),
                 TextColumn::make('status')
                     ->badge()
