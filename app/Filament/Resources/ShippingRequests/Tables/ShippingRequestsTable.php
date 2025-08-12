@@ -11,6 +11,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Filament\Support\Enums\FontWeight;
 use App\Enums\ShippingRequestStatus;
+use Filament\Actions\DeleteAction;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Enums\RecordActionsPosition;
 
@@ -61,12 +62,10 @@ class ShippingRequestsTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('requested_date')
                     ->label('Ngày giao hàng')
-                    ->badge()
                     ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('lifting_time')
                     ->label('Thời gian đóng hàng')
-                    ->badge()
                     ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('status')
@@ -180,12 +179,19 @@ class ShippingRequestsTable
                  EditAction::make()
                     ->icon('heroicon-m-pencil-square')
                     ->iconButton(),
+                DeleteAction::make()
+                    ->icon('heroicon-m-trash')
+                    ->iconButton()
+                    ->requiresConfirmation()
+                    ->successNotificationTitle('Yêu cầu vận chuyển đã được xóa thành công.')
+                    ->failureNotificationTitle('Không thể xóa yêu cầu vận chuyển.'),
                 ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label('Xóa'),
                 ]),
-            ]);
+            ])
+            ->recordUrl(null);
     }
 }

@@ -33,7 +33,7 @@ class ReceivingPlansTable
                     ->toggleable(),
                 TextColumn::make('plan_date')
                     ->label('Ngày hàng đến')
-                    ->date('H:i d/m/Y ')
+                    ->date('d/m/Y')
                     ->alignEnd()
                     ->sortable()
                     ->toggleable(),
@@ -183,6 +183,7 @@ class ReceivingPlansTable
                        
                 ]),
             ])->striped()
+            ->recordUrl(null)
             ->reorderableColumns();
     }
 }
