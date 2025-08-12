@@ -50,19 +50,20 @@ class ReceivingPlanForm
                                     ->required()
                                     ->default(now())
                                     ->seconds(false)
-                                    ->displayFormat('H:i | d/m/Y')
+                                    ->displayFormat('d/m/Y | H:i')
+                                    ->timezone('Asia/Ho_Chi_Minh')
                                     ->placeholder('Chọn ngày hàng đến')
-                                    ->native(false) 
                                     ->columnSpan(3)
                                     ->prefixIcon('heroicon-o-calendar'),
                                 DateTimePicker::make('arrival_date')
                                     ->label('Giờ hạ hàng')
                                     ->default(now())
                                     ->seconds(false)
-                                    ->native(false)
-                                    ->displayFormat('H:i | d/m/Y')
+                                    ->displayFormat('d/m/Y | H:i')
+                                    ->timezone('Asia/Ho_Chi_Minh')
                                     ->placeholder('Chọn giờ hạ hàng')
                                     ->prefixIcon('heroicon-o-calendar')
+                                    
                                     ->columnSpan(3),
                                 Select::make('status')
                                     ->label('Trạng thái')
@@ -71,7 +72,6 @@ class ReceivingPlanForm
                                     ->default(ReceivingPlanStatus::PENDING->value)
                                     ->disabled()
                                     ->dehydrated()
-                                    ->native(false) 
                                     ->columnSpan(3),
                                 Select::make('created_by')
                                     ->label('Người tạo')

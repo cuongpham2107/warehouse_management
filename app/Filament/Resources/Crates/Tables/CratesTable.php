@@ -97,8 +97,7 @@ class CratesTable
                     ->label('Trạng thái')
                     ->options(CrateStatus::class)
                     ->multiple()
-                    ->preload()
-                    ->native(false),
+                    ->preload(),
                 Filter::make('list_crates')
                     ->schema([
                         Textarea::make('crate_ids')
