@@ -62,8 +62,7 @@ class DeviceForm
                             ->label('Trạng thái')
                             ->required()
                             ->options(DeviceStatus::getOptions())
-                            ->default(DeviceStatus::INACTIVE->value)
-                            ->native(false),
+                            ->default(DeviceStatus::INACTIVE->value),
                             
                         TextInput::make('assigned_to')
                             ->label('Được gán cho')

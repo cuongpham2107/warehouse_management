@@ -48,6 +48,11 @@ class ShippingRequestResource extends Resource
         return '2. Yêu cầu xuất kho';
     }
 
+    protected function getTitle(): string
+    {
+        return '';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ShippingRequestForm::configure($schema);

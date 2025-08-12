@@ -34,7 +34,6 @@ class ActivitiesRelationManager extends RelationManager
                     ->label('Hành động')
                     ->options(PalletActivityAction::getOptions())
                     ->default(PalletActivityAction::ATTACH_CRATE->value)
-                    ->native(false)
                     ->required(),
                 Textarea::make('description')
                     ->maxLength(500)

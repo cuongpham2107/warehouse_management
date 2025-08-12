@@ -46,7 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->topNavigation()
             ->maxContentWidth(Width::Full)
             ->subNavigationPosition(SubNavigationPosition::End)
-            ->brandName('ASGL')
+            ->brandName('Quản lý kho ASGL')
             ->globalSearch(true)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {

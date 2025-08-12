@@ -36,7 +36,6 @@ class AuditLogForm
                                 'login' => 'Đăng nhập',
                                 'logout' => 'Đăng xuất',
                             ])
-                            ->native(false)
                             ->placeholder('Chọn loại hành động'),
                             
                         TextInput::make('table_name')

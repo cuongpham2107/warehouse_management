@@ -119,7 +119,6 @@ class PalletsTable
                         'shipped' => 'Đã xuất kho',
                         'damaged' => 'Bị hư hỏng',
                     ])
-                    ->native(false)
                     ->modifyFormFieldUsing(fn($field) => $field->default('stored'))
                     ->default(),
 
