@@ -52,6 +52,7 @@ class ReceivingPlanForm
                                     ->seconds(false)
                                     ->displayFormat('d/m/Y | H:i')
                                     ->timezone('Asia/Ho_Chi_Minh')
+                                    ->locale('vi')
                                     ->placeholder('Chọn ngày hàng đến')
                                     ->columnSpan(3)
                                     ->prefixIcon('heroicon-o-calendar'),
@@ -61,9 +62,9 @@ class ReceivingPlanForm
                                     ->seconds(false)
                                     ->displayFormat('d/m/Y | H:i')
                                     ->timezone('Asia/Ho_Chi_Minh')
+                                    ->locale('vi')
                                     ->placeholder('Chọn giờ hạ hàng')
                                     ->prefixIcon('heroicon-o-calendar')
-                                    
                                     ->columnSpan(3),
                                 Select::make('status')
                                     ->label('Trạng thái')
