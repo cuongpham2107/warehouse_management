@@ -58,8 +58,11 @@ class AuthController extends Controller
             $token = $user->createToken('api-token')->plainTextToken;
 
             return response()->json([
+                "success" => true,
+                "message" => "",
+                "error_code" => null,
                 'data' => [
-                    'user' => new UserResource($user),
+                    'employees' => new UserResource($user),
                     'token' => $token
                 ]
             ]);
@@ -68,6 +71,32 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Đăng nhập không thành công'
         ], 401);
+    }
+
+    public function checkEmployeeCode($asgl_id): JsonResponse
+    {
+        // Kiểm tra xem mã nhân viên có tồn tại trong hệ thống hay không
+        $response = Http::withHeaders([
+            'x-api-key' => '76d43e23a183b85d31f140acca740976',
+        ])->get("https://id.asgl.net.vn/api/internal/users/by-asgl-id/{$asgl_id}");
+
+        if ($response->successful()) {
+            $userData = $response->json();
+            return response()->json([
+                "success" => true,
+                "message" => "",
+                "error_code" => null,
+                'data' => [
+                    'id' => $userData['data']['user']['id'],
+                    'asgl_id' => $userData['data']['user']['asgl_id'],
+                    'name' => $userData['data']['user']['full_name'],
+                ]
+            ]);
+        }
+        return response()->json([
+            'exists' => false,
+            'message' => 'Mã nhân viên không tồn tại'
+        ], 404);
     }
     /**
      * Đăng xuất và thu hồi token

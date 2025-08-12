@@ -18,10 +18,10 @@ class ReceivingPlanResource extends JsonResource
         return [
             'id' => $this->id,
             'plan_code' => $this->plan_code,
-            'vendor' => [
-                'id' => $this->vendor->id,
-                'name' => $this->vendor->name,
-            ],
+            // 'vendor' => [
+            //     'id' => $this->vendor->id,
+            //     'name' => $this->vendor->name,
+            // ],
             'license_plate' => $this->license_plate,
             'plan_date' => $this->plan_date->format('Y-m-d'),
             'total_crates' => $this->total_crates,
@@ -34,8 +34,8 @@ class ReceivingPlanResource extends JsonResource
                 'id' => $this->creator->id,
                 'name' => $this->creator->name,
             ],
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            // 'created_at' => $this->created_at,
+            // 'updated_at' => $this->updated_at,
             'crates' => $this->when($this->relationLoaded('crates'), function () {
                 return $this->crates->map(function ($crate) {
                     return [
