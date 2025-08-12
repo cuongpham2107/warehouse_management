@@ -39,7 +39,7 @@ class PalletsTable
                     ->copyable(),
 
                 TextColumn::make('crate.crate_id')
-                    ->label('Thùng hàng')
+                    ->label('Mã kiện hàng')
                      ->width('15%')
                     ->searchable()
                     ->sortable()
