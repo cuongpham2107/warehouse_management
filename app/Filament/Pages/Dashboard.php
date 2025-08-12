@@ -21,6 +21,8 @@ class Dashboard extends BaseDashboard
             // \App\Filament\Widgets\ShippedPalletsWidget::class,
             // Yêu cầu vận chuyển gần đây
             \App\Filament\Widgets\ReceivingPlanStatsWidget::class,
+            // KPI nhân viên theo hoạt động pallet
+            \App\Filament\Widgets\EmployeeKPIWidget::class,
         ];
     }
     public function getColumns(): int | array

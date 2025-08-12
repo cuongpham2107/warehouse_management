@@ -46,22 +46,22 @@ class ReceivingPlanForm
                                     ->createOptionForm(fn(Schema $schema) => VendorForm::configure($schema)),
 
                                 DateTimePicker::make('plan_date')
-                                    ->label('Ngày kế hoạch')
+                                    ->label('Ngày hàng đến')
                                     ->required()
                                     ->default(now())
                                     ->seconds(false)
                                     ->displayFormat('H:i | d/m/Y')
-                                    ->placeholder('Chọn ngày kế hoạch')
+                                    ->placeholder('Chọn ngày hàng đến')
                                     ->native(false) 
                                     ->columnSpan(3)
                                     ->prefixIcon('heroicon-o-calendar'),
                                 DateTimePicker::make('arrival_date')
-                                    ->label('Ngày nhập kho')
+                                    ->label('Giờ hạ hàng')
                                     ->default(now())
                                     ->seconds(false)
                                     ->native(false)
                                     ->displayFormat('H:i | d/m/Y')
-                                    ->placeholder('Chọn ngày nhập kho')
+                                    ->placeholder('Chọn giờ hạ hàng')
                                     ->prefixIcon('heroicon-o-calendar')
                                     ->columnSpan(3),
                                 Select::make('status')

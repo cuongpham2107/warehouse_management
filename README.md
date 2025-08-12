@@ -63,7 +63,7 @@ Chức năng này quản lý quy trình lấy hàng từ kho và chuẩn bị ch
 ### Quy trình và tương tác thiết bị:
 
 #### Trang hiển thị thông tin xuất hàng (Web):
-- **Thông tin hiển thị**: Cung cấp tổng quan về các kiện hàng có sẵn để xuất, bao gồm: Crate ID, Description, PCS, Ngày nhập kho (giúp xác định hàng tồn kho cũ hơn), Vị trí (rack kho), Vender
+- **Thông tin hiển thị**: Cung cấp tổng quan về các kiện hàng có sẵn để xuất, bao gồm: Crate ID, Description, PCS, Giờ hạ hàng (giúp xác định hàng tồn kho cũ hơn), Vị trí (rack kho), Vender
 
 #### Tải yêu cầu giao hàng lên hệ thống (Web):
 - **Người dùng có thể tải lên các file hoặc nhập thủ công thông tin yêu cầu giao hàng**: Chủ yếu là danh sách các Crate ID cần xuất. Hệ thống sẽ xử lý yêu cầu này để tạo ra các lệnh xuất hàng
