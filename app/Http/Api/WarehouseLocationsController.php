@@ -14,34 +14,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class WarehouseLocationsController extends Controller
 {
     /**
-     * Hiển thị danh sách các vị trí trong kho.
+     * Hiển thị danh sách các vị trí trong kho
      *
      * @param Request $request
      * @return JsonResource
-     *
-     * @operationId listLocations
-     * @tags Warehouse Locations
-     * @summary Lấy danh sách vị trí trong kho có phân trang
-     * 
-     * @parameter query string search Tìm kiếm theo mã vị trí
-     * @parameter query string sort Trường để sắp xếp (mặc định: created_at)
-     * @parameter query string direction Hướng sắp xếp (asc/desc)
-     * @parameter query integer per_page Số lượng item trên mỗi trang (mặc định: 15)
-     * @parameter query integer page Số trang hiện tại
-     *
-     * @response 200 {
-     *     "data": [
-     *         {
-     *             "id": 1,
-     *             "location_code": "A1-01",
-     *             "pallets_count": 5,
-     *             "created_at": "2024-07-26T10:00:00Z",
-     *             "updated_at": "2024-07-26T10:00:00Z"
-     *         }
-     *     ],
-     *     "links": {},
-     *     "meta": {}
-     * }
      */
     public function index(Request $request): JsonResource
     {
@@ -87,169 +63,57 @@ class WarehouseLocationsController extends Controller
         return WarehouseLocationResource::collection($locations);
     }
 
-    /**
-     * Hiển thị chi tiết một vị trí trong kho.
-     *
-     * @param WarehouseLocation $warehouseLocation
-     * @return JsonResource
-     *
-     * @operationId getLocation
-     * @tags Warehouse Locations
-     * @summary Lấy thông tin chi tiết của một vị trí trong kho
-     *
-     * @response 200 {
-     *     "data": {
-     *         "id": 1,
-     *         "location_code": "A1-01",
-     *         "pallets_count": 5,
-     *         "created_at": "2024-07-26T10:00:00Z",
-     *         "updated_at": "2024-07-26T10:00:00Z",
-     *         "pallets": []
-     *     }
-     * }
-     * @response 404 {
-     *     "message": "Không tìm thấy vị trí"
-     * }
-     */
-    public function show(WarehouseLocation $warehouseLocation): JsonResource
-    {
-        return new WarehouseLocationResource($warehouseLocation->load('pallets'));
-    }
+    // /**
+    //  * Hiển thị chi tiết một vị trí trong kho
+    //  *
+    //  * @param WarehouseLocation $warehouseLocation
+    //  * @return JsonResource
+    //  */
+    // public function show(WarehouseLocation $warehouseLocation): JsonResource
+    // {
+    //     return new WarehouseLocationResource($warehouseLocation->load('pallets'));
+    // }
 
-    /**
-     * Tạo mới một vị trí trong kho.
-     *
-     * @param StoreWarehouseLocationRequest $request
-     * @return JsonResource
-     *
-     * @operationId createLocation
-     * @tags Warehouse Locations
-     * @summary Tạo mới một vị trí trong kho
-     *
-     * @requestBody {
-     *     "required": true,
-     *     "content": {
-     *         "application/json": {
-     *             "schema": {
-     *                 "type": "object",
-     *                 "required": ["location_code"],
-     *                 "properties": {
-     *                     "location_code": {
-     *                         "type": "string",
-     *                         "maxLength": 255,
-     *                         "description": "Mã vị trí trong kho"
-     *                     }
-     *                 }
-     *             }
-     *         }
-     *     }
-     * }
-     *
-     * @response 201 {
-     *     "data": {
-     *         "id": 1,
-     *         "location_code": "A1-01",
-     *         "pallets_count": 0,
-     *         "created_at": "2024-07-26T10:00:00Z",
-     *         "updated_at": "2024-07-26T10:00:00Z"
-     *     }
-     * }
-     * @response 422 {
-     *     "message": "Dữ liệu không hợp lệ.",
-     *     "errors": {
-     *         "location_code": ["Mã vị trí là bắt buộc."]
-     *     }
-     * }
-     */
-    public function store(StoreWarehouseLocationRequest $request): JsonResource
-    {
-        $location = WarehouseLocation::create($request->validated());
-        return new WarehouseLocationResource($location);
-    }
+    // /**
+    //  * Tạo mới một vị trí trong kho
+    //  *
+    //  * @param StoreWarehouseLocationRequest $request
+    //  * @return JsonResource
+    //  */
+    // public function store(StoreWarehouseLocationRequest $request): JsonResource
+    // {
+    //     $location = WarehouseLocation::create($request->validated());
+    //     return new WarehouseLocationResource($location);
+    // }
 
-    /**
-     * Cập nhật thông tin của một vị trí trong kho.
-     *
-     * @param UpdateWarehouseLocationRequest $request
-     * @param WarehouseLocation $warehouseLocation
-     * @return JsonResource
-     *
-     * @operationId updateLocation
-     * @tags Warehouse Locations
-     * @summary Cập nhật thông tin của một vị trí trong kho
-     *
-     * @requestBody {
-     *     "required": true,
-     *     "content": {
-     *         "application/json": {
-     *             "schema": {
-     *                 "type": "object",
-     *                 "properties": {
-     *                     "location_code": {
-     *                         "type": "string",
-     *                         "maxLength": 255,
-     *                         "description": "Mã vị trí trong kho"
-     *                     }
-     *                 }
-     *             }
-     *         }
-     *     }
-     * }
-     *
-     * @response 200 {
-     *     "data": {
-     *         "id": 1,
-     *         "location_code": "A1-01",
-     *         "pallets_count": 0,
-     *         "created_at": "2024-07-26T10:00:00Z",
-     *         "updated_at": "2024-07-26T10:00:00Z"
-     *     }
-     * }
-     * @response 404 {
-     *     "message": "Không tìm thấy vị trí"
-     * }
-     * @response 422 {
-     *     "message": "Dữ liệu không hợp lệ.",
-     *     "errors": {
-     *         "location_code": ["Mã vị trí này đã tồn tại."]
-     *     }
-     * }
-     */
-    public function update(UpdateWarehouseLocationRequest $request, WarehouseLocation $warehouseLocation): JsonResource
-    {
-        $warehouseLocation->update($request->validated());
-        return new WarehouseLocationResource($warehouseLocation);
-    }
+    // /**
+    //  * Cập nhật thông tin của một vị trí trong kho
+    //  *
+    //  * @param UpdateWarehouseLocationRequest $request
+    //  * @param WarehouseLocation $warehouseLocation
+    //  * @return JsonResource
+    //  */
+    // public function update(UpdateWarehouseLocationRequest $request, WarehouseLocation $warehouseLocation): JsonResource
+    // {
+    //     $warehouseLocation->update($request->validated());
+    //     return new WarehouseLocationResource($warehouseLocation);
+    // }
 
-    /**
-     * Xóa một vị trí trong kho.
-     *
-     * @param WarehouseLocation $warehouseLocation
-     * @return JsonResponse
-     *
-     * @operationId deleteLocation
-     * @tags Warehouse Locations
-     * @summary Xóa một vị trí khỏi kho
-     *
-     * @response 200 {
-     *     "message": "Đã xóa vị trí thành công"
-     * }
-     * @response 404 {
-     *     "message": "Không tìm thấy vị trí"
-     * }
-     * @response 422 {
-     *     "message": "Không thể xóa vị trí đang chứa pallet"
-     * }
-     */
-    public function destroy(WarehouseLocation $warehouseLocation): JsonResponse
-    {
-        if ($warehouseLocation->pallets()->count() > 0) {
-            return response()->json([
-                'message' => 'Không thể xóa vị trí đang chứa pallet'
-            ], 422);
-        }
+    // /**
+    //  * Xóa một vị trí trong kho
+    //  *
+    //  * @param WarehouseLocation $warehouseLocation
+    //  * @return JsonResponse
+    //  */
+    // public function destroy(WarehouseLocation $warehouseLocation): JsonResponse
+    // {
+    //     if ($warehouseLocation->pallets()->count() > 0) {
+    //         return response()->json([
+    //             'message' => 'Không thể xóa vị trí đang chứa pallet'
+    //         ], 422);
+    //     }
 
-        $warehouseLocation->delete();
-        return response()->json(['message' => 'Đã xóa vị trí thành công']);
-    }
+    //     $warehouseLocation->delete();
+    //     return response()->json(['message' => 'Đã xóa vị trí thành công']);
+    // }
 }

@@ -7,6 +7,7 @@ use App\Filament\Resources\Pallets\Pages\EditPallet;
 use App\Filament\Resources\Pallets\Pages\ListPallets;
 use App\Filament\Resources\Pallets\Schemas\PalletForm;
 use App\Filament\Resources\Pallets\Tables\PalletsTable;
+use App\Filament\Resources\Pallets\RelationManagers\ActivitiesRelationManager;
 use App\Models\Pallet;
 use BackedEnum;
 use UnitEnum;
@@ -62,7 +63,7 @@ class PalletResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ActivitiesRelationManager::class,
         ];
     }
 

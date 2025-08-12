@@ -13,7 +13,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class ReceivingPlansController extends Controller
 {
     /**
-     * Hiển thị danh sách kế hoạch nhận hàng đang xử lý.
+     * 1. Hiển thị danh sách kế hoạch nhận hàng đang xử lý
+     *
+     * @param Request $request
+     * @return JsonResource
      */
     public function index(Request $request): JsonResource
     {
@@ -38,10 +41,10 @@ class ReceivingPlansController extends Controller
     }
 
     /**
-     * Hiển thị thông tin chi tiết của kế hoạch nhận hàng đang xử lý.
+     * 2. Hiển thị thông tin chi tiết của kế hoạch nhận hàng đang xử lý
      *
-     * @response ReceivingPlanResource
-     * @response 404 array{message: string}
+     * @param ReceivingPlan $receivingPlan
+     * @return JsonResource
      */
     public function show(ReceivingPlan $receivingPlan): JsonResource
     {
@@ -53,11 +56,11 @@ class ReceivingPlansController extends Controller
     }
 
     /**
-     * Hoàn thành kế hoạch nhận hàng.
+     * 5. Hoàn thành kế hoạch nhận hàng
      *
-     * @response ReceivingPlanResource
-     * @response 400 array{message: string}
-     * @response 404 array{message: string}
+     * @param Request $request
+     * @param int $id
+     * @return JsonResource
      */
     public function update(Request $request, int $id): JsonResource
     {

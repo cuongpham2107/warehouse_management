@@ -51,14 +51,6 @@ class Crate extends Model
     }
 
     /**
-     * Get all inventory movements for this crate.
-     */
-    public function inventoryMovements()
-    {
-        return $this->hasMany(InventoryMovement::class);
-    }
-
-    /**
      * Scope a query to only include planned crates.
      */
     public function scopePlanned($query)

@@ -41,13 +41,11 @@ class Pallet extends Model
         return $this->belongsTo(Crate::class);
     }
 
-    /**
-     * Get all inventory movements for this pallet.
-     */
-    public function inventoryMovements()
+    public function activities()
     {
-        return $this->hasMany(InventoryMovement::class);
+        return $this->hasMany(PalletActivity::class);
     }
+
 
   
 

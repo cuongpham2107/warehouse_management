@@ -38,13 +38,7 @@ class Device extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    /**
-     * Get inventory movements performed with this device.
-     */
-    public function inventoryMovements()
-    {
-        return $this->hasMany(InventoryMovement::class, 'device_id', 'device_code');
-    }
+   
 
     /**
      * Scope a query to only include active devices.
