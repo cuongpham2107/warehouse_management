@@ -51,8 +51,6 @@ class ReceivingPlanForm
                                     ->default(now())
                                     ->seconds(false)
                                     ->displayFormat('d/m/Y | H:i')
-                                    ->timezone('Asia/Ho_Chi_Minh')
-                                    ->locale('vi')
                                     ->placeholder('Chọn ngày hàng đến')
                                     ->columnSpan(3)
                                     ->prefixIcon('heroicon-o-calendar'),
@@ -61,18 +59,15 @@ class ReceivingPlanForm
                                     ->default(now())
                                     ->seconds(false)
                                     ->displayFormat('d/m/Y | H:i')
-                                    ->timezone('Asia/Ho_Chi_Minh')
-                                    ->locale('vi')
                                     ->placeholder('Chọn giờ hạ hàng')
                                     ->prefixIcon('heroicon-o-calendar')
-                                    ->columnSpan(3),
+                                    ->locale('vi')
+                                    ->columnSpan(3), 
                                 Select::make('status')
                                     ->label('Trạng thái')
                                     ->required()
                                     ->options(ReceivingPlanStatus::getOptions())
                                     ->default(ReceivingPlanStatus::PENDING->value)
-                                    ->disabled()
-                                    ->dehydrated()
                                     ->columnSpan(3),
                                 Select::make('created_by')
                                     ->label('Người tạo')
@@ -80,8 +75,6 @@ class ReceivingPlanForm
                                     ->searchable()
                                     ->preload()
                                     ->default(fn() => Auth::id())
-                                    ->disabled()
-                                    ->dehydrated()
                                     ->helperText('Tự động gán người dùng hiện tại')
                                     ->columnSpan(3),
                                 
@@ -111,27 +104,22 @@ class ReceivingPlanForm
                                 TextInput::make('total_crates')
                                     ->label('Tổng Quantity')
                                     ->numeric()
-                                    ->readOnly()
                                     ->default(0)
                                     ->minValue(0)
                                     ->placeholder('Nhập tổng số kiện')
-                                    ->suffixIcon('heroicon-o-cube')
-                                    ->readOnly(),
+                                    ->suffixIcon('heroicon-o-cube'),
 
                                 TextInput::make('total_pcs')
                                     ->label('Tổng PCS')
                                     ->numeric()
-                                    ->readOnly()
                                     ->default(0)
                                     ->minValue(0)
                                     ->placeholder('Nhập tổng số sản phẩm')
-                                    ->suffixIcon('heroicon-o-archive-box')
-                                    ->readOnly(),
+                                    ->suffixIcon('heroicon-o-archive-box'),
 
                                 TextInput::make('total_weight')
                                     ->label('Tổng khối lượng (kg)')
                                     ->numeric()
-                                    ->readOnly()
                                     ->default(0)
                                     ->minValue(0)
                                     ->step(0.01)
