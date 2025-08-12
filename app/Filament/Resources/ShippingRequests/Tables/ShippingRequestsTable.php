@@ -60,12 +60,12 @@ class ShippingRequestsTable
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('requested_date')
-                    ->label('TG yêu cầu')
+                    ->label('Ngày giao hàng')
                     ->badge()
                     ->date('d/m/Y')
                     ->sortable(),
-                TextColumn::make('departure_time')
-                    ->label('TG xuất phát')
+                TextColumn::make('lifting_time')
+                    ->label('Thời gian đóng hàng')
                     ->badge()
                     ->date('d/m/Y')
                     ->sortable(),
@@ -96,8 +96,8 @@ class ShippingRequestsTable
                 Filter::make('requested_date')
                     ->form([
                         \Filament\Forms\Components\TextInput::make('value')
-                            ->label('Ngày yêu cầu (YYYY-MM-DD)')
-                            ->placeholder('Nhập ngày yêu cầu'),
+                            ->label('Ngày giao hàng (YYYY-MM-DD)')
+                            ->placeholder('Nhập ngày giao hàng'),
                     ])
                     ->query(function ($query, $data) {
                         if (!empty($data['value'])) {

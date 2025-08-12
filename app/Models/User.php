@@ -48,4 +48,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the pallet activities performed by this user.
+     */
+    public function palletActivities()
+    {
+        return $this->hasMany(PalletActivity::class);
+    }
 }

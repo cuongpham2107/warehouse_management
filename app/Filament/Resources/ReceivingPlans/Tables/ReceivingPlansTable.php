@@ -32,13 +32,13 @@ class ReceivingPlansTable
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('plan_date')
-                    ->label('Ngày lên kế hoạch')
+                    ->label('Ngày hàng đến')
                     ->date('H:i d/m/Y ')
                     ->alignEnd()
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('arrival_date')
-                    ->label('Ngày nhập kho')
+                    ->label('Giờ hạ hàng')
                     ->date('H:i d/m/Y ')
                     ->alignEnd()
                     ->sortable()
@@ -116,7 +116,7 @@ class ReceivingPlansTable
                     ->label('Nhà cung cấp')
                     ->relationship('vendor', 'vendor_name'),
                 // Nếu có DateFilter thì dùng, nếu không thì bỏ dòng này hoặc dùng SelectFilter với các giá trị ngày mẫu
-                // DateFilter::make('plan_date')->label('Ngày kế hoạch'),
+                // DateFilter::make('plan_date')->label('Ngày hàng đến'),
                 SelectFilter::make('created_by')
                     ->label('Người tạo')
                     ->relationship('creator', 'name'),

@@ -15,9 +15,7 @@ use App\Models\PalletWithInfo;
 use Filament\Tables\Columns\ColumnGroup;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
-use Filament\Support\Enums\Size;
 use Filament\Tables\Grouping\Group;
-use Filament\Support\Enums\TextSize;
 
 class ReportWarehouse extends Page implements HasTable
 {
@@ -120,7 +118,7 @@ class ReportWarehouse extends Page implements HasTable
                             ->searchable()
                             ->toggleable(),
                         TextColumn::make('plan_date')
-                            ->label('Ngày kế hoạch')
+                            ->label('Ngày hàng đến')
                             ->date('d/m/Y')
                             ->alignCenter()
                             ->sortable()
@@ -179,7 +177,7 @@ class ReportWarehouse extends Page implements HasTable
                                 ->searchable()
                                 ->toggleable(),
                             TextColumn::make('requested_date')
-                                ->label('Ngày yêu cầu')
+                                ->label('Ngày giao hàng')
                                 ->date('d/m/Y')
                                 ->alignCenter()
                                 ->sortable()
@@ -271,13 +269,13 @@ class ReportWarehouse extends Page implements HasTable
                     ->searchable()
                     ->placeholder('Chọn nhà xe xuất kho'),
 
-                // Filter theo ngày kế hoạch
+                // Filter theo ngày hàng đến
                 Filter::make('plan_date_range')
                     ->form([
                         DatePicker::make('plan_date_from')
-                            ->label('Từ ngày kế hoạch'),
+                            ->label('Từ ngày hàng đến'),
                         DatePicker::make('plan_date_to')
-                            ->label('Đến ngày kế hoạch'),
+                            ->label('Đến ngày hàng đến'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -315,9 +313,9 @@ class ReportWarehouse extends Page implements HasTable
                 Filter::make('departure_time_range')
                     ->form([
                         DatePicker::make('departure_time_from')
-                            ->label('Từ ngày xuất kho'),
+                            ->label('Từ thời gian đóng hàng'),
                         DatePicker::make('departure_time_to')
-                            ->label('Đến ngày xuất kho'),
+                            ->label('Đến thời gian đóng hàng'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query

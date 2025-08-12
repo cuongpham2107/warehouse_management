@@ -39,19 +39,20 @@ class ShippingRequestForm
                                     ->placeholder('Nhập số niêm phong')
                                     ->columnSpan(1),
                                 DateTimePicker::make('requested_date')
-                                    ->label('Ngày yêu cầu')
+                                    ->label('Ngày giao hàng')
                                     ->default(now())
                                     ->required()
+                                    ->native(false)
                                     ->placeholder('Chọn ngày yêu cầu')
                                     ->prefixIcon('heroicon-o-calendar')
                                     ->columnSpan(1),
                                 DateTimePicker::make('lifting_time')
-                                    ->label('Thời gian nâng hạ hàng')
+                                    ->label('Thời gian đóng hàng')
                                     ->prefixIcon('heroicon-o-calendar')
-                                    ->default(now())
                                     ->displayFormat('H:i d/m/Y')
+                                    ->native(false)
                                     ->seconds(false)
-                                    ->placeholder('Chọn thời gian nâng hạ hàng')
+                                    ->placeholder('Chọn thời gian đóng hàng')
                                     ->columnSpan(1),
                             ])
                             ->columns(2)
@@ -80,6 +81,7 @@ class ShippingRequestForm
                                     ->default(now())
                                     ->displayFormat('H:i d/m/Y')
                                     ->seconds(false)
+                                    ->native(false)
                                     ->required()
                                     ->placeholder('Chọn thời gian xuất phát')
                                     ->columnSpan(1),

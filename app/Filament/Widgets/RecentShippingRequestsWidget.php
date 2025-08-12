@@ -39,7 +39,7 @@ class RecentShippingRequestsWidget extends BaseWidget
                     ->limit(50),
 
                 Tables\Columns\TextColumn::make('requested_date')
-                    ->label('Ngày yêu cầu')
+                    ->label('Ngày giao hàng')
                     ->date(),
 
                 Tables\Columns\TextColumn::make('created_at')
