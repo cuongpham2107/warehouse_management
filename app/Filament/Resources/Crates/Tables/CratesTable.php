@@ -24,7 +24,7 @@ class CratesTable
             ->recordUrl(null)
             ->columns([
                 TextColumn::make('crate_id')
-                    ->label('Mã thùng hàng')
+                    ->label('Mã kiện hàng')
                     ->searchable()
                     ->sortable()
                     ->copyable(),

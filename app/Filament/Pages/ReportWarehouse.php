@@ -66,6 +66,11 @@ class ReportWarehouse extends Page implements HasTable
                     ->toggleable(),
                 ColumnGroup::make('Hàng hoá')
                     ->columns([
+                        TextColumn::make('crate.crate_id')
+                            ->label('Mã kiện hàng')
+                            ->sortable()
+                            ->searchable()
+                            ->toggleable(),
                         TextColumn::make('crate_description')
                             ->label('Tên hàng')
                             ->sortable()
