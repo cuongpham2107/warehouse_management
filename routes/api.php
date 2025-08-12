@@ -3,7 +3,7 @@
 use App\Http\Api\PalletsController;
 use App\Http\Api\ReceivingPlansController;
 use App\Http\Api\ShippingRequestsController;
-use App\Http\Api\InventoryMovementsController;
+use App\Http\Api\WarehouseLocationsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,10 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Pallet routes
     Route::apiResource('pallets', PalletsController::class);
-    
-    // Inventory Movement routes
-    Route::apiResource('inventory-movements', InventoryMovementsController::class)
-         ->only(['index', 'store', 'show']);
+    Route::get('pallets/search', [PalletsController::class, 'searchByPalletId']);
          
     // Receiving Plan routes
     Route::apiResource('receiving-plans', ReceivingPlansController::class)
@@ -33,4 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('shipping-requests', ShippingRequestsController::class);
 
     Route::post('shipping-requests/{shippingRequest}/check-out-pallet', [ShippingRequestsController::class, 'checkOutPallet']);
+
+
+    Route::apiResource('warehouse-locations', WarehouseLocationsController::class);
 });

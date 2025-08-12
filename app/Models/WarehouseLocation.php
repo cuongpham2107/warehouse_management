@@ -21,22 +21,6 @@ class WarehouseLocation extends Model
      */
     public function pallets()
     {
-        return $this->hasMany(Pallet::class, 'location_id');
-    }
-
-    /**
-     * Get inventory movements from this location.
-     */
-    public function movementsFrom()
-    {
-        return $this->hasMany(InventoryMovement::class, 'from_location_id');
-    }
-
-    /**
-     * Get inventory movements to this location.
-     */
-    public function movementsTo()
-    {
-        return $this->hasMany(InventoryMovement::class, 'to_location_id');
+        return $this->hasMany(Pallet::class, 'location_code');
     }
 }

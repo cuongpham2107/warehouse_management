@@ -33,7 +33,7 @@ enum PalletActivityAction: string
     public function getIcon(): string
     {
         return match ($this) {
-            self::ATTACH_CRATE => 'heroicon-m-box',
+            self::ATTACH_CRATE => 'heroicon-m-plus-circle',
             self::IMPORT_PALLET => 'heroicon-m-arrows-up-down',
             self::RELOCATE_PALLET => 'heroicon-m-arrows-right-left',
             self::EXPORT_PALLET => 'heroicon-m-trash',

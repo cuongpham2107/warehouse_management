@@ -14,21 +14,10 @@ use App\Models\User;
 class AuthController extends Controller
 {
     /**
-     * Đăng nhập và tạo token cho người dùng.
+     * Đăng nhập và tạo token cho người dùng
      *
      * @param LoginRequest $request
      * @return JsonResponse
-     *
-     * @operationId login
-     * @tags Authentication
-     * @summary Đăng nhập vào hệ thống
-     *
-     * @response 200 {
-     *     "data": {
-     *         "user": UserResource,
-     *         "token": "your_token_here"
-     *     }
-     * }
      */
     public function loginWithEmployeeCode(LoginRequest $request):JsonResponse
     {
@@ -81,17 +70,9 @@ class AuthController extends Controller
         ], 401);
     }
     /**
-     * Đăng xuất và thu hồi token.
+     * Đăng xuất và thu hồi token
      *
      * @return JsonResponse
-     *
-     * @operationId logout
-     * @tags Authentication
-     * @summary Đăng xuất khỏi hệ thống
-     *
-     * @response 200 {
-     *     "message": "Đăng xuất thành công"
-     * }
      */
     public function logout(): JsonResponse
     {

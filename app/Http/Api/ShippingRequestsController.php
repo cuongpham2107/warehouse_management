@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Auth;
 class ShippingRequestsController extends Controller
 {
     /**
-     * Hiển thị danh sách các Lệnh xuất hàng
+     * 11. Hiển thị danh sách các Lệnh xuất hàng
      *
      * @param Request $request
      * @return JsonResource
@@ -53,7 +53,7 @@ class ShippingRequestsController extends Controller
         return ShippingRequestResource::collection($requests);
     }
     /**
-     * Hiển thị chi tiết của một yêu cầu vận chuyển
+     * 12. Hiển thị chi tiết của một yêu cầu vận chuyển
      *
      * @param ShippingRequest $shippingRequest
      * @return JsonResource
@@ -63,7 +63,7 @@ class ShippingRequestsController extends Controller
         return new ShippingRequestResource($shippingRequest->load(['creator', 'items']));
     }
     /**
-     * Cập nhật trạng thái cho Yêu cầu xuất hàng 
+     * 14. Cập nhật trạng thái cho Yêu cầu xuất hàng 
      *
      * @param Request $request
      * @param ShippingRequest $shippingRequest
@@ -95,7 +95,7 @@ class ShippingRequestsController extends Controller
     }
 
     /**
-     * Cập nhật trạng thái cho Kiện hàng và Pallet khi đã xuất hàng
+     * 13. Cập nhật trạng thái cho Kiện hàng và Pallet khi đã xuất hàng
      *
      * @param Request $request
      * @return JsonResource
@@ -124,6 +124,11 @@ class ShippingRequestsController extends Controller
         $crate->status = CrateStatus::SHIPPED->value;
         $crate->save();
         $pallet->status = \App\Enums\PalletStatus::SHIPPED->value;
+        $pallet->activities()->create([
+            'action' => 'export_pallet',
+            'user_id' => Auth::id(),
+            'description' => 'Pallet đã được xuất kho',
+        ]);
         $pallet->save();
 
         return new PalletResource($pallet->load(['crate']));

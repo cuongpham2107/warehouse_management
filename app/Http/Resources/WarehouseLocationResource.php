@@ -12,11 +12,8 @@ class WarehouseLocationResource extends JsonResource
         return [
             'id' => $this->id,
             'location_code' => $this->location_code,
-            'pallets_count' => $this->pallets()->count(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            // Thêm relationships khi cần
-            'pallets' => PalletResource::collection($this->whenLoaded('pallets')),
         ];
     }
 }
