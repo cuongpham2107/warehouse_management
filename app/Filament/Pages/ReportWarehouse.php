@@ -96,13 +96,17 @@ class ReportWarehouse extends Page implements HasTable
                     ]),
                 ColumnGroup::make('Nhập kho ASGL')
                     ->columns([
-                        TextColumn::make('plan_date_date')
-                            ->label('Ngày')
+                        TextColumn::make('plan_date')
+                            ->label('Ngày hàng đến')
+                            ->date('H:i d/m/Y')
+                            ->alignCenter()
                             ->sortable()
                             ->searchable()
                             ->toggleable(),
-                        TextColumn::make('plan_date_date_time')
-                            ->label('Giờ')
+                         TextColumn::make('arrival_date')
+                            ->label('Giờ Hạ hàng')
+                            ->date('H:i d/m/Y')
+                            ->alignCenter()
                             ->sortable()
                             ->searchable()
                             ->toggleable(),
@@ -122,20 +126,7 @@ class ReportWarehouse extends Page implements HasTable
                             ->alignCenter()
                             ->searchable()
                             ->toggleable(),
-                        TextColumn::make('plan_date')
-                            ->label('Ngày hàng đến')
-                            ->date('d/m/Y')
-                            ->alignCenter()
-                            ->sortable()
-                            ->searchable()
-                            ->toggleable(),
-                        TextColumn::make('arrival_date')
-                            ->label('Hạ hàng')
-                            ->date('d/m/Y')
-                            ->alignCenter()
-                            ->sortable()
-                            ->searchable()
-                            ->toggleable(),
+                       
                         TextColumn::make('checkInBy.name')
                             ->label('Người nhập kho')
                             ->sortable()
@@ -148,13 +139,17 @@ class ReportWarehouse extends Page implements HasTable
                         ->toggleable(),
                     ColumnGroup::make('Xuất kho ASGL')
                         ->columns([
-                            TextColumn::make('departure_time_date')
-                                ->label('Ngày')
+                            TextColumn::make('requested_date')
+                                ->label('Ngày giao hàng')
+                                ->date('H:i d/m/Y')
+                                ->alignCenter()
                                 ->sortable()
                                 ->searchable()
                                 ->toggleable(),
-                             TextColumn::make('departure_time_time')
-                                ->label('Giờ')
+                             TextColumn::make('lifting_time')
+                                ->label('Thời gian đón hàng')
+                                ->date('H:i d/m/Y')
+                                ->alignCenter()
                                 ->sortable()
                                 ->searchable()
                                 ->toggleable(),
@@ -171,26 +166,6 @@ class ReportWarehouse extends Page implements HasTable
                             TextColumn::make('shipping_vehicle_capacity')
                                 ->label('Tải trọng xe (tấn)')
                                 ->alignCenter()
-                                ->sortable()
-                                ->searchable()
-                                ->toggleable(),
-                            TextColumn::make('lifting_time')
-                                ->label('Nâng hàng')
-                                ->date('d/m/Y')
-                                ->alignCenter()
-                                ->sortable()
-                                ->searchable()
-                                ->toggleable(),
-                            TextColumn::make('requested_date')
-                                ->label('Ngày giao hàng')
-                                ->date('d/m/Y')
-                                ->alignCenter()
-                                ->sortable()
-                                ->searchable()
-                                ->toggleable(),
-                            TextColumn::make('pallet_created_at')
-                                ->label('Tạo lúc')
-                                ->dateTime('H:i d/m/Y')
                                 ->sortable()
                                 ->searchable()
                                 ->toggleable(),

@@ -14,8 +14,14 @@ class StorePalletRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pallet_id' => 'required|string|max:255',
-            'crate_id' => 'required|string|max:255',
+            /**
+             * Pallet Code
+             */
+            'pallet_code' => 'required|string|max:255',
+            /**
+             * Crate Code
+             */
+            'crate_code' => 'required|string|max:255',
         ];
     }
 }

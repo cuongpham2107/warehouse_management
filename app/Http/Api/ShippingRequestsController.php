@@ -55,7 +55,7 @@ class ShippingRequestsController extends Controller
     /**
      * 12. Hiển thị chi tiết của một yêu cầu vận chuyển
      *
-     * @param ShippingRequest $shippingRequest
+     * @param ShippingRequest $shippingRequest ID của yêu cầu vận chuyển
      * @return JsonResource
      */
     public function show(ShippingRequest $shippingRequest): JsonResource
@@ -66,7 +66,7 @@ class ShippingRequestsController extends Controller
      * 14. Cập nhật trạng thái cho Yêu cầu xuất hàng 
      *
      * @param Request $request
-     * @param ShippingRequest $shippingRequest
+     * @param ShippingRequest $shippingRequest ID của yêu cầu vận chuyển
      * @return JsonResource
      */
     public function update(Request $request, ShippingRequest $shippingRequest): JsonResource
@@ -98,36 +98,83 @@ class ShippingRequestsController extends Controller
      * 13. Cập nhật trạng thái cho Kiện hàng và Pallet khi đã xuất hàng
      *
      * @param Request $request
+     * @param int $id Mã yêu cầu xuất hàng
      * @return JsonResource
      */
-    public function checkOutPallet(Request $request): JsonResource
+    public function checkOutPallet(Request $request, $id): JsonResource
     {
         $request->validate([
+            /**
+             * Mã kiện hàng
+             */
             'crate_code' => 'required|string',
+            /**
+             * Mã pallet
+             */
             'pallet_code' => 'required|string',
         ]);
+        $shippingRequest = ShippingRequest::find($id);
+        if (!$shippingRequest) {
+            return new JsonResource([
+                'message' => 'Không tìm thấy yêu cầu xuất hàng'
+            ]);
+        }
 
+        // Tìm item trong shipping request với crate_id
+        $shippingItem = $shippingRequest->items()
+            ->where('crate_id', $request->crate_code)
+            ->first();
+            
+        if (!$shippingItem) {
+            return new JsonResource([
+                'message' => 'Không tìm thấy kiện hàng trong yêu cầu xuất hàng'
+            ]);
+        }
+
+        // Kiểm tra xem crate có tồn tại không
         $crate = Crate::where('crate_id', $request->crate_code)->first();
-        if($crate->status === \App\Enums\PalletStatus::SHIPPED) {
+        if (!$crate) {
+            return new JsonResource([
+                'message' => 'Không tìm thấy kiện hàng'
+            ]);
+        }
+
+        // Kiểm tra xem pallet có tồn tại và có khớp với crate không
+        $pallet = Pallet::where('pallet_id', $request->pallet_code)
+            ->where('crate_id', $request->crate_code)
+            ->first();
+            
+        if (!$pallet) {
+            return new JsonResource([
+                'message' => 'Không tìm thấy pallet hoặc pallet không khớp với kiện hàng'
+            ]);
+        }
+        // Kiểm tra trạng thái crate
+        if($crate->status === CrateStatus::SHIPPED) {
             return new JsonResource([
                 'message' => 'Kiện hàng đã được vận chuyển'
             ]);
         }
-         $pallet = Pallet::where('pallet_id', $request->pallet_code)->first();
+        
+        // Kiểm tra trạng thái pallet
         if($pallet->status === \App\Enums\PalletStatus::SHIPPED) {
             return new JsonResource([
                 'message' => 'Pallet đã được xuất kho'
             ]);
         }
 
-
+        // Cập nhật trạng thái
         $crate->status = CrateStatus::SHIPPED->value;
         $crate->save();
+        
         $pallet->status = \App\Enums\PalletStatus::SHIPPED->value;
+        $pallet->checked_out_at = now();
+        $pallet->checked_out_by = Auth::id();
         $pallet->activities()->create([
             'action' => 'export_pallet',
             'user_id' => Auth::id(),
             'description' => 'Pallet đã được xuất kho',
+            'action_time' => now(),
         ]);
         $pallet->save();
 
