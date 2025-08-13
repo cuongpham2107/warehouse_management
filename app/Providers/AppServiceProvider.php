@@ -8,6 +8,8 @@ use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Carbon\Carbon;
+use App\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Field;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,5 +42,10 @@ class AppServiceProvider extends ServiceProvider
                         ->setDescription('Sử dụng mã thông báo của người mang để xác thực.'),
                 );
             });
+
+        Field::macro('dateTimePicker', function (string $name): DateTimePicker {
+            return DateTimePicker::make($name);
+        });
+
     }
 }
