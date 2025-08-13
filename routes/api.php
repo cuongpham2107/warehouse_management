@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('shipping-requests', ShippingRequestsController::class);
 
-    Route::post('shipping-requests/{shippingRequest}/check-out-pallet', [ShippingRequestsController::class, 'checkOutPallet']);
+    Route::post('shipping-requests/{id}/check-out-pallet', [ShippingRequestsController::class, 'checkOutPallet']);
 
 
     Route::apiResource('warehouse-locations', WarehouseLocationsController::class);

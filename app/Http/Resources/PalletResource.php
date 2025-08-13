@@ -11,21 +11,18 @@ class PalletResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'pallet_id' => $this->pallet_id,
+            /**
+             * Pallet code 
+             */
+            'pallet_code' => $this->pallet_id,
+            /**
+             * Crate ID
+             */
             'crate_id' => $this->crate_id,
-            'crate' => [
-                'id' => $this->crate->id,
-                'crate_id' => $this->crate->crate_id,
-                'status' => $this->crate->status,
-            ],
-            'location_code' => $this->location_code,
+            /**
+             * Trạng thái 
+             */
             'status' => $this->status,
-            'checked_in_at' => $this->checked_in_at,
-            'checked_in_by' => $this->checked_in_by,
-            'checked_out_at' => $this->checked_out_at,
-            'checked_out_by' => $this->checked_out_by,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
     }
 }

@@ -22,6 +22,9 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
+            /**
+             * Mã nhân viên
+             */
             'employee_code' => 'required|string',
         ];
     }

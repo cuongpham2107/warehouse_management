@@ -20,10 +20,25 @@ class ReceivingPlansController extends Controller
      */
     public function index(Request $request): JsonResource
     {
+        /**
+         * Từ khoá tìm kiếm
+         */
         $search = $request->query('search', '');
+        /**
+         * Sắp xếp theo trường
+         */
         $sort = $request->query('sort', 'created_at');
+        /**
+         * Hướng sắp xếp
+         */
         $direction = $request->query('direction', 'desc');
+        /**
+         * Số bản ghi trên mỗi trang
+         */
         $perPage = $request->query('per_page', 15);
+        /**
+         * Trang hiện tại
+         */
         $page = $request->query('page', 1);
 
         $plans = ReceivingPlan::query()
@@ -43,7 +58,7 @@ class ReceivingPlansController extends Controller
     /**
      * 2. Hiển thị thông tin chi tiết của kế hoạch nhận hàng đang xử lý
      *
-     * @param ReceivingPlan $receivingPlan
+     * @param ReceivingPlan $receivingPlan ID của kế hoạch nhận hàng
      * @return JsonResource
      */
     public function show(ReceivingPlan $receivingPlan): JsonResource
@@ -58,8 +73,7 @@ class ReceivingPlansController extends Controller
     /**
      * 5. Hoàn thành kế hoạch nhận hàng
      *
-     * @param Request $request
-     * @param int $id
+     * @param int $id  ID của kế hoạch nhận hàng
      * @return JsonResource
      */
     public function update(Request $request, int $id): JsonResource

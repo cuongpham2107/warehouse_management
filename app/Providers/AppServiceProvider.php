@@ -40,5 +40,8 @@ class AppServiceProvider extends ServiceProvider
                         ->setDescription('Sử dụng mã thông báo của người mang để xác thực.'),
                 );
             });
+
+       
+
     }
 }

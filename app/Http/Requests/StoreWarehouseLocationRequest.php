@@ -14,6 +14,9 @@ class StoreWarehouseLocationRequest extends FormRequest
     public function rules(): array
     {
         return [
+            /**
+             * Mã vị trí
+             */
             'location_code' => 'required|string|max:255|unique:warehouse_locations',
         ];
     }

@@ -6,7 +6,6 @@ use App\Enums\PalletStatus;
 use App\Enums\CrateStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePalletRequest;
-use App\Http\Requests\UpdatePalletRequest;
 use App\Http\Resources\PalletResource;
 use App\Models\Pallet;
 use App\Models\Crate;
@@ -69,7 +68,7 @@ class PalletsController extends Controller
     /**
      * Hiển thị thông tin chi tiết của một pallet
      *
-     * @param Pallet $pallet
+     * @param Pallet $pallet ID của Pallet
      * @return JsonResource
      */
     public function show(Pallet $pallet): JsonResource
@@ -119,43 +118,43 @@ class PalletsController extends Controller
     public function store(StorePalletRequest $request): JsonResource
     {
         $validated = $request->validated();
-        // Kiểm tra trường crate_id có tồn tại trong validated
-        if (!isset($validated['crate_id'])) {
+        // Kiểm tra trường crate_code có tồn tại trong validated
+        if (!isset($validated['crate_code'])) {
             return new JsonResource([
-                'message' => 'crate_id là bắt buộc.',
+                'message' => 'crate_code là bắt buộc.',
                 'errors' => [
-                    'crate_id' => ['crate_id không được bỏ trống.']
+                    'crate_code' => ['crate_code không được bỏ trống.']
                 ]
             ]);
         }
 
         // Kiểm tra crate có tồn tại
-        $crate = Crate::where('crate_id', $validated['crate_id'])->first();
+        $crate = Crate::where('crate_id', $validated['crate_code'])->first();
         if (!$crate) {
             return new JsonResource([
                 'message' => 'Crate not found.',
                 'errors' => [
-                    'crate_id' => ['Crate không tồn tại.']
+                    'crate_code' => ['Crate không tồn tại.']
                 ]
             ]);
         }
 
         // Kiểm tra crate đã được gán pallet chưa
-        if ($crate->pallet_id) {
+        if ($crate->pallet) {
             return new JsonResource([
                 'message' => 'Crate đã được gán cho pallet khác.',
                 'errors' => [
-                    'crate_id' => ['Crate đã được gán pallet.']
+                    'crate_code' => ['Crate đã được gán pallet.']
                 ]
             ]);
         }
 
         // Kiểm tra pallet_id trùng lặp
-        if (isset($validated['pallet_id']) && Pallet::where('pallet_id', $validated['pallet_id'])->exists()) {
+        if (isset($validated['pallet_code']) && Pallet::where('pallet_id', $validated['pallet_code'])->exists()) {
             return new JsonResource([
                 'message' => 'Pallet ID đã tồn tại.',
                 'errors' => [
-                    'pallet_id' => ['Pallet ID đã tồn tại.']
+                    'pallet_code' => ['Pallet ID đã tồn tại.']
                 ]
             ]);
         }
@@ -165,24 +164,21 @@ class PalletsController extends Controller
         $crate->save();
 
         $data = array_merge($validated, [
+            'pallet_id' => $validated['pallet_code'],
             'crate_id' => $crate->id,
             'status' => PalletStatus::IN_TRANSIT->value,
         ]);
         $pallet = Pallet::create($data);
 
-        // Gán pallet_id cho crate
-        $crate->pallet_id = $pallet->id;
-        $crate->save();
-
         // Ghi nhận activity cho pallet
         $pallet->activities()->create([
             'action' => 'attach_crate',
-            'description' => 'Gắn crate ' . $crate->crate_id . ' vào pallet ' . $pallet->pallet_id,
+            'description' => 'Gắn crate "' . $crate->crate_id . '" vào pallet "' . $pallet->pallet_id . '"',
             'user_id' => Auth::id(),
             'action_time' => now(),
         ]);
 
-        /** @status 201 */
+        /** @status 200 */
         return new PalletResource($pallet);
     }
 
@@ -190,13 +186,21 @@ class PalletsController extends Controller
      * 4. Cập nhật vị trí cho pallet - hỗ trợ cả nhập kho và di chuyển vị trí
      *
      * @param \Illuminate\Http\Request $request
-     * @param Pallet $pallet
-     * @return JsonResource
+     * @param Pallet $pallet 
+     * @return PalletResource
      */
     public function update(\Illuminate\Http\Request $request, Pallet $pallet): JsonResource
     {
         $request->validate([
+            /**
+             * Mã vị trí kho mới
+             * @example WH-001
+             */
             'location_code' => 'required|string|max:255',
+            /**
+             * Loại hành động
+             * @example import
+             */
             'action_type' => 'required|string|in:import,relocate'
         ]);
 

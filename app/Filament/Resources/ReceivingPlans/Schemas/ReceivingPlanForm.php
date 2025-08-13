@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\ReceivingPlans\Schemas;
 
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use App\Enums\ReceivingPlanStatus;
 use Illuminate\Database\Eloquent\Builder;
@@ -50,6 +48,7 @@ class ReceivingPlanForm
                                     ->required()
                                     ->default(now())
                                     ->seconds(false)
+                                    ->locale('vi')
                                     ->displayFormat('d/m/Y | H:i')
                                     ->placeholder('Chọn ngày hàng đến')
                                     ->columnSpan(3)

@@ -11,22 +11,44 @@ class ShippingRequestResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            /**
+             * Mã yêu cầu
+             * @example SR-001
+             */
             'request_code' => $this->request_code,
-            'customer_name' => $this->customer_name,
-            'customer_contact' => $this->customer_contact,
-            'delivery_address' => $this->delivery_address,
-            'requested_date' => $this->requested_date?->format('Y-m-d'),
-            'departure_time' => $this->departure_time?->format('Y-m-d H:i:s'),
-            'license_plate' => $this->license_plate,
-            'driver_name' => $this->driver_name,
-            'driver_phone' => $this->driver_phone,
+            /**
+             * Ngày giao hàng
+             * @example 2023-03-15
+             */
+            'requested_date' => $this->requested_date?->format('d-m-Y H:i'),
+            /**
+             * Thời gian đóng hàng
+             * @example 2023-03-15 10:00
+             */
+            'lifting_time' => $this->lifting_time?->format('d-m-Y H:i'),
+            /**
+             * Thời gian khởi hành
+             * @example 2023-03-15 10:00
+             */
+            'departure_time' => $this->departure_time?->format('d-m-Y H:i'),
+            /**
+             * Số seal
+             * @example SEAL-001
+             */
             'seal_number' => $this->seal_number,
-            'priority' => $this->priority,
+            /**
+             * Trạng thái
+             * @example pending 
+             */
             'status' => $this->status,
+            /**
+             * Ghi chú
+             * @example Ghi chú về yêu cầu
+             */
             'notes' => $this->notes,
-            'total_shipped_quantity' => $this->total_shipped_quantity,
-            'days_until_requested' => $this->days_until_requested,
-            'creator' => new UserResource($this->whenLoaded('creator')),
+            /**
+             * Danh sách pallet
+             */
             'items' => $this->when($this->relationLoaded('items'), function () {
                 return $this->items->map(function ($item) {
                     return [
@@ -40,8 +62,6 @@ class ShippingRequestResource extends JsonResource
                     ];
                 });
             }),
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];
     }
 }

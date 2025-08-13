@@ -17,30 +17,34 @@ class ReceivingPlanResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            /**
+             * Mã kế hoạch
+             */
             'plan_code' => $this->plan_code,
-            // 'vendor' => [
-            //     'id' => $this->vendor->id,
-            //     'name' => $this->vendor->name,
-            // ],
-            'license_plate' => $this->license_plate,
-            'plan_date' => $this->plan_date->format('Y-m-d'),
-            'total_crates' => $this->total_crates,
-            'total_pcs' => $this->total_pcs,
-            'total_weight' => $this->total_weight,
+            /**
+             * Ngày hàng đến
+             */
+            'plan_date' => $this->plan_date->format('d-m-Y H:i'),
+            /**
+             * Ngày giờ hạ hàng
+             */
+            'arrival_date' => $this->arrival_date ? $this->arrival_date->format('d-m-Y H:i') : null,
+            /**
+             * Trạng thái
+             */
             'status' => $this->status->value,
-            'completion_percentage' => $this->completion_percentage,
+            /**
+             * Ghi chú
+             */
             'notes' => $this->notes,
-            'creator' => [
-                'id' => $this->creator->id,
-                'name' => $this->creator->name,
-            ],
-            // 'created_at' => $this->created_at,
-            // 'updated_at' => $this->updated_at,
+            /**
+             * Danh sách kiện hàng
+             */
             'crates' => $this->when($this->relationLoaded('crates'), function () {
                 return $this->crates->map(function ($crate) {
                     return [
                         'id' => $crate->id,
-                        'crate_id' => $crate->crate_id,
+                        'crate_code' => $crate->crate_id,
                         'description'=> $crate->description,
                         'pcs' => $crate->pcs,
                         'pieces' => $crate->pieces,
