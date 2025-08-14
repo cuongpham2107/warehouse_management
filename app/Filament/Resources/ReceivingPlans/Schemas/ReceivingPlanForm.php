@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\Vendors\Schemas\VendorForm;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ReceivingPlan;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TimePicker;
 
 class ReceivingPlanForm
 {
@@ -43,21 +44,21 @@ class ReceivingPlanForm
                                     ->columnSpan(6)
                                     ->createOptionForm(fn(Schema $schema) => VendorForm::configure($schema)),
 
-                                DateTimePicker::make('plan_date')
+                                DatePicker::make('plan_date')
                                     ->label('Ngày hàng đến')
                                     ->required()
                                     ->default(now())
                                     ->seconds(false)
                                     ->locale('vi')
-                                    ->displayFormat('d/m/Y | H:i')
+                                    ->displayFormat('d/m/Y')
                                     ->placeholder('Chọn ngày hàng đến')
                                     ->columnSpan(3)
                                     ->prefixIcon('heroicon-o-calendar'),
-                                DateTimePicker::make('arrival_date')
+                                TimePicker::make('arrival_date')
                                     ->label('Giờ hạ hàng')
                                     ->default(now())
                                     ->seconds(false)
-                                    ->displayFormat('d/m/Y | H:i')
+                                    ->displayFormat('H:i')
                                     ->placeholder('Chọn giờ hạ hàng')
                                     ->prefixIcon('heroicon-o-calendar')
                                     ->locale('vi')

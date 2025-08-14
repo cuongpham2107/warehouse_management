@@ -39,7 +39,7 @@ class ReceivingPlansTable
                     ->toggleable(),
                 TextColumn::make('arrival_date')
                     ->label('Giờ hạ hàng')
-                    ->date('H:i d/m/Y ')
+                    ->date('H:i ')
                     ->alignEnd()
                     ->sortable()
                     ->toggleable(),

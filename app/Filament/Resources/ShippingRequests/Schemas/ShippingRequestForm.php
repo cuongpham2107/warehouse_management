@@ -11,6 +11,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use App\Enums\ShippingRequestStatus;
+use Filament\Forms\Components\TimePicker;
 use Illuminate\Support\Facades\Date;
 
 class ShippingRequestForm
@@ -38,18 +39,18 @@ class ShippingRequestForm
                                     ->required()
                                     ->placeholder('Nhập số niêm phong')
                                     ->columnSpan(1),
-                                DateTimePicker::make('requested_date')
+                                DatePicker::make('requested_date')
                                     ->label('Ngày giao hàng')
                                     ->required()
-                                    ->displayFormat('d/m/Y | H:i')
+                                    ->displayFormat('d/m/Y')
                                     ->seconds(false)
                                     ->placeholder('Chọn ngày yêu cầu')
                                     ->prefixIcon('heroicon-o-calendar')
                                     ->columnSpan(1),
-                                DateTimePicker::make('lifting_time')
+                                TimePicker::make('lifting_time')
                                     ->label('Thời gian đóng hàng')
                                     ->prefixIcon('heroicon-o-calendar')
-                                    ->displayFormat('d/m/Y | H:i')
+                                    ->displayFormat('H:i')
                                     ->timezone('Asia/Ho_Chi_Minh')
                                     ->seconds(false)
                                     ->placeholder('Chọn thời gian đóng hàng')

@@ -24,11 +24,11 @@ class ReceivingPlanResource extends JsonResource
             /**
              * Ngày hàng đến
              */
-            'plan_date' => $this->plan_date->format('d-m-Y H:i'),
+            'plan_date' => $this->plan_date->format('d-m-Y'),
             /**
              * Ngày giờ hạ hàng
              */
-            'arrival_date' => $this->arrival_date ? $this->arrival_date->format('d-m-Y H:i') : null,
+            'arrival_date' => $this->arrival_date ? $this->arrival_date->format('H:i') : null,
             /**
              * Trạng thái
              */
