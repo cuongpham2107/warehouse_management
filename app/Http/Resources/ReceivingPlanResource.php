@@ -42,7 +42,7 @@ class ReceivingPlanResource extends JsonResource
              */
             'crates' => $this->when($this->relationLoaded('crates'), function () {
                 return $this->crates
-                    ->where('status', 'checked_in')
+                    // ->where('status', 'checked_in')
                     ->map(function ($crate) {
                         return [
                             'id' => $crate->id,
@@ -52,6 +52,12 @@ class ReceivingPlanResource extends JsonResource
                             'pieces' => $crate->pieces,
                             'gross_weight' => $crate->gross_weight,
                             'status' => $crate->status->value,
+                            'pallet' => $crate->pallet ? [
+                                'id' => $crate->pallet->id,
+                                'pallet_code' => $crate->pallet->pallet_id,
+                                'location_code' => $crate->pallet->location_code,
+                                'status' => $crate->pallet->status->value,
+                            ] : null,
                         ];
                     })
                     ->values();

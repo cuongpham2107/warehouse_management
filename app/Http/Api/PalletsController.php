@@ -92,7 +92,7 @@ class PalletsController extends Controller
                 'errors' => [
                     'pallet_id' => ['pallet_id là bắt buộc.']
                 ]
-            ]);
+            ],400);
         }
 
         $pallet = Pallet::where('pallet_id', $palletId)->first();
@@ -103,7 +103,7 @@ class PalletsController extends Controller
                 'errors' => [
                     'pallet_id' => ['Pallet không tồn tại.']
                 ]
-            ]);
+            ],400);
         }
 
         return new PalletResource($pallet);
@@ -125,7 +125,7 @@ class PalletsController extends Controller
                 'errors' => [
                     'crate_code' => ['crate_code không được bỏ trống.']
                 ]
-            ]);
+            ],400);
         }
 
         // Kiểm tra crate có tồn tại
@@ -136,7 +136,7 @@ class PalletsController extends Controller
                 'errors' => [
                     'crate_code' => ['Crate không tồn tại.']
                 ]
-            ]);
+            ],400);
         }
 
         // Kiểm tra crate đã được gán pallet chưa
@@ -146,7 +146,7 @@ class PalletsController extends Controller
                 'errors' => [
                     'crate_code' => ['Crate đã được gán pallet.']
                 ]
-            ]);
+            ],400);
         }
 
         // Kiểm tra pallet_id trùng lặp
@@ -156,7 +156,7 @@ class PalletsController extends Controller
                 'errors' => [
                     'pallet_code' => ['Pallet ID đã tồn tại.']
                 ]
-            ]);
+            ],400);
         }
 
         // Cập nhật trạng thái crate
@@ -276,5 +276,47 @@ class PalletsController extends Controller
         }
 
         return new PalletResource($pallet);
+    }
+
+    /**
+     * Kiểm tra crate đã gán pallet hay chưa
+     */
+    public function checkPalletWithCrateCode($id): JsonResource
+    {
+        $crate = Crate::with('pallet')->where('id', $id)->first();
+
+        if (!$crate) {
+            return new JsonResource([
+                'message' => 'Crate not found.',
+                'errors' => [
+                    'crate_code' => ['Crate không tồn tại.']
+                ]
+            ],400);
+        }
+
+        // Kiểm tra crate đã được gán pallet chưa
+        if ($crate->pallet) {
+            return new JsonResource([
+                'message' => 'Crate đã được gán pallet.',
+                'errors' => [
+                    'crate_code' => ['Crate đã được gán pallet.']
+                ]
+            ],400);
+        }
+
+        return new JsonResource([
+            'message' => 'Crate có thể gán pallet.',
+            'data' => [
+                'crate_id' => $crate->id,
+                'crate_code' => $crate->crate_id,
+                'pallet' => $crate->pallet ? [
+                    'id' => $crate->pallet->id,
+                    'pallet_code' => $crate->pallet->pallet_id,
+                    'location_code' => $crate->pallet->location_code,
+                    'status' => $crate->pallet->status->value,
+                ] : null
+            ]
+        ]);
+
     }
 }
