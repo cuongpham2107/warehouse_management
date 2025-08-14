@@ -40,10 +40,9 @@ class ShippingRequestForm
                                     ->columnSpan(1),
                                 DateTimePicker::make('requested_date')
                                     ->label('Ngày giao hàng')
-                                    ->default(now())
                                     ->required()
                                     ->displayFormat('d/m/Y | H:i')
-                                    ->timezone('Asia/Ho_Chi_Minh')
+                                    ->seconds(false)
                                     ->placeholder('Chọn ngày yêu cầu')
                                     ->prefixIcon('heroicon-o-calendar')
                                     ->columnSpan(1),

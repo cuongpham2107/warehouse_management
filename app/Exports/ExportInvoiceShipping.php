@@ -16,7 +16,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ExportInvoiceShipping implements FromView, WithEvents, WithDrawings
 {
-   protected $shippingRequest;
+    protected $shippingRequest;
     protected $items;
     protected $totalPcs = 0;
     protected $totalGrossWeight = 0;
