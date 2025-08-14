@@ -66,7 +66,8 @@ class ShippingRequestsTable
                     ->sortable(),
                 TextColumn::make('lifting_time')
                     ->label('Thời gian đóng hàng')
-                    ->date('d/m/Y')
+                    ->date('H:i')
+                    ->alignCenter()
                     ->sortable(),
                 TextColumn::make('status')
                     ->label('Trạng thái')
