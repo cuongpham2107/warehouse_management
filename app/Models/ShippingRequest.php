@@ -36,7 +36,7 @@ class ShippingRequest extends Model
     protected $primaryKey = 'id';
 
     protected $casts = [
-        'requested_date' => 'date',
+        'requested_date' => 'datetime',
         'departure_time' => 'datetime',
         'status' => ShippingRequestStatus::class,
         'created_by' => 'integer',
