@@ -54,6 +54,8 @@ class ReceivingPlan extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+   
+
     /**
      * Get all crates for this receiving plan.
      */
