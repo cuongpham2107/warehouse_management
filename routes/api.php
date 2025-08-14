@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Pallet routes
     Route::apiResource('pallets', PalletsController::class);
     Route::get('pallets/search', [PalletsController::class, 'searchByPalletId']);
+    Route::get('pallets/{pallet}/check-crate', [PalletsController::class, 'checkPalletWithCrateCode']);
          
     // Receiving Plan routes
     Route::apiResource('receiving-plans', ReceivingPlansController::class)
