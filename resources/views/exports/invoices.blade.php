@@ -134,7 +134,7 @@ $items = $items ?? $shippingRequest->items;
             </td>
             <td colspan="3" rowspan="2"
                 style="  vertical-align: middle; font-family: Arial, sans-serif; font-weight: 400;padding-left: 20px;">
-                5</td>
+                {{ $shippingRequest->items->count() ?? 0 }}</td>
             <td colspan="2" rowspan="2"
                 style="   vertical-align: top; font-family: Arial, sans-serif; font-weight: 400;">
                 <span style="font-family: Arial, sans-serif; font-weight: 700;">Địa điểm giao hàng:</span><br>
