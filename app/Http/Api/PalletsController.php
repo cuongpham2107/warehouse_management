@@ -83,12 +83,12 @@ class PalletsController extends Controller
     }
 
     /**
-     * Tìm kiếm pallet theo pallet_id
+     * Tìm kiếm pallet theo pallet_code
      *
      * @param \Illuminate\Http\Request $request
      * @return JsonResource
      */
-    public function searchByPalletId(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    public function searchByPalletCode(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             /**
@@ -107,7 +107,7 @@ class PalletsController extends Controller
         }
 
         $pallet = Pallet::where('pallet_id', $request->pallet_code)->first();
-
+      
         if (!$pallet) {
             return response()->json([
                 'message' => 'Pallet not found',
@@ -181,6 +181,7 @@ class PalletsController extends Controller
             'pallet_id' => $validated['pallet_code'],
             'crate_id' => $crate->id,
             'status' => PalletStatus::IN_TRANSIT->value,
+            'updated_at' => now(),
         ]);
         $pallet = Pallet::create($data);
 
@@ -348,6 +349,19 @@ class PalletsController extends Controller
                     'status' => $crate->pallet->status->value,
                 ] : null
             ]
+        ]);
+    }
+
+
+    /** 
+     * Lấy danh sách pallet có trạng thái không phải là IN_STOCK, SHIPPED, DAMAGED
+     */
+    public function getPalletsNotInStock(): \Illuminate\Http\JsonResponse
+    {
+        $pallets = Pallet::whereNotIn('status', [PalletStatus::IN_STOCK->value, PalletStatus::SHIPPED->value, PalletStatus::DAMAGED->value])->orderBy('updated_at', 'desc')->get();
+        return response()->json([
+            'message' => 'Lấy danh sách pallet thành công',
+            'data' => PalletResource::collection($pallets)
         ]);
     }
 }

@@ -20,6 +20,10 @@ class PalletResource extends JsonResource
              */
             'crate_id' => $this->crate_id,
             /**
+             * Vị trí pallet
+             */
+            'location_code' => $this->location_code,
+            /**
              * Trạng thái 
              */
             'status' => $this->status,

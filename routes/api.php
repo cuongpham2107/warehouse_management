@@ -21,10 +21,12 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Pallet routes
+    Route::get('pallets/get-pallets-not-in-stock', [PalletsController::class, 'getPalletsNotInStock']);
+    Route::get('pallets/search-by-pallet-code', [PalletsController::class, 'searchByPalletCode']);
     Route::apiResource('pallets', PalletsController::class);
-    Route::get('pallets/search', [PalletsController::class, 'searchByPalletId']);
     Route::get('pallets/{pallet}/check-crate', [PalletsController::class, 'checkPalletWithCrateCode']);
     Route::post('pallets/update-pallet-with-location', [PalletsController::class, 'updatePalletWithLocation']);
+    
          
     // Receiving Plan routes
     Route::apiResource('receiving-plans', ReceivingPlansController::class)
