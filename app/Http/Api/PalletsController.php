@@ -200,9 +200,14 @@ class PalletsController extends Controller
      * @param Pallet $pallet 
      * @return PalletResource
      */
-    public function update(\Illuminate\Http\Request $request, Pallet $pallet): \Illuminate\Http\JsonResponse
+    public function updatePalletWithLocation(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
+            /**
+             * Mã pallet
+             * @example PAL-001
+             */
+            'pallet_code' => 'required|string|max:255',
             /**
              * Mã vị trí kho mới
              * @example WH-001
@@ -214,9 +219,19 @@ class PalletsController extends Controller
              */
             'action_type' => 'required|string|in:import,relocate'
         ]);
+        $pallet = Pallet::where('pallet_id', $request->pallet_code)->first();
+        if (!$pallet) {
+            return response()->json([
+                'message' => 'Pallet không tồn tại.',
+                'errors' => [
+                    'pallet_code' => ['Pallet không tồn tại.']
+                ]
+            ], 400);
+        }
+
 
         $actionType = $request->action_type;
-        $oldLocation = $pallet->location_code;
+        $oldLocation = $pallet->location_code ?? '';
         $newLocation = $request->location_code;
 
         // Kiểm tra điều kiện dựa trên loại hành động
