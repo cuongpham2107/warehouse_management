@@ -16,9 +16,9 @@ class ReceivingPlansController extends Controller
      * 1. Hiển thị danh sách kế hoạch nhận hàng đang xử lý
      *
      * @param Request $request
-     * @return JsonResource
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request): JsonResource
+    public function index(Request $request)
     {
         /**
          * Từ khoá tìm kiếm
@@ -52,31 +52,35 @@ class ReceivingPlansController extends Controller
             ->orderBy($sort, $direction)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        return ReceivingPlanResource::collection($plans);
+        return response()->json([
+            'message' => 'Kế hoạch nhận hàng đang xử lý đã hoàn thành',
+            'data' => ReceivingPlanResource::collection($plans)
+        ], 200);
     }
 
     /**
      * 2. Hiển thị thông tin chi tiết của kế hoạch nhận hàng đang xử lý
      *
      * @param ReceivingPlan $receivingPlan ID của kế hoạch nhận hàng
-     * @return JsonResource
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(ReceivingPlan $receivingPlan): JsonResource
+    public function show(ReceivingPlan $receivingPlan)
     {
         abort_if($receivingPlan->status !== ReceivingPlanStatus::IN_PROGRESS, 404, 'Không tìm thấy kế hoạch nhận hàng đang xử lý');
 
-        return new ReceivingPlanResource(
-            $receivingPlan->load(['vendor', 'creator', 'crates'])
-        );
+        return response()->json([
+            'message' => 'Kế hoạch nhận hàng đang xử lý đã hoàn thành',
+            'data' => new ReceivingPlanResource($receivingPlan->load(['vendor', 'creator', 'crates']))
+        ], 200);
     }
 
     /**
      * 5. Hoàn thành kế hoạch nhận hàng
      *
      * @param int $id  ID của kế hoạch nhận hàng
-     * @return JsonResource
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, int $id): JsonResource
+    public function update(Request $request, int $id)
     {
         $receivingPlan = ReceivingPlan::find($id);
         if (!$receivingPlan) {
@@ -98,6 +102,9 @@ class ReceivingPlansController extends Controller
         $receivingPlan->status = ReceivingPlanStatus::COMPLETED;
         $receivingPlan->save();
         
-        return new ReceivingPlanResource($receivingPlan);
+        return response()->json([
+            'message' => 'Kế hoạch nhận hàng đã hoàn thành',
+            'data' => new ReceivingPlanResource($receivingPlan)
+        ], 200);
     }
 }
