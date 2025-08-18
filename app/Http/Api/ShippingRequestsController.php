@@ -150,7 +150,7 @@ class ShippingRequestsController extends Controller
 
         // Kiểm tra xem pallet có tồn tại và có khớp với crate không
         $pallet = Pallet::where('pallet_id', $request->pallet_code)
-            ->where('crate_id', $request->crate_code)
+            ->where('crate_id', $crate->id)
             ->first();
             
         if (!$pallet) {
