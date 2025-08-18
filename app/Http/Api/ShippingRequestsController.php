@@ -78,12 +78,12 @@ class ShippingRequestsController extends Controller
                 return $item->pallet && $item->pallet->status === \App\Enums\PalletStatus::SHIPPED;
             });
         if (!$allPalletsShipped) {
-            return new JsonResource([
+            return response()->json([
                 'message' => 'Tất cả pallets của yêu cầu xuất hàng phải đã được vận chuyển',
             ]);
         }
         if($shippingRequest->status == ShippingRequestStatus::COMPLETED->value){
-            return new JsonResource([
+            return response()->json([
                 'message' => 'Yêu cầu xuất hàng đã hoàn thành'
             ]);
         }
@@ -115,29 +115,29 @@ class ShippingRequestsController extends Controller
         ]);
         $shippingRequest = ShippingRequest::find($id);
         if (!$shippingRequest) {
-            return new JsonResource([
+            return response()->json([
                 'message' => 'Không tìm thấy yêu cầu xuất hàng'
-            ]);
+            ], 400);
         }
-
-        // Tìm item trong shipping request với crate_id
-        $shippingItem = $shippingRequest->items()
-            ->where('crate_id', $request->crate_code)
-            ->first();
-            
-        if (!$shippingItem) {
-            return new JsonResource([
-                'message' => 'Không tìm thấy kiện hàng trong yêu cầu xuất hàng'
-            ]);
-        }
-
         // Kiểm tra xem crate có tồn tại không
         $crate = Crate::where('crate_id', $request->crate_code)->first();
         if (!$crate) {
-            return new JsonResource([
+            return response()->json([
                 'message' => 'Không tìm thấy kiện hàng'
-            ]);
+            ], 400);
         }
+        // Tìm item trong shipping request với crate_id
+        $shippingItem = $shippingRequest->items()
+            ->where('crate_id', $crate->id)
+            ->first();
+
+        if (!$shippingItem) {
+            return response()->json([
+                'message' => 'Không tìm thấy kiện hàng trong yêu cầu xuất hàng'
+            ], 400);
+        }
+
+        
 
         // Kiểm tra xem pallet có tồn tại và có khớp với crate không
         $pallet = Pallet::where('pallet_id', $request->pallet_code)
@@ -145,22 +145,22 @@ class ShippingRequestsController extends Controller
             ->first();
             
         if (!$pallet) {
-            return new JsonResource([
+            return response()->json([
                 'message' => 'Không tìm thấy pallet hoặc pallet không khớp với kiện hàng'
-            ]);
+            ], 400);
         }
         // Kiểm tra trạng thái crate
         if($crate->status === CrateStatus::SHIPPED) {
-            return new JsonResource([
+            return response()->json([
                 'message' => 'Kiện hàng đã được vận chuyển'
-            ]);
+            ], 400);
         }
         
         // Kiểm tra trạng thái pallet
         if($pallet->status === \App\Enums\PalletStatus::SHIPPED) {
-            return new JsonResource([
+            return response()->json([
                 'message' => 'Pallet đã được xuất kho'
-            ]);
+            ], 400);
         }
 
         // Cập nhật trạng thái
