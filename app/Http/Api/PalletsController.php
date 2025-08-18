@@ -90,24 +90,29 @@ class PalletsController extends Controller
      */
     public function searchByPalletId(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
     {
-        $palletId = $request->query('pallet_id');
-
-        if (!$palletId) {
+        $request->validate([
+            /**
+             * Mã pallet
+             * @example PAL-001
+             */
+            'pallet_code' => 'required|string|max:255',
+        ]);
+        if (!$request->pallet_code) {
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => [
-                    'pallet_id' => ['pallet_id là bắt buộc.']
+                    'pallet_code' => ['pallet_code là bắt buộc.']
                 ]
             ], 400);
         }
 
-        $pallet = Pallet::where('pallet_id', $palletId)->first();
+        $pallet = Pallet::where('pallet_id', $request->pallet_code)->first();
 
         if (!$pallet) {
             return response()->json([
                 'message' => 'Pallet not found',
                 'errors' => [
-                    'pallet_id' => ['Pallet không tồn tại.']
+                    'pallet_code' => ['Pallet không tồn tại.']
                 ]
             ], 400);
         }
