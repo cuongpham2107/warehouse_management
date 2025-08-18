@@ -23,9 +23,9 @@ class ShippingRequestResource extends JsonResource
             'requested_date' => $this->requested_date?->format('d-m-Y H:i'),
             /**
              * Thời gian đóng hàng
-             * @example 2023-03-15 10:00
+             * @example 10:00
              */
-            'lifting_time' => $this->lifting_time?->format('d-m-Y H:i'),
+            'lifting_time' => $this->lifting_time,
             /**
              * Thời gian khởi hành
              * @example 2023-03-15 10:00
