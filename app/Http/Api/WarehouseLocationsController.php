@@ -17,9 +17,9 @@ class WarehouseLocationsController extends Controller
      * Hiển thị danh sách các vị trí trong kho
      *
      * @param Request $request
-     * @return JsonResource
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request): JsonResource
+    public function index(Request $request)
     {
        /**
          * Đây là một tham số truy vấn để tìm kiếm các chuyển động hàng tồn kho.
@@ -60,7 +60,10 @@ class WarehouseLocationsController extends Controller
             ->orderBy($sort, $direction)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        return WarehouseLocationResource::collection($locations);
+        return response()->json([
+            'message' => 'Vị trí trong kho đã hoàn thành',
+            'data' => WarehouseLocationResource::collection($locations)
+        ], 200);
     }
 
     // /**
