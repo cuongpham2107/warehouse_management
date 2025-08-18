@@ -21,7 +21,7 @@ class ShippingRequestsController extends Controller
      * 11. Hiển thị danh sách các Lệnh xuất hàng
      *
      * @param Request $request
-     * @return JsonResource
+     * @return \Illuminate\Http\JsonResponse
      *
      */
     #[QueryParameter('search', description: 'Tìm kiếm theo mã yêu cầu hoặc tên khách hàng', type: 'string', required: false)]
@@ -30,7 +30,7 @@ class ShippingRequestsController extends Controller
     #[QueryParameter('direction', description: 'Hướng sắp xếp (asc/desc)', type: 'string', required: false)]
     #[QueryParameter('per_page', description: 'Số lượng item trên mỗi trang (mặc định: 15)', type: 'integer', required: false)]
     #[QueryParameter('page', description: 'Số trang hiện tại', type: 'integer', required: false)]
-    public function index(Request $request): JsonResource
+    public function index(Request $request)
     {
         $search = $request->query('search', '');
         $sort = $request->query('sort', 'created_at');
@@ -50,26 +50,32 @@ class ShippingRequestsController extends Controller
             ->orderBy($sort, $direction)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        return ShippingRequestResource::collection($requests);
+        return response()->json([
+            'message' => 'Yêu cầu xuất hàng đã hoàn thành',
+            'data' => ShippingRequestResource::collection($requests)
+        ], 200);
     }
     /**
      * 12. Hiển thị chi tiết của một yêu cầu vận chuyển
      *
      * @param ShippingRequest $shippingRequest ID của yêu cầu vận chuyển
-     * @return JsonResource
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(ShippingRequest $shippingRequest): JsonResource
+    public function show(ShippingRequest $shippingRequest)
     {
-        return new ShippingRequestResource($shippingRequest->load(['creator', 'items']));
+        return response()->json([
+            'message' => 'Yêu cầu xuất hàng đã hoàn thành',
+            'data' => new ShippingRequestResource($shippingRequest->load(['creator', 'items']))
+        ], 200);
     }
     /**
      * 14. Cập nhật trạng thái cho Yêu cầu xuất hàng 
      *
      * @param Request $request
      * @param ShippingRequest $shippingRequest ID của yêu cầu vận chuyển
-     * @return JsonResource
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, ShippingRequest $shippingRequest): JsonResource
+    public function update(Request $request, ShippingRequest $shippingRequest)
     {
         $allPalletsShipped = $shippingRequest->items()
             ->with('pallet')
@@ -80,18 +86,21 @@ class ShippingRequestsController extends Controller
         if (!$allPalletsShipped) {
             return response()->json([
                 'message' => 'Tất cả pallets của yêu cầu xuất hàng phải đã được vận chuyển',
-            ]);
+            ], 400);
         }
         if($shippingRequest->status == ShippingRequestStatus::COMPLETED->value){
             return response()->json([
                 'message' => 'Yêu cầu xuất hàng đã hoàn thành'
-            ]);
+            ], 400);
         }
 
         $shippingRequest->update([
             'status' => ShippingRequestStatus::COMPLETED->value
         ]);
-        return new ShippingRequestResource($shippingRequest->load(['creator', 'items']));
+        return response()->json([
+            'message' => 'Yêu cầu xuất hàng đã hoàn thành',
+            'data' => new ShippingRequestResource($shippingRequest->load(['creator', 'items']))
+        ], 200);
     }
 
     /**
@@ -99,9 +108,9 @@ class ShippingRequestsController extends Controller
      *
      * @param Request $request
      * @param int $id Mã yêu cầu xuất hàng
-     * @return JsonResource
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function checkOutPallet(Request $request, $id): JsonResource
+    public function checkOutPallet(Request $request, $id)
     {
         $request->validate([
             /**
@@ -178,7 +187,10 @@ class ShippingRequestsController extends Controller
         ]);
         $pallet->save();
 
-        return new PalletResource($pallet->load(['crate']));
+        return response()->json([
+            'message' => 'Pallet đã được xuất kho',
+            'data' => new PalletResource($pallet->load(['crate']))
+        ], 200);
     }
    
 }
