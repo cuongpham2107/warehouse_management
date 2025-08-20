@@ -219,11 +219,6 @@ class PalletsController extends Controller
              * @example WH-001
              */
             'location_code' => 'required|string|max:255',
-            /**
-             * Loại hành động
-             * @example import
-             */
-            'action_type' => 'required|string|in:import,relocate'
         ]);
         $pallet = Pallet::where('pallet_id', $request->pallet_code)->first();
         if (!$pallet) {
@@ -234,14 +229,10 @@ class PalletsController extends Controller
                 ]
             ], 400);
         }
-
-
-        $actionType = $request->action_type;
         $oldLocation = $pallet->location_code ?? '';
         $newLocation = $request->location_code;
-
-        // Kiểm tra điều kiện dựa trên loại hành động
-        if ($actionType === 'import') {
+        // Kiểm tra điều kiện 
+        if (isset($oldLocation) && $oldLocation === '') {
             // Nhập kho: kiểm tra pallet có thể nhập kho không
             if ($pallet->status === PalletStatus::STORED->value) {
                 return response()->json([
