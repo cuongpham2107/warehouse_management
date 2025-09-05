@@ -44,10 +44,17 @@ class ReportWarehouse extends Page implements HasTable
         return '3. Báo cáo tổng hợp';
     }
 
-     public function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
-            ->query(PalletWithInfo::query())
+            ->query(
+                PalletWithInfo::query()
+                    ->orderByRaw("CASE 
+                        WHEN pallet_status = 'shipped' THEN 1 
+                        ELSE 0 
+                    END")
+                    ->orderBy('plan_date', 'asc')
+            )
             ->extremePaginationLinks()
             ->striped()
             ->columns([
@@ -105,7 +112,7 @@ class ReportWarehouse extends Page implements HasTable
                             ->sortable()
                             ->searchable()
                             ->toggleable(),
-                         TextColumn::make('arrival_date')
+                        TextColumn::make('arrival_date')
                             ->label('Giờ Hạ hàng')
                             ->date('H:i')
                             ->alignCenter()
@@ -128,63 +135,63 @@ class ReportWarehouse extends Page implements HasTable
                             ->alignCenter()
                             ->searchable()
                             ->toggleable(),
-                       
+
                         TextColumn::make('checkInBy.name')
                             ->label('Người nhập kho')
                             ->sortable()
                             ->searchable()
                             ->toggleable(),
                     ]),
-                    TextColumn::make('receiving_notes')
-                        ->label('Ghi chú nhập kho')
-                        ->searchable()
-                        ->toggleable(),
-                    ColumnGroup::make('Xuất kho ASGL')
-                        ->columns([
-                            TextColumn::make('requested_date')
-                                ->label('Ngày giao hàng')
-                                ->date('d/m/Y')
-                                ->alignCenter()
-                                ->sortable()
-                                ->searchable()
-                                ->toggleable(),
-                             TextColumn::make('lifting_time')
-                                ->label('Thời gian đóng hàng')
-                                ->date('H:i')
-                                ->alignCenter()
-                                ->sortable()
-                                ->searchable()
-                                ->toggleable(),
-                            TextColumn::make('shipping_license_plate')
-                                ->label('Biển số xe')
-                                ->sortable()
-                                ->searchable()
-                                ->toggleable(),
-                            TextColumn::make('shipping_transport_garage')
-                                ->label('Nhà xe vận chuyển')
-                                ->sortable()
-                                ->searchable()
-                                ->toggleable(),
-                            TextColumn::make('shipping_vehicle_capacity')
-                                ->label('Tải trọng xe (tấn)')
-                                ->alignCenter()
-                                ->sortable()
-                                ->searchable()
-                                ->toggleable(),
-                            TextColumn::make('customer_name')
-                                ->label('Khách hàng')
-                                ->sortable()
-                                ->searchable()
-                                ->toggleable(),
-                        ]),
-                        TextColumn::make('shipping_notes')
-                            ->label('Ghi chú xuất kho')
+                TextColumn::make('receiving_notes')
+                    ->label('Ghi chú nhập kho')
+                    ->searchable()
+                    ->toggleable(),
+                ColumnGroup::make('Xuất kho ASGL')
+                    ->columns([
+                        TextColumn::make('requested_date')
+                            ->label('Ngày giao hàng')
+                            ->date('d/m/Y')
+                            ->alignCenter()
+                            ->sortable()
                             ->searchable()
                             ->toggleable(),
-                    
+                        TextColumn::make('lifting_time')
+                            ->label('Thời gian đóng hàng')
+                            ->date('H:i')
+                            ->alignCenter()
+                            ->sortable()
+                            ->searchable()
+                            ->toggleable(),
+                        TextColumn::make('shipping_license_plate')
+                            ->label('Biển số xe')
+                            ->sortable()
+                            ->searchable()
+                            ->toggleable(),
+                        TextColumn::make('shipping_transport_garage')
+                            ->label('Nhà xe vận chuyển')
+                            ->sortable()
+                            ->searchable()
+                            ->toggleable(),
+                        TextColumn::make('shipping_vehicle_capacity')
+                            ->label('Tải trọng xe (tấn)')
+                            ->alignCenter()
+                            ->sortable()
+                            ->searchable()
+                            ->toggleable(),
+                        TextColumn::make('customer_name')
+                            ->label('Khách hàng')
+                            ->sortable()
+                            ->searchable()
+                            ->toggleable(),
+                    ]),
+                TextColumn::make('shipping_notes')
+                    ->label('Ghi chú xuất kho')
+                    ->searchable()
+                    ->toggleable(),
 
 
-                    ])
+
+            ])
             ->striped()
             ->filters([
                 // Filter theo trạng thái pallet
@@ -192,7 +199,7 @@ class ReportWarehouse extends Page implements HasTable
                     ->label('Trạng thái Pallet')
                     ->options([
                         'in_transit' => 'Đang gắn vị trí và vận chuyển',
-                        'stored' => 'Đã lưu kho', 
+                        'stored' => 'Đã lưu kho',
                         'in_stock' => 'Đang xuất kho',
                         'shipped' => 'Đã xuất kho',
                         'damaged' => 'Bị hư hỏng',
@@ -263,11 +270,11 @@ class ReportWarehouse extends Page implements HasTable
                         return $query
                             ->when(
                                 $data['plan_date_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('plan_date', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('plan_date', '>=', $date),
                             )
                             ->when(
                                 $data['plan_date_to'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('plan_date', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('plan_date', '<=', $date),
                             );
                     }),
 
@@ -283,11 +290,11 @@ class ReportWarehouse extends Page implements HasTable
                         return $query
                             ->when(
                                 $data['arrival_date_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('arrival_date', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('arrival_date', '>=', $date),
                             )
                             ->when(
                                 $data['arrival_date_to'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('arrival_date', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('arrival_date', '<=', $date),
                             );
                     }),
 
@@ -303,11 +310,11 @@ class ReportWarehouse extends Page implements HasTable
                         return $query
                             ->when(
                                 $data['departure_time_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('departure_time', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('departure_time', '>=', $date),
                             )
                             ->when(
                                 $data['departure_time_to'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('departure_time', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('departure_time', '<=', $date),
                             );
                     }),
 
@@ -360,19 +367,19 @@ class ReportWarehouse extends Page implements HasTable
                 // Filter chỉ hiển thị những record có thông tin xuất kho
                 Filter::make('has_shipping_info')
                     ->label('Có thông tin xuất kho')
-                    ->query(fn (Builder $query): Builder => $query->whereNotNull('shipping_request_id'))
+                    ->query(fn(Builder $query): Builder => $query->whereNotNull('shipping_request_id'))
                     ->toggle(),
 
                 // Filter chỉ hiển thị những record chưa có thông tin xuất kho
                 Filter::make('no_shipping_info')
                     ->label('Chưa có thông tin xuất kho')
-                    ->query(fn (Builder $query): Builder => $query->whereNull('shipping_request_id'))
+                    ->query(fn(Builder $query): Builder => $query->whereNull('shipping_request_id'))
                     ->toggle(),
             ])
             ->groups([
                 Group::make('plan_code')
-                ->label('Mã kế hoạch')
-                ->collapsible(),
+                    ->label('Mã kế hoạch')
+                    ->collapsible(),
             ])
             ->recordActions([
                 // ...
@@ -380,7 +387,7 @@ class ReportWarehouse extends Page implements HasTable
             ->toolbarActions([
                 // ...
             ])
-    
+
             ->paginated([10, 25, 50, 100, 'all'])
             ->defaultPaginationPageOption(25)
             ->reorderableColumns();
