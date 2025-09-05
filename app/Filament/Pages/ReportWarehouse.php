@@ -48,6 +48,8 @@ class ReportWarehouse extends Page implements HasTable
     {
         return $table
             ->query(PalletWithInfo::query())
+            ->extremePaginationLinks()
+            ->striped()
             ->columns([
                 TextColumn::make('pallet_id')
                     ->label('STT')

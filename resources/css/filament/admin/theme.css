@@ -51,12 +51,8 @@
     }
 }
 
-.fi-ta-table {
-    & > thead {
-        & > tr {
-            background-color: #005a88;
-        }
-    }
+.fi-ta-table thead  tr th {
+    background-color: #005a88;
 }
 
 .fi-ta-header-cell{
@@ -143,3 +139,4 @@
 .fi-ta-cell .fi-checkbox-input{
     border: 1px solid rgb(71, 71, 71);
 }
+
