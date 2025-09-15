@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     <style>
         .fi-ta-content-ctn {
-            height: 700px;
+            height: 800px;
         }
         .fi-ta-table thead .fi-ta-table-head-groups-row th {
             position: sticky;

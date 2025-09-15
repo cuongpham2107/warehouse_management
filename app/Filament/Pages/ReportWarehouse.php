@@ -12,10 +12,17 @@ use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use App\Models\PalletWithInfo;
+use App\Enums\PalletStatus;
 use Filament\Tables\Columns\ColumnGroup;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Tables\Grouping\Group;
+use GMP;
+use Illuminate\Support\Facades\DB;
+use App\Exports\WarehouseReportExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
 
 class ReportWarehouse extends Page implements HasTable
 {
@@ -49,11 +56,6 @@ class ReportWarehouse extends Page implements HasTable
         return $table
             ->query(
                 PalletWithInfo::query()
-                    ->orderByRaw("CASE 
-                        WHEN pallet_status = 'shipped' THEN 1 
-                        ELSE 0 
-                    END")
-                    ->orderBy('plan_date', 'asc')
             )
             ->extremePaginationLinks()
             ->striped()
@@ -188,22 +190,36 @@ class ReportWarehouse extends Page implements HasTable
                     ->label('Ghi chú xuất kho')
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('pallet_status')
+                    ->label('Trạng thái Pallet')
+                    ->formatStateUsing(function ($state) {
+                        try {
+                            return \App\Enums\PalletStatus::from($state)->getLabel();
+                        } catch (\ValueError $e) {
+                            return $state ?? 'Không xác định';
+                        }
+                    })
+                    ->badge()
+                    ->color(function ($state) {
+                        try {
+                            return \App\Enums\PalletStatus::from($state)->getColor();
+                        } catch (\ValueError $e) {
+                            return 'gray';
+                        }
+                    })
+                    ->sortable()
+                    ->toggleable(),
 
 
 
             ])
+            ->defaultSort('requested_date', 'asc')
             ->striped()
             ->filters([
                 // Filter theo trạng thái pallet
                 SelectFilter::make('pallet_status')
                     ->label('Trạng thái Pallet')
-                    ->options([
-                        'in_transit' => 'Đang gắn vị trí và vận chuyển',
-                        'stored' => 'Đã lưu kho',
-                        'in_stock' => 'Đang xuất kho',
-                        'shipped' => 'Đã xuất kho',
-                        'damaged' => 'Bị hư hỏng',
-                    ])
+                    ->options(PalletStatus::getOptions())
                     ->placeholder('Tất cả trạng thái'),
 
                 // Filter theo mã kế hoạch
@@ -380,12 +396,127 @@ class ReportWarehouse extends Page implements HasTable
                 Group::make('plan_code')
                     ->label('Mã kế hoạch')
                     ->collapsible(),
+                Group::make('receivingPlan.vendor.vendor_name')
+                    ->label('Nhà cung cấp')
+                    ->collapsible(),
             ])
+            ->defaultGroup('receivingPlan.vendor.vendor_name')
             ->recordActions([
                 // ...
             ])
+            ->headerActions([
+                Action::make('export-excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->label('Xuất excel')
+                    ->form([
+                        Select::make('date_filter_type')
+                            ->label('Lọc theo thời gian')
+                            ->options([
+                                'all' => 'Tất cả dữ liệu',
+                                'today' => 'Hôm nay',
+                                'this_week' => 'Tuần này',
+                                'this_month' => 'Tháng này',
+                                'this_year' => 'Năm này',
+                                'custom' => 'Tùy chỉnh khoảng thời gian',
+                            ])
+                            ->default('all')
+                            ->reactive(),
+                        
+                        Select::make('date_column')
+                            ->label('Lọc theo cột ngày')
+                            ->options([
+                                'plan_date' => 'Ngày hàng đến',
+                                'arrival_date' => 'Ngày hạ hàng', 
+                                'requested_date' => 'Ngày giao hàng',
+                                'lifting_time' => 'Thời gian đóng hàng',
+                            ])
+                            ->default('plan_date')
+                            ->visible(fn($get) => $get('date_filter_type') !== 'all'),
+                            
+                        DatePicker::make('date_from')
+                            ->label('Từ ngày')
+                            ->visible(fn($get) => $get('date_filter_type') === 'custom')
+                            ->required(fn($get) => $get('date_filter_type') === 'custom'),
+                            
+                        DatePicker::make('date_to')
+                            ->label('Đến ngày')
+                            ->visible(fn($get) => $get('date_filter_type') === 'custom')
+                            ->required(fn($get) => $get('date_filter_type') === 'custom'),
+                            
+                        Select::make('pallet_status')
+                            ->label('Trạng thái Pallet')
+                            ->options(array_merge(['' => 'Tất cả trạng thái'], PalletStatus::getOptions()))
+                            ->default(''),
+                    ])
+                    ->action(function (array $data) {
+                        // Bắt đầu với query cơ bản
+                        $query = PalletWithInfo::query();
+                        
+                        // Áp dụng filter theo thời gian
+                        if ($data['date_filter_type'] !== 'all') {
+                            $dateColumn = $data['date_column'] ?? 'plan_date';
+                            
+                            switch ($data['date_filter_type']) {
+                                case 'today':
+                                    $query->whereDate($dateColumn, today());
+                                    break;
+                                case 'this_week':
+                                    $query->whereBetween($dateColumn, [
+                                        now()->startOfWeek(),
+                                        now()->endOfWeek()
+                                    ]);
+                                    break;
+                                case 'this_month':
+                                    $query->whereMonth($dateColumn, now()->month)
+                                          ->whereYear($dateColumn, now()->year);
+                                    break;
+                                case 'this_year':
+                                    $query->whereYear($dateColumn, now()->year);
+                                    break;
+                                case 'custom':
+                                    if (!empty($data['date_from']) && !empty($data['date_to'])) {
+                                        $query->whereBetween($dateColumn, [
+                                            $data['date_from'],
+                                            $data['date_to']
+                                        ]);
+                                    }
+                                    break;
+                            }
+                        }
+                        
+                        // Áp dụng filter theo trạng thái pallet
+                        if (!empty($data['pallet_status'])) {
+                            $query->where('pallet_status', $data['pallet_status']);
+                        }
+                        
+                        // Lấy records
+                        $records = $query->get();
+                        
+                        // Tạo tên file với timestamp và thông tin filter
+                        $filterInfo = '';
+                        if ($data['date_filter_type'] !== 'all') {
+                            $filterInfo = '-' . str_replace('_', '-', $data['date_filter_type']);
+                            if ($data['date_filter_type'] === 'custom' && !empty($data['date_from']) && !empty($data['date_to'])) {
+                                $filterInfo = '-' . \Carbon\Carbon::parse($data['date_from'])->format('d-m-Y') . 
+                                             '-den-' . \Carbon\Carbon::parse($data['date_to'])->format('d-m-Y');
+                            }
+                        }
+                        
+                        $fileName = 'bao-cao-tong-hop' . $filterInfo . '-' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+                        
+                        // Export file với collection
+                        return Excel::download(
+                            new WarehouseReportExport($records),
+                            $fileName
+                        );
+                    })
+                    ->color('success')
+                    ->modalHeading('Cấu hình xuất Excel')
+                    ->modalSubmitActionLabel('Xuất Excel')
+                    ->modalCancelActionLabel('Hủy')
+            ])
             ->toolbarActions([
-                // ...
+                
             ])
 
             ->paginated([10, 25, 50, 100, 'all'])
