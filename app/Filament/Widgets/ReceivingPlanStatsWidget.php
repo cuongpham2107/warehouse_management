@@ -2,130 +2,175 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\ReceivingPlan;
+use App\Models\PalletWithInfo;
 use App\Models\Vendor;
-use App\Enums\ReceivingPlanStatus;
+use App\Models\VendorStats;
+use App\Enums\PalletStatus;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
+use Illuminate\Contracts\Pagination\Paginator;
 
 class ReceivingPlanStatsWidget extends BaseWidget
 {
-    protected static ?string $heading = 'Kế hoạch nhập kho theo nhà cung cấp';
+    protected static ?string $heading = 'Thống kê Pallet theo nhà cung cấp';
 
     protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table
-    {
+    {        
         return $table
             ->query(
-                Vendor::query()
-                    ->whereHas('receivingPlans')
-                    ->withCount([
-                        'receivingPlans',
-                        'receivingPlans as pending_plans_count' => function (Builder $query) {
-                            $query->where('status', ReceivingPlanStatus::PENDING);
-                        },
-                        'receivingPlans as in_progress_plans_count' => function (Builder $query) {
-                            $query->where('status', ReceivingPlanStatus::IN_PROGRESS);
-                        },
-                        'receivingPlans as completed_plans_count' => function (Builder $query) {
-                            $query->where('status', ReceivingPlanStatus::COMPLETED);
-                        },
-                        'receivingPlans as cancelled_plans_count' => function (Builder $query) {
-                            $query->where('status', ReceivingPlanStatus::CANCELLED);
-                        },
+                // Sử dụng VendorStats model với join trực tiếp
+                VendorStats::query()
+                    ->join('pallet_with_info', 'vendors.id', '=', 'pallet_with_info.vendor_id')
+                    ->whereNotNull('pallet_with_info.vendor_id')
+                    ->select([
+                        'vendors.id',
+                        'vendors.vendor_name',
+                        'vendors.vendor_code',
+                        DB::raw('COUNT(*) as total_pallets'),
+                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "stored" THEN 1 ELSE 0 END) as stored_pallets'),
+                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "shipped" THEN 1 ELSE 0 END) as shipped_pallets'),
+                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "in_stock" THEN 1 ELSE 0 END) as in_stock_pallets'),
+                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "in_transit" THEN 1 ELSE 0 END) as in_transit_pallets'),
+                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "damaged" THEN 1 ELSE 0 END) as damaged_pallets'),
+                        DB::raw('SUM(COALESCE(pallet_with_info.crate_pcs, 0)) as total_pcs'),
+                        DB::raw('SUM(COALESCE(pallet_with_info.crate_gross_weight, 0)) as total_weight'),
+                        DB::raw('COUNT(DISTINCT pallet_with_info.plan_code) as total_plans'),
                     ])
-                    ->withSum('receivingPlans', 'total_crates')
-                    ->withSum('receivingPlans', 'total_pcs')
-                    ->withSum('receivingPlans', 'total_weight')
-                    ->orderBy('receiving_plans_count', 'desc')
+                    ->groupBy('vendors.id', 'vendors.vendor_name', 'vendors.vendor_code')
+                    ->orderByRaw('COUNT(*) DESC, vendors.vendor_name ASC')
             )
             ->columns([
                 Tables\Columns\TextColumn::make('vendor_code')
                     ->label('Mã NCC')
-                    ->searchable(),
+                    ->searchable(false)
+                    ->sortable(false),
 
                 Tables\Columns\TextColumn::make('vendor_name')
-                    ->label('Tên nhà cung cấp')
-                    ->searchable()
-                    ->weight('medium'),
+                    ->label('Nhà cung cấp')
+                    ->searchable(false)
+                    ->weight('medium')
+                    ->sortable(false),
 
-                Tables\Columns\TextColumn::make('receiving_plans_count')
-                    ->label('Tổng kế hoạch')
+                Tables\Columns\TextColumn::make('total_pallets')
+                    ->label('Tổng Pallet')
                     ->alignCenter()
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->sortable(false),
 
-                Tables\Columns\TextColumn::make('pending_plans_count')
-                    ->label('Chờ thực hiện')
-                    ->alignCenter()
-                    ->badge()
-                    ->color('warning')
-                    ->formatStateUsing(fn ($state) => $state ?: '0'),
-
-                Tables\Columns\TextColumn::make('in_progress_plans_count')
-                    ->label('Đang thực hiện')
-                    ->alignCenter()
-                    ->badge()
-                    ->color('info')
-                    ->formatStateUsing(fn ($state) => $state ?: '0'),
-
-                Tables\Columns\TextColumn::make('completed_plans_count')
-                    ->label('Hoàn thành')
+                Tables\Columns\TextColumn::make('stored_pallets')
+                    ->label('Tồn kho')
                     ->alignCenter()
                     ->badge()
                     ->color('success')
-                    ->formatStateUsing(fn ($state) => $state ?: '0'),
+                    ->formatStateUsing(fn ($state) => $state ?: '0')
+                    ->sortable(false),
 
-                Tables\Columns\TextColumn::make('cancelled_plans_count')
-                    ->label('Đã hủy')
+                Tables\Columns\TextColumn::make('shipped_pallets')
+                    ->label('Đã xuất')
+                    ->alignCenter()
+                    ->badge()
+                    ->color('primary')
+                    ->formatStateUsing(fn ($state) => $state ?: '0')
+                    ->sortable(false),
+
+                Tables\Columns\TextColumn::make('in_stock_pallets')
+                    ->label('Đang xuất')
+                    ->alignCenter()
+                    ->badge()
+                    ->color('warning')
+                    ->formatStateUsing(fn ($state) => $state ?: '0')
+                    ->sortable(false),
+
+                Tables\Columns\TextColumn::make('in_transit_pallets')
+                    ->label('Vận chuyển')
+                    ->alignCenter()
+                    ->badge()
+                    ->color('info')
+                    ->formatStateUsing(fn ($state) => $state ?: '0')
+                    ->sortable(false),
+
+                Tables\Columns\TextColumn::make('damaged_pallets')
+                    ->label('Hư hỏng')
                     ->alignCenter()
                     ->badge()
                     ->color('danger')
-                    ->formatStateUsing(fn ($state) => $state ?: '0'),
+                    ->formatStateUsing(fn ($state) => $state ?: '0')
+                    ->sortable(false),
 
-                Tables\Columns\TextColumn::make('receiving_plans_sum_total_crates')
-                    ->label('Tổng thùng')
-                    ->alignCenter()
-                    ->formatStateUsing(fn ($state) => number_format($state ?: 0)),
-
-                Tables\Columns\TextColumn::make('receiving_plans_sum_total_pcs')
+                Tables\Columns\TextColumn::make('total_pcs')
                     ->label('Tổng PCS')
                     ->alignCenter()
-                    ->formatStateUsing(fn ($state) => number_format($state ?: 0)),
+                    ->formatStateUsing(fn ($state) => number_format($state ?: 0))
+                    ->sortable(false),
 
-                Tables\Columns\TextColumn::make('receiving_plans_sum_total_weight')
+                Tables\Columns\TextColumn::make('total_weight')
                     ->label('Tổng KL (kg)')
                     ->alignCenter()
-                    ->formatStateUsing(fn ($state) => number_format($state ?: 0, 2)),
+                    ->formatStateUsing(fn ($state) => number_format($state ?: 0, 2))
+                    ->sortable(false),
 
-                Tables\Columns\TextColumn::make('completion_rate')
-                    ->label('Tỷ lệ HT (%)')
+                Tables\Columns\TextColumn::make('total_plans')
+                    ->label('Số kế hoạch')
+                    ->alignCenter()
+                    ->badge()
+                    ->color('gray')
+                    ->sortable(false),
+
+                Tables\Columns\TextColumn::make('storage_rate')
+                    ->label('Tỷ lệ tồn (%)')
                     ->alignCenter()
                     ->state(function ($record) {
-                        $total = $record->receiving_plans_count ?? 0;
-                        $completed = $record->completed_plans_count ?? 0;
+                        $total = $record->total_pallets ?? 0;
+                        $stored = $record->stored_pallets ?? 0;
                         
                         if ($total == 0) return 0;
                         
-                        return round(($completed / $total) * 100, 1);
+                        return round(($stored / $total) * 100, 1);
                     })
                     ->formatStateUsing(fn ($state) => $state . '%')
                     ->badge()
                     ->color(function ($state) {
-                        if ($state >= 90) return 'success';
-                        if ($state >= 70) return 'warning';
-                        if ($state > 0) return 'danger';
+                        if ($state >= 70) return 'success';
+                        if ($state >= 40) return 'warning';
+                        if ($state > 0) return 'info';
                         return 'gray';
-                    }),
+                    })
+                    ->sortable(false),
+
+                Tables\Columns\TextColumn::make('shipping_rate')
+                    ->label('Tỷ lệ xuất (%)')
+                    ->alignCenter()
+                    ->state(function ($record) {
+                        $total = $record->total_pallets ?? 0;
+                        $shipped = $record->shipped_pallets ?? 0;
+                        
+                        if ($total == 0) return 0;
+                        
+                        return round(($shipped / $total) * 100, 1);
+                    })
+                    ->formatStateUsing(fn ($state) => $state . '%')
+                    ->badge()
+                    ->color(function ($state) {
+                        if ($state >= 70) return 'primary';
+                        if ($state >= 40) return 'warning';
+                        if ($state > 0) return 'info';
+                        return 'gray';
+                    })
+                    ->sortable(false),
             ])
             ->filters([
-                SelectFilter::make('has_pending_plans')
-                    ->label('Có kế hoạch chờ')
+                SelectFilter::make('has_stored_pallets')
+                    ->label('Có hàng tồn kho')
                     ->options([
                         'yes' => 'Có',
                         'no' => 'Không',
@@ -133,15 +178,15 @@ class ReceivingPlanStatsWidget extends BaseWidget
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['value'] === 'yes',
-                            fn (Builder $query) => $query->having('pending_plans_count', '>', 0)
+                            fn (Builder $query) => $query->having('stored_pallets', '>', 0)
                         )->when(
                             $data['value'] === 'no',
-                            fn (Builder $query) => $query->having('pending_plans_count', '=', 0)
+                            fn (Builder $query) => $query->having('stored_pallets', '=', 0)
                         );
                     }),
 
-                SelectFilter::make('has_in_progress_plans')
-                    ->label('Có kế hoạch đang thực hiện')
+                SelectFilter::make('has_shipped_pallets')
+                    ->label('Có hàng đã xuất')
                     ->options([
                         'yes' => 'Có',
                         'no' => 'Không',
@@ -149,65 +194,164 @@ class ReceivingPlanStatsWidget extends BaseWidget
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['value'] === 'yes',
-                            fn (Builder $query) => $query->having('in_progress_plans_count', '>', 0)
+                            fn (Builder $query) => $query->having('shipped_pallets', '>', 0)
                         )->when(
                             $data['value'] === 'no',
-                            fn (Builder $query) => $query->having('in_progress_plans_count', '=', 0)
+                            fn (Builder $query) => $query->having('shipped_pallets', '=', 0)
                         );
                     }),
 
-                SelectFilter::make('completion_rate_range')
-                    ->label('Tỷ lệ hoàn thành')
+                SelectFilter::make('has_damaged_pallets')
+                    ->label('Có hàng hư hỏng')
                     ->options([
-                        'high' => 'Cao (≥90%)',
-                        'medium' => 'Trung bình (70-89%)',
-                        'low' => 'Thấp (<70%)',
-                        'zero' => 'Chưa hoàn thành (0%)',
+                        'yes' => 'Có',
+                        'no' => 'Không',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'] === 'yes',
+                            fn (Builder $query) => $query->having('damaged_pallets', '>', 0)
+                        )->when(
+                            $data['value'] === 'no',
+                            fn (Builder $query) => $query->having('damaged_pallets', '=', 0)
+                        );
+                    }),
+
+                SelectFilter::make('storage_rate_range')
+                    ->label('Tỷ lệ tồn kho')
+                    ->options([
+                        'high' => 'Cao (≥70%)',
+                        'medium' => 'Trung bình (40-69%)',
+                        'low' => 'Thấp (<40%)',
+                        'zero' => 'Không tồn (0%)',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['value'] === 'high',
-                            fn (Builder $query) => $query->havingRaw('(completed_plans_count * 100.0 / receiving_plans_count) >= 90')
+                            fn (Builder $query) => $query->havingRaw('(stored_pallets * 100.0 / total_pallets) >= 70')
                         )->when(
                             $data['value'] === 'medium',
-                            fn (Builder $query) => $query->havingRaw('(completed_plans_count * 100.0 / receiving_plans_count) >= 70 AND (completed_plans_count * 100.0 / receiving_plans_count) < 90')
+                            fn (Builder $query) => $query->havingRaw('(stored_pallets * 100.0 / total_pallets) >= 40 AND (stored_pallets * 100.0 / total_pallets) < 70')
                         )->when(
                             $data['value'] === 'low',
-                            fn (Builder $query) => $query->havingRaw('(completed_plans_count * 100.0 / receiving_plans_count) < 70 AND completed_plans_count > 0')
+                            fn (Builder $query) => $query->havingRaw('(stored_pallets * 100.0 / total_pallets) < 40 AND stored_pallets > 0')
                         )->when(
                             $data['value'] === 'zero',
-                            fn (Builder $query) => $query->having('completed_plans_count', '=', 0)
+                            fn (Builder $query) => $query->having('stored_pallets', '=', 0)
+                        );
+                    }),
+
+                SelectFilter::make('shipping_rate_range')
+                    ->label('Tỷ lệ xuất kho')
+                    ->options([
+                        'high' => 'Cao (≥70%)',
+                        'medium' => 'Trung bình (40-69%)',
+                        'low' => 'Thấp (<40%)',
+                        'zero' => 'Chưa xuất (0%)',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'] === 'high',
+                            fn (Builder $query) => $query->havingRaw('(shipped_pallets * 100.0 / total_pallets) >= 70')
+                        )->when(
+                            $data['value'] === 'medium',
+                            fn (Builder $query) => $query->havingRaw('(shipped_pallets * 100.0 / total_pallets) >= 40 AND (shipped_pallets * 100.0 / total_pallets) < 70')
+                        )->when(
+                            $data['value'] === 'low',
+                            fn (Builder $query) => $query->havingRaw('(shipped_pallets * 100.0 / total_pallets) < 40 AND shipped_pallets > 0')
+                        )->when(
+                            $data['value'] === 'zero',
+                            fn (Builder $query) => $query->having('shipped_pallets', '=', 0)
                         );
                     }),
 
                 Filter::make('high_volume_vendors')
                     ->label('Nhà cung cấp khối lượng lớn')
                     ->toggle()
-                    ->query(fn (Builder $query): Builder => $query->having('receiving_plans_count', '>=', 10)),
+                    ->query(fn (Builder $query): Builder => $query->having('total_pallets', '>=', 10)),
 
-                Filter::make('active_vendors_only')
-                    ->label('Chỉ nhà cung cấp đang hoạt động')
+                Filter::make('active_shipping')
+                    ->label('Đang có hoạt động xuất kho')
                     ->toggle()
-                    ->default()
-                    ->query(fn (Builder $query): Builder => $query->where('vendors.status', 'active')),
+                    ->query(fn (Builder $query): Builder => $query->having('in_stock_pallets', '>', 0)),
 
-                SelectFilter::make('min_total_plans')
-                    ->label('Số kế hoạch tối thiểu')
+                SelectFilter::make('min_total_pallets')
+                    ->label('Số pallet tối thiểu')
                     ->options([
-                        '1' => '≥ 1 kế hoạch',
-                        '5' => '≥ 5 kế hoạch',
-                        '10' => '≥ 10 kế hoạch',
-                        '20' => '≥ 20 kế hoạch',
+                        '1' => '≥ 1 pallet',
+                        '5' => '≥ 5 pallet',
+                        '10' => '≥ 10 pallet',
+                        '20' => '≥ 20 pallet',
+                        '50' => '≥ 50 pallet',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             filled($data['value']),
-                            fn (Builder $query) => $query->having('receiving_plans_count', '>=', (int) $data['value'])
+                            fn (Builder $query) => $query->having('total_pallets', '>=', (int) $data['value'])
                         );
                     }),
             ])
+            ->groups([
+                Group::make('vendor_name')
+                    ->label('Theo nhà cung cấp')
+                    ->collapsible(),
+
+                Group::make('storage_rate')
+                    ->label('Theo tỷ lệ tồn kho')
+                    ->getDescriptionFromRecordUsing(function ($record) {
+                        $rate = $record->total_pallets > 0 ? round(($record->stored_pallets / $record->total_pallets) * 100, 1) : 0;
+                        if ($rate >= 70) return 'Tồn kho cao (≥70%)';
+                        if ($rate >= 40) return 'Tồn kho trung bình (40-69%)';
+                        if ($rate > 0) return 'Tồn kho thấp (<40%)';
+                        return 'Không tồn kho (0%)';
+                    })
+                    ->collapsible(),
+
+                Group::make('shipping_rate')
+                    ->label('Theo tỷ lệ xuất kho')
+                    ->getDescriptionFromRecordUsing(function ($record) {
+                        $rate = $record->total_pallets > 0 ? round(($record->shipped_pallets / $record->total_pallets) * 100, 1) : 0;
+                        if ($rate >= 70) return 'Xuất kho cao (≥70%)';
+                        if ($rate >= 40) return 'Xuất kho trung bình (40-69%)';
+                        if ($rate > 0) return 'Xuất kho thấp (<40%)';
+                        return 'Chưa xuất kho (0%)';
+                    })
+                    ->collapsible(),
+
+                Group::make('total_pallets')
+                    ->label('Theo khối lượng pallet')
+                    ->getDescriptionFromRecordUsing(function ($record) {
+                        $total = $record->total_pallets;
+                        if ($total >= 50) return 'Khối lượng rất lớn (≥50 pallet)';
+                        if ($total >= 20) return 'Khối lượng lớn (20-49 pallet)';
+                        if ($total >= 10) return 'Khối lượng trung bình (10-19 pallet)';
+                        return 'Khối lượng nhỏ (<10 pallet)';
+                    })
+                    ->collapsible(),
+            ])
+            ->defaultGroup('vendor_name')
             ->striped()
-            ->paginated([10, 25, 50]);
+            ->paginated([25, 50, 100])
+            ->reorderable(false)
+            ->searchable(false)
+            ->defaultSort(null) // Tắt default sorting
+            ->deferLoading();
+    }
+
+    protected function getDefaultTableSortColumn(): ?string
+    {
+        return null; // Tắt default sorting
+    }
+
+    protected function getDefaultTableSortDirection(): ?string
+    {
+        return null; // Tắt default sorting
+    }
+
+    protected function applyDefaultSortingToTableQuery(Builder $query): Builder
+    {
+        // Không áp dụng default sorting, giữ nguyên ordering từ query
+        return $query;
     }
 
     protected function getTableRecordsPerPageSelectOptions(): array
