@@ -3,8 +3,11 @@
 namespace App\Filament\Resources\Pallets\Pages;
 
 use App\Filament\Resources\Pallets\PalletResource;
+use App\Exports\PalletExport;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListPallets extends ListRecords
 {
@@ -20,5 +23,15 @@ class ListPallets extends ListRecords
         return [
             CreateAction::make()->label('Tạo mới'),
         ];
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        return parent::getTableQuery()->with([
+            'crate.receivingPlan',
+            'shippingRequestItem.shippingRequest',
+            'checkedInBy',
+            'checkedOutBy'
+        ]);
     }
 }

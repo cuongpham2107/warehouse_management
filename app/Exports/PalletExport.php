@@ -16,8 +16,13 @@ class PalletExport implements FromCollection, WithHeadings, WithMapping, Respons
 
     public function __construct(Collection $records)
     {
-        // Nạp các quan hệ cần thiết
-        $this->records = $records->load(['crate', 'location', 'shipmentItems.shipment.vehicle']);
+        // Nạp các quan hệ cần thiết theo cấu trúc thực tế
+        $this->records = $records->load([
+            'crate.receivingPlan', 
+            'shippingRequestItem.shippingRequest',
+            'checkedInBy',
+            'checkedOutBy'
+        ]);
     }
 
     public function collection()
@@ -29,35 +34,42 @@ class PalletExport implements FromCollection, WithHeadings, WithMapping, Respons
     {
         return [
             'Mã Pallet',
-            'Mã Thùng Hàng',
+            'Mã Kiện Hàng',
+            'Kế Hoạch Nhập Kho',
             'Vị Trí',
             'Trạng Thái',
             'Thời Gian Nhập Kho',
+            'Người Nhập Kho',
             'Thời Gian Xuất Kho',
-            'Mã Lô Vận Chuyển',
+            'Người Xuất Kho',
+            'Mã Yêu Cầu Xuất Kho',
             'Biển Số Xe',
             'Tên Tài Xế',
             'Số ĐT Tài Xế',
+            'Số Niêm Phong',
         ];
     }
 
     public function map($pallet): array
     {
-        // Lấy thông tin shipment đầu tiên nếu có
-        $shipmentItem = $pallet->shipmentItems->first();
-        $shipment = $shipmentItem?->shipment;
-        $vehicle = $shipment?->vehicle;
+        // Lấy thông tin shipping request nếu có
+        $shippingRequest = $pallet->shippingRequestItem?->shippingRequest;
+        
         return [
             $pallet->pallet_id,
             $pallet->crate->crate_id ?? '',
-            $pallet->location->location_code ?? '',
+            $pallet->crate->receivingPlan->plan_code ?? '',
+            $pallet->location_code ?? '',
             $pallet->status instanceof \App\Enums\PalletStatus ? $pallet->status->getLabel() : $pallet->status,
-            $pallet->checked_in_at,
-            $pallet->checked_out_at,
-            $shipment?->shipment_code ?? '',
-            $vehicle?->license_plate ?? '',
-            $vehicle?->driver_name ?? '',
-            $vehicle?->driver_phone ?? '',
+            $pallet->checked_in_at ? $pallet->checked_in_at->format('H:i d/m/Y') : '',
+            $pallet->checkedInBy->name ?? '',
+            $pallet->checked_out_at ? $pallet->checked_out_at->format('H:i d/m/Y') : '',
+            $pallet->checkedOutBy->name ?? '',
+            $shippingRequest?->request_code ?? '',
+            $shippingRequest?->license_plate ?? '',
+            $shippingRequest?->driver_name ?? '',
+            $shippingRequest?->driver_phone ?? '',
+            $shippingRequest?->seal_number ?? '',
         ];
     }
 

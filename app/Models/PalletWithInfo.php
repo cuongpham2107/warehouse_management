@@ -94,7 +94,10 @@ class PalletWithInfo extends Model
     public function getCrateDimensionsAttribute()
     {
         if ($this->crate_length && $this->crate_width && $this->crate_height) {
-            return "{$this->crate_length} x {$this->crate_width} x {$this->crate_height}";
+            $crate_length = (int)$this->crate_length;
+            $crate_width = (int)$this->crate_width;
+            $crate_height = (int)$this->crate_height;
+            return "{$crate_length} x {$crate_width} x {$crate_height}";
         }
         return null;
     }

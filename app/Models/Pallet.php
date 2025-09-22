@@ -47,7 +47,10 @@ class Pallet extends Model
     }
 
 
-  
+    public function shippingRequestItem()
+    {   
+        return $this->belongsTo(ShippingRequestItem::class, 'crate_id', 'crate_id');
+    }
 
     /**
      * Get the user who checked in this pallet.
