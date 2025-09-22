@@ -21,7 +21,10 @@ use Filament\Forms\Components\Textarea;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ShippingInvoiceExportController;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Schemas\Components\Section;
 
 class PalletsTable
 {
@@ -175,6 +178,57 @@ class PalletsTable
                 DeleteAction::make()
                     ->icon('heroicon-o-trash')
                     ->iconButton(),
+                ViewAction::make()
+                    ->icon('heroicon-o-eye')
+                    ->iconButton()
+                    ->modalHeading('Thông tin xuất kho của pallet')
+                    ->visible(fn ($record) => $record->shippingRequestItem && $record->shippingRequestItem->shippingRequest)
+                    ->fillForm(function ($record) {
+                        $shippingRequest = $record->shippingRequestItem?->shippingRequest;
+                        
+                        if (!$shippingRequest) {
+                            return [];
+                        }
+                        
+                        return [
+                            'lifting_time' => $shippingRequest->lifting_time ? 
+                                \Carbon\Carbon::parse($shippingRequest->lifting_time)->format('H:i d/m/Y') : 
+                                'Chưa có thông tin',
+                            'requested_date' => $shippingRequest->requested_date ? 
+                                \Carbon\Carbon::parse($shippingRequest->requested_date)->format('H:i d/m/Y') : 
+                                'Chưa có thông tin',
+                            'license_plate' => $shippingRequest->license_plate ?? 'Chưa có thông tin',
+                            'driver_name' => $shippingRequest->driver_name ?? 'Chưa có thông tin',
+                            'driver_phone' => $shippingRequest->driver_phone ?? 'Chưa có thông tin',
+                            'seal_number' => $shippingRequest->seal_number ?? 'Chưa có thông tin',
+                        ];
+                    })
+                    ->schema([
+                        Section::make('')
+                            ->columns(4)
+                            ->schema([
+                                TextInput::make('lifting_time')
+                                    ->label('Thời gian đóng hàng')
+                                    ->columnSpan(2)
+                                    ->disabled(),
+                                TextInput::make('requested_date')
+                                    ->label('Ngày giao hàng')
+                                    ->columnSpan(2)
+                                    ->disabled(),
+                                TextInput::make('license_plate')
+                                    ->label('Biển số xe')
+                                    ->disabled(),
+                                TextInput::make('driver_name')
+                                    ->label('Tên tài xế')
+                                    ->disabled(),
+                                TextInput::make('driver_phone')
+                                    ->label('SĐT tài xế')
+                                    ->disabled(),
+                                TextInput::make('seal_number')
+                                    ->label('Số niêm phong')
+                                    ->disabled(),
+                            ])
+                    ])
             ],position: RecordActionsPosition::BeforeColumns)
             ->recordUrl(null)
             ->headerActions([
@@ -279,8 +333,23 @@ class PalletsTable
                     ->extraModalFooterActions(fn(Action $action): array => [
                         $action->makeModalSubmitAction('createAndExport', arguments: ['export' => true])->label('Tạo và xuất file Excel')->color('success')
 
-                    ])
-
+                    ]),
+                BulkAction::make('export-excel')
+                    ->label('Xuất file Excel')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->color('success')
+                    ->action(function (Collection $records) {
+                        $records = $records->load([
+                            'crate.receivingPlan',
+                            'shippingRequestItem.shippingRequest',
+                            'checkedInBy',
+                            'checkedOutBy'
+                        ]);
+                        $fileName = 'pallets_export_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
+                        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\PalletExport($records), $fileName);
+                    })
+                    ->requiresConfirmation(),
+                       
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
