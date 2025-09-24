@@ -28,7 +28,7 @@ class ReceivingPlan extends Model
 
     protected $casts = [
         'plan_date' => 'date',
-        'arrival_date' => 'date',
+        'arrival_date' => 'datetime',
         'total_crates' => 'integer',
         'total_pcs' => 'integer',
         'total_weight' => 'decimal:2',

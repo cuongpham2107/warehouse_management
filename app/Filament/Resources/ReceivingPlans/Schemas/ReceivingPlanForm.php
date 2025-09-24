@@ -56,7 +56,6 @@ class ReceivingPlanForm
                                     ->prefixIcon('heroicon-o-calendar'),
                                 TimePicker::make('arrival_date')
                                     ->label('Giờ hạ hàng')
-                                    ->default(now())
                                     ->seconds(false)
                                     ->displayFormat('H:i')
                                     ->placeholder('Chọn giờ hạ hàng')
