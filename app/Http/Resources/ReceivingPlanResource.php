@@ -40,11 +40,17 @@ class ReceivingPlanResource extends JsonResource
             /**
              * Danh sách kiện hàng
              */
-            'crates' => $this->when($this->relationLoaded('crates'), function () {
-                return $this->crates
-                    // ->where('status', 'checked_in')
-                    ->map(function ($crate) {
-                        return [
+                'crates' => $this->when($this->resource->relationLoaded('crates'), function () {
+                    $order = [
+                        'checked_in' => 1,
+                        'planned' => 2,
+                        'received' => 3,
+                        'shipped' => 4,
+                        'stored' => 5,
+                    ];
+                    return $this->crates
+                        ->sortBy(fn($crate) => $order[$crate->status->value] ?? 99)
+                        ->map(fn ($crate) => [
                             'id' => $crate->id,
                             'crate_code' => $crate->crate_id,
                             'description'=> $crate->description,
@@ -58,10 +64,9 @@ class ReceivingPlanResource extends JsonResource
                                 'location_code' => $crate->pallet->location_code,
                                 'status' => $crate->pallet->status->value,
                             ] : null,
-                        ];
-                    })
-                    ->values();
-            }),
+                        ])
+                        ->values();
+                }),
             /**
              * Danh sách pallet
              */
