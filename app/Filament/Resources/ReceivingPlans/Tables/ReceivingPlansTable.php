@@ -14,6 +14,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Grouping\Group;
+use Filament\Actions\ReplicateAction;
 
 class ReceivingPlansTable
 {
@@ -140,11 +141,18 @@ class ReceivingPlansTable
                     ->collapsible(),
             ])
             ->defaultSort('plan_date', 'desc')
+            
             ->recordActions([
+               
                 EditAction::make()
-                    ->modal('edit_receiving_plan')
                     ->icon('heroicon-m-pencil-square')
                     ->iconButton(),
+                ReplicateAction::make()
+                    ->iconButton()
+                    ->mutateRecordDataUsing(function (array $data): array {
+                        $data['plan_code'] = $data['plan_code'] . '_' . str_pad($data['id'], 2, '0', STR_PAD_LEFT);
+                        return $data;
+                    }),
                 DeleteAction::make()
                     ->icon('heroicon-m-trash')
                     ->iconButton()
@@ -156,25 +164,6 @@ class ReceivingPlansTable
                         // Xoá bản ghi
                         $record->delete();
                     }),
-                // \Filament\Actions\Action::make('activate')
-                //     ->icon('heroicon-o-bolt')
-                //     ->iconButton()
-                //     ->visible(fn($record) => $record->status === \App\Enums\ReceivingPlanStatus::PENDING)
-                //     ->requiresConfirmation()
-                //     ->action(function($record) {
-                //         $record->status = \App\Enums\ReceivingPlanStatus::IN_PROGRESS;
-                //         $record->save();
-                //     }),
-                // \Filament\Actions\Action::make('close')
-                //     ->iconButton()
-                //     ->icon('heroicon-o-lock-closed')
-                //     ->visible(fn($record) => $record->status === \App\Enums\ReceivingPlanStatus::IN_PROGRESS)
-                //     ->requiresConfirmation()
-                //     ->action(function($record) {
-                //         $record->status = \App\Enums\ReceivingPlanStatus::COMPLETED;
-                //         $record->save();
-                //     }),
-
                 ],position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
