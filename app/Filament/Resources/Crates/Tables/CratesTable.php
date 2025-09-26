@@ -15,6 +15,11 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use App\Models\WarehouseLocation;
+use App\Enums\PalletActivityAction;
 
 class CratesTable
 {
@@ -90,7 +95,7 @@ class CratesTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-               
+
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -123,15 +128,55 @@ class CratesTable
                     ->collapsible(),
             ])
             ->recordActions([
+                Action::make('create_pallet')
+                    ->label('Tạo pallet từ kiện hàng')
+                    ->icon('heroicon-o-plus')
+                    ->iconButton()
+                    ->schema([
+                        Section::make('Thông tin pallet')
+                            ->columns(2)
+                            ->schema([
+                                TextInput::make('pallet_id')
+                                    ->label('Mã pallet')
+                                    ->required()
+                                    ->placeholder('Nhập mã pallet'),
+                                TextInput::make('location_code')
+                                    ->required()
+                                    ->label('Mã vị trí')
+                                    ->placeholder('Nhập mã vị trí (nếu có)')
+                                    ->datalist(
+                                        fn() => WarehouseLocation::query()->pluck('location_code')->all()
+                                    ),
+                            ]),
+
+                    ])
+                    ->action(function (array $data, $record) {
+                        $pallet = $record->pallet()->create([
+                            'pallet_id' => $data['pallet_id'],
+                            'location_code' => $data['location_code'] ?? null,
+                            'status' => \App\Enums\PalletStatus::STORED,
+                        ]);
+
+                        $pallet->activities()->create([
+                            'user_id' => auth()->id(),
+                            'action' => PalletActivityAction::ATTACH_CRATE->value,
+                            'description' => 'Tạo pallet từ kiện hàng',
+                            'action_time' => now(),
+                        ]);
+                        $record->status = CrateStatus::STORED;
+                        $record->save();
+                        $record->refresh();
+                    }),
+                
                 EditAction::make()
                     ->icon('heroicon-o-pencil')
                     ->iconButton(),
                 DeleteAction::make()
                     ->icon('heroicon-o-trash')
                     ->iconButton(),
-            ],position: RecordActionsPosition::BeforeColumns)
+            ], position: RecordActionsPosition::BeforeColumns)
             ->headerActions([
-                
+
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

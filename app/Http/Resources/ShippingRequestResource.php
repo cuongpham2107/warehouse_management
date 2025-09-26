@@ -50,17 +50,27 @@ class ShippingRequestResource extends JsonResource
              * Danh sách pallet
              */
             'items' => $this->when($this->relationLoaded('items'), function () {
-                return $this->items->map(function ($item) {
-                    return [
-                        'crate_code' => $item->crate->crate_id,
-                        'pallet_code' => $item->pallet->pallet_id,
-                        'location_code' => $item->pallet->location_code,
-                        'pieces' => $item->crate->pieces,
-                        'pcs' => $item->crate->pcs,
-                        'gross_weight' => $item->crate->gross_weight,
-                        'status' => $item->pallet->status,
-                    ];
-                });
+                $order = [
+                    'in_stock' => 1,
+                    'in_transit' => 2,
+                    'stored' => 3,
+                    'shipped' => 4,
+                    'damaged' => 5,
+                ];
+
+                return $this->items
+                    ->sortBy(fn($item) => $order[$item->pallet->status->value] ?? 99)
+                    ->map(function ($item) {
+                        return [
+                            'crate_code' => $item->crate->crate_id,
+                            'pallet_code' => $item->pallet->pallet_id,
+                            'location_code' => $item->pallet->location_code,
+                            'pieces' => $item->crate->pieces,
+                            'pcs' => $item->crate->pcs,
+                            'gross_weight' => $item->crate->gross_weight,
+                            'status' => $item->pallet->status,
+                        ];
+                    });
             }),
         ];
     }

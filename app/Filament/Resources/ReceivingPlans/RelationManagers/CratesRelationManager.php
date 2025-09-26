@@ -266,7 +266,7 @@ class CratesRelationManager extends RelationManager
                             return $data;
                         }),
             ])
-            ->recordAction(null)
+            
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
@@ -277,7 +277,6 @@ class CratesRelationManager extends RelationManager
                         ->modalHeading('Xóa các kiện hàng đã chọn')
                         ->modalDescription('Bạn có chắc muốn xóa tất cả kiện hàng đã chọn? Hành động này không thể hoàn tác.'),
                 ]),
-
             ])
             ->defaultSort('created_at', 'desc')
             ->paginated([10, 25, 50, 100]);
