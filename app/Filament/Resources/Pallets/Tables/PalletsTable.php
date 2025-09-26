@@ -25,6 +25,8 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\DatePicker;
 
 class PalletsTable
 {
@@ -181,54 +183,99 @@ class PalletsTable
                 ViewAction::make()
                     ->icon('heroicon-o-eye')
                     ->iconButton()
-                    ->modalHeading('Thông tin xuất kho của pallet')
-                    ->visible(fn ($record) => $record->shippingRequestItem && $record->shippingRequestItem->shippingRequest)
                     ->fillForm(function ($record) {
-                        $shippingRequest = $record->shippingRequestItem?->shippingRequest;
-                        
-                        if (!$shippingRequest) {
+                        $info = null;
+                        if ($record->status->value === 'shipped') {
+                            $shippingInfo = $record->shippingRequestItem?->shippingRequest;
+                            if (!$shippingInfo) {
+                                return [];
+                            }
+                            $info = [
+                                'lifting_time' => $shippingInfo->lifting_time ? $shippingInfo->lifting_time : 'Chưa có thông tin',
+                                'requested_date' => $shippingInfo->requested_date ? $shippingInfo->requested_date : 'Chưa có thông tin',
+                                'license_plate' => $shippingInfo->license_plate ?? 'Chưa có thông tin',
+                                'driver_name' => $shippingInfo->driver_name ?? 'Chưa có thông tin',
+                                'driver_phone' => $shippingInfo->driver_phone ?? 'Chưa có thông tin',
+                                'seal_number' => $shippingInfo->seal_number ?? 'Chưa có thông tin',
+                            ];
+                        } elseif ($record->status->value === 'stored') {
+                            $plan = $record->crate?->receivingPlan;
+                            if (!$plan) {
+                                return [];
+                            }
+                            $info = [
+                                'location_code' => $record->location_code ?? 'Chưa có thông tin',
+                                'lifting_time' => $plan->arrival_date ? $plan->arrival_date : 'Chưa có thông tin',
+                                'requested_date' => $plan->plan_date ? $plan->plan_date : 'Chưa có thông tin',
+                                'license_plate' => $plan->license_plate ?? 'Chưa có thông tin',
+                                'transport_garage' => $plan->transport_garage ?? 'Chưa có thông tin',
+                                'vehicle_capacity' => $plan->vehicle_capacity ?? 'Chưa có thông tin',
+                            ];
+                        } else {
                             return [];
                         }
-                        
-                        return [
-                            'lifting_time' => $shippingRequest->lifting_time ? 
-                                \Carbon\Carbon::parse($shippingRequest->lifting_time)->format('H:i d/m/Y') : 
-                                'Chưa có thông tin',
-                            'requested_date' => $shippingRequest->requested_date ? 
-                                \Carbon\Carbon::parse($shippingRequest->requested_date)->format('H:i d/m/Y') : 
-                                'Chưa có thông tin',
-                            'license_plate' => $shippingRequest->license_plate ?? 'Chưa có thông tin',
-                            'driver_name' => $shippingRequest->driver_name ?? 'Chưa có thông tin',
-                            'driver_phone' => $shippingRequest->driver_phone ?? 'Chưa có thông tin',
-                            'seal_number' => $shippingRequest->seal_number ?? 'Chưa có thông tin',
-                        ];
+                        return $info;
                     })
-                    ->schema([
-                        Section::make('')
-                            ->columns(4)
-                            ->schema([
-                                TextInput::make('lifting_time')
-                                    ->label('Thời gian đóng hàng')
-                                    ->columnSpan(2)
-                                    ->disabled(),
-                                TextInput::make('requested_date')
-                                    ->label('Ngày giao hàng')
-                                    ->columnSpan(2)
-                                    ->disabled(),
-                                TextInput::make('license_plate')
-                                    ->label('Biển số xe')
-                                    ->disabled(),
-                                TextInput::make('driver_name')
-                                    ->label('Tên tài xế')
-                                    ->disabled(),
-                                TextInput::make('driver_phone')
-                                    ->label('SĐT tài xế')
-                                    ->disabled(),
-                                TextInput::make('seal_number')
-                                    ->label('Số niêm phong')
-                                    ->disabled(),
-                            ])
-                    ])
+                    ->schema(fn ($record) => $record->status->value === 'shipped'
+                        ? [
+                            Section::make('Thông tin xuất kho')
+                                ->columns(4)
+                                ->schema([
+                                    TimePicker::make('lifting_time')
+                                        ->label('Thời gian đóng hàng')
+                                        ->columnSpan(2)
+                                        ->disabled(),
+                                    DatePicker::make('requested_date')
+                                        ->label('Ngày giao hàng')
+                                        ->displayFormat('d/m/Y')
+                                        ->columnSpan(2)
+                                        ->disabled(),
+                                    TextInput::make('license_plate')
+                                        ->label('Biển số xe')
+                                        ->disabled(),
+                                    TextInput::make('driver_name')
+                                        ->label('Tên tài xế')
+                                        ->disabled(),
+                                    TextInput::make('driver_phone')
+                                        ->label('SĐT tài xế')
+                                        ->disabled(),
+                                    TextInput::make('seal_number')
+                                        ->label('Số niêm phong')
+                                        ->disabled(),
+                                ])
+                        ]
+                        : [
+                            Section::make('Thông tin kế hoạch nhập kho')
+                                ->columns(6)
+                                ->schema([
+                                    TextInput::make('location_code')
+                                        ->label('Mã vị trí')
+                                        ->disabled()
+                                        ->columnSpan(2),
+                                    TimePicker::make('lifting_time')
+                                        ->label('Thời gian dự kiến hạ hàng')
+                                        ->disabled()
+                                        ->columnSpan(2),
+                                    DatePicker::make('requested_date')
+                                        ->label('Ngày kế hoạch')
+                                        ->displayFormat('d/m/Y')
+                                        ->disabled()
+                                        ->columnSpan(2),
+                                    TextInput::make('transport_garage')
+                                        ->label('Nhà xe vận chuyển')
+                                        ->disabled()
+                                        ->columnSpan(2),
+                                    TextInput::make('license_plate')
+                                        ->label('Biển số xe')
+                                        ->disabled()
+                                        ->columnSpan(2),
+                                    TextInput::make('vehicle_capacity')
+                                        ->label('Tải trọng xe (tấn)')
+                                        ->disabled()
+                                        ->columnSpan(2),
+                                ])
+                        ]
+                    )
             ],position: RecordActionsPosition::BeforeColumns)
             ->recordUrl(null)
             ->headerActions([
