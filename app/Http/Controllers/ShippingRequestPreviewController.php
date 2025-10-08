@@ -22,14 +22,12 @@ class ShippingRequestPreviewController extends Controller
         foreach ($shippingRequest->items as $item) {
             $totalPcs += $item->crate->pcs ?? 0;
             $totalGrossWeight += $item->crate->gross_weight ?? 0;
-            $totalPcs += $item->crate->pcs ?? 0;
         }
 
         return view('exports.invoices', [
             'shippingRequest' => $shippingRequest,
             'totalPcs' => $totalPcs,
             'totalGrossWeight' => $totalGrossWeight,
-            'totalPcs' => $totalPcs,
             'preview' => true, // Thêm biến này để xác định là xem trước
         ]);
     }
