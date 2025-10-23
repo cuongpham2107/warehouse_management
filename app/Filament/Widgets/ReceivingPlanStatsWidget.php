@@ -41,6 +41,12 @@ class ReceivingPlanStatsWidget extends BaseWidget
                         DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "in_stock" THEN 1 ELSE 0 END) as in_stock_pallets'),
                         DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "in_transit" THEN 1 ELSE 0 END) as in_transit_pallets'),
                         DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "damaged" THEN 1 ELSE 0 END) as damaged_pallets'),
+                        // Tổng crate_pcs theo từng trạng thái
+                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "stored" THEN COALESCE(pallet_with_info.crate_pcs, 0) ELSE 0 END) as stored_pcs'),
+                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "shipped" THEN COALESCE(pallet_with_info.crate_pcs, 0) ELSE 0 END) as shipped_pcs'),
+                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "in_stock" THEN COALESCE(pallet_with_info.crate_pcs, 0) ELSE 0 END) as in_stock_pcs'),
+                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "in_transit" THEN COALESCE(pallet_with_info.crate_pcs, 0) ELSE 0 END) as in_transit_pcs'),
+                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "damaged" THEN COALESCE(pallet_with_info.crate_pcs, 0) ELSE 0 END) as damaged_pcs'),
                         DB::raw('SUM(COALESCE(pallet_with_info.crate_pcs, 0)) as total_pcs'),
                         DB::raw('SUM(COALESCE(pallet_with_info.crate_gross_weight, 0)) as total_weight'),
                         DB::raw('COUNT(DISTINCT pallet_with_info.plan_code) as total_plans'),
@@ -60,57 +66,46 @@ class ReceivingPlanStatsWidget extends BaseWidget
                     ->weight('medium')
                     ->sortable(false),
 
-                Tables\Columns\TextColumn::make('total_pallets')
-                    ->label('Tổng Pallet')
+                Tables\Columns\TextColumn::make('total_pcs')
+                    ->label('Tổng PCS')
                     ->alignCenter()
                     ->badge()
                     ->color('gray')
                     ->sortable(false),
 
-                Tables\Columns\TextColumn::make('stored_pallets')
+                Tables\Columns\TextColumn::make('stored_pcs')
                     ->label('Tồn kho')
                     ->alignCenter()
                     ->badge()
                     ->color('success')
-                    ->formatStateUsing(fn ($state) => $state ?: '0')
                     ->sortable(false),
 
-                Tables\Columns\TextColumn::make('shipped_pallets')
+                Tables\Columns\TextColumn::make('shipped_pcs')
                     ->label('Đã xuất')
                     ->alignCenter()
                     ->badge()
                     ->color('primary')
-                    ->formatStateUsing(fn ($state) => $state ?: '0')
                     ->sortable(false),
 
-                Tables\Columns\TextColumn::make('in_stock_pallets')
+                Tables\Columns\TextColumn::make('in_stock_pcs')
                     ->label('Đang xuất')
                     ->alignCenter()
                     ->badge()
                     ->color('warning')
-                    ->formatStateUsing(fn ($state) => $state ?: '0')
                     ->sortable(false),
 
-                Tables\Columns\TextColumn::make('in_transit_pallets')
+                Tables\Columns\TextColumn::make('in_transit_pcs')
                     ->label('Vận chuyển')
                     ->alignCenter()
                     ->badge()
                     ->color('info')
-                    ->formatStateUsing(fn ($state) => $state ?: '0')
                     ->sortable(false),
 
-                Tables\Columns\TextColumn::make('damaged_pallets')
+                Tables\Columns\TextColumn::make('damaged_pcs')
                     ->label('Hư hỏng')
                     ->alignCenter()
                     ->badge()
                     ->color('danger')
-                    ->formatStateUsing(fn ($state) => $state ?: '0')
-                    ->sortable(false),
-
-                Tables\Columns\TextColumn::make('total_pcs')
-                    ->label('Tổng PCS')
-                    ->alignCenter()
-                    ->formatStateUsing(fn ($state) => number_format($state ?: 0))
                     ->sortable(false),
 
                 Tables\Columns\TextColumn::make('total_weight')
