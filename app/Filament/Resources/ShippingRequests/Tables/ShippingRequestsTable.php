@@ -11,9 +11,11 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Filament\Support\Enums\FontWeight;
 use App\Enums\ShippingRequestStatus;
+use App\Enums\PalletStatus;
 use Filament\Actions\DeleteAction;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Notifications\Notification;
 
 class ShippingRequestsTable
 {
@@ -133,60 +135,33 @@ class ShippingRequestsTable
             ->groups([
                 Group::make('driver_name')
                     ->label('Tài xế'),
-                    
             ])
             ->defaultSort('requested_date', 'desc')
             ->recordActions([
-                // \Filament\Actions\Action::make('successfully')
-                //     ->label('Hoàn thành')
-                //     ->icon('heroicon-o-check-circle')
-                //     ->color('success')
-                //     ->visible(fn($record) => $record->status === ShippingRequestStatus::IN_PROGRESS)
-                //     ->requiresConfirmation()
-                //     ->action(function($record) {
-                //         $record->status = 'completed';
-                //         $record->items()->with('pallet','crate')->each(function ($item) {
-                //             if ($item->crate) {
-                //                 $item->crate->status = \App\Enums\CrateStatus::SHIPPED->value;
-                //                 $item->crate->save();
-                //             }
-                //             if ($item->pallet) {
-                //                 $item->pallet->status = \App\Enums\PalletStatus::SHIPPED->value;
-                //                 $item->pallet->save();
-                //             }
-                //         });
-                //         $record->save();
-                //     }),
-                // \Filament\Actions\Action::make('approve')
-                //     ->label('Duyệt')
-                //     ->icon('heroicon-o-check-circle')
-                //     ->color('success')
-                //     ->visible(fn($record) => $record->status === ShippingRequestStatus::PENDING)
-                //     ->requiresConfirmation()
-                //     ->action(function($record) {
-                //         $record->status = 'in_progress';
-                //         $record->save();
-                //     }),
-                // \Filament\Actions\Action::make('cancel')
-                //     ->label('Hủy')
-                //     ->icon('heroicon-o-x-circle')
-                //     ->color('danger')
-                //     ->visible(fn($record) => in_array($record->status, [ShippingRequestStatus::PENDING, ShippingRequestStatus::IN_PROGRESS]))
-                //     ->requiresConfirmation()
-                //     ->action(function($record) {
-                //         $record->status = 'cancelled';
-                //         $record->save();
-                //     }),
-                 EditAction::make()
+                EditAction::make()
                     ->icon('heroicon-m-pencil-square')
                     ->iconButton(),
                 DeleteAction::make()
                     ->icon('heroicon-m-trash')
                     ->iconButton()
                     ->requiresConfirmation()
-                    ->successNotificationTitle('Yêu cầu vận chuyển đã được xóa thành công.')
-                    ->failureNotificationTitle('Không thể xóa yêu cầu vận chuyển.'),
-                ], position: RecordActionsPosition::BeforeColumns)
+                    ->action(function ($record) {
+                        // Cập nhật trạng thái pallet về "stored" trước khi xóa
+                        $record->items()->with('pallet')->get()->each(function ($item) {
+                            if ($item->pallet) {
+                                $item->pallet->status = PalletStatus::STORED;
+                                $item->pallet->save();
+                            }
+                        });
+
+                        $record->delete();
+
+                        Notification::make()
+                            ->title('Yêu cầu vận chuyển đã được xóa thành công.')
+                            ->success()
+                            ->send();
+                    }),
+            ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()

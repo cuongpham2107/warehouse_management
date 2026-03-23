@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Filament\Support\Facades\FilamentTimezone;
+use Illuminate\Support\Facades\URL;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -32,6 +33,10 @@ class AppServiceProvider extends ServiceProvider
         
         // Set locale cho ứng dụng Laravel
         app()->setLocale('vi');
+
+        if (str_contains(config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
         
         Scramble::configure()
             ->withDocumentTransformers(function (OpenApi $openApi) {
@@ -40,8 +45,6 @@ class AppServiceProvider extends ServiceProvider
                         ->setDescription('Sử dụng mã thông báo của người mang để xác thực.'),
                 );
             });
-
-       
 
     }
 }
