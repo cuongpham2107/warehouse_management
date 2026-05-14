@@ -12,10 +12,11 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithUpserts;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 
-class CratesExcelImport implements SkipsEmptyRows, SkipsOnFailure, ToModel, WithBatchInserts, WithChunkReading, WithHeadingRow, WithValidation
+class CratesExcelImport implements SkipsEmptyRows, SkipsOnFailure, ToModel, WithBatchInserts, WithChunkReading, WithHeadingRow, WithUpserts, WithValidation
 {
     use Importable;
 
@@ -38,8 +39,6 @@ class CratesExcelImport implements SkipsEmptyRows, SkipsOnFailure, ToModel, With
     }
 
     /**
-     * @param array $row
-     *
      * @return \Illuminate\Database\Eloquent\Model|null
      */
     public function model(array $row)
@@ -64,23 +63,20 @@ class CratesExcelImport implements SkipsEmptyRows, SkipsOnFailure, ToModel, With
         $this->totalPcs += $row['pcs'] ?? 0;
         $this->totalWeight += $row['gross_weight_kg'] ?? 0.0;
 
-        // FirstOrNew to handle updates for existing crates
-        return Crate::firstOrNew(
-            ['crate_id' => $row['crate_id']],
-            [
-                'receiving_plan_id' => $receivingPlanId,
-                'description' => $row['description_of_goods'] ?? null,
-                'pieces' => $row['quantity'] ?? 0,
-                'pcs' => $row['pcs'] ?? 0,
-                'type' => $row['packing_type'],
-                'gross_weight' => $row['gross_weight_kg'] ?? 0,
-                'dimensions_length' => $row['dimensions_length_cm'] ?? 0,
-                'dimensions_width' => $row['dimensions_width_cm'] ?? 0,
-                'dimensions_height' => $row['dimensions_height_cm'] ?? 0,
-                'status' => CrateStatus::from($row['status'] ?? CrateStatus::CHECKED_IN->value),
-                'barcode' => $row['barcode'] ?? null,
-            ]
-        );
+        return new Crate([
+            'crate_id' => $row['crate_id'],
+            'receiving_plan_id' => $receivingPlanId,
+            'description' => $row['description_of_goods'] ?? null,
+            'pieces' => $row['quantity'] ?? 0,
+            'pcs' => $row['pcs'] ?? 0,
+            'type' => $row['packing_type'],
+            'gross_weight' => $row['gross_weight_kg'] ?? 0,
+            'dimensions_length' => $row['dimensions_length_cm'] ?? 0,
+            'dimensions_width' => $row['dimensions_width_cm'] ?? 0,
+            'dimensions_height' => $row['dimensions_height_cm'] ?? 0,
+            'status' => CrateStatus::from($row['status'] ?? CrateStatus::CHECKED_IN->value),
+            'barcode' => $row['barcode'] ?? null,
+        ]);
     }
 
     public function getTotalCrates(): int
@@ -104,7 +100,7 @@ class CratesExcelImport implements SkipsEmptyRows, SkipsOnFailure, ToModel, With
             'crate_id' => ['required', 'max:100'],
             'quantity' => ['required', 'integer', 'min:1'],
             'packing_type' => ['nullable', 'string'],
-            'gross_weight_kg' => ['required', 'numeric', 'min:0'],
+            'gross_weight_kg' => ['nullable', 'numeric', 'min:0'],
             'dimensions_length_cm' => ['nullable', 'numeric', 'min:0'],
             'dimensions_width_cm' => ['nullable', 'numeric', 'min:0'],
             'dimensions_height_cm' => ['nullable', 'numeric', 'min:0'],
@@ -128,12 +124,17 @@ class CratesExcelImport implements SkipsEmptyRows, SkipsOnFailure, ToModel, With
 
     public function batchSize(): int
     {
-        return 10000; // Số lượng bản ghi mỗi lần import
+        return 100; // Giảm batch size để tránh lỗi câu lệnh SQL quá dài (SQLSTATE[21S01])
     }
 
     public function chunkSize(): int
     {
-        return 10000; // Số lượng bản ghi mỗi lần đọc
+        return 100; // Giảm chunk size tương ứng
+    }
+
+    public function uniqueBy()
+    {
+        return ['crate_id', 'receiving_plan_id'];
     }
 
     public function onFailure(Failure ...$failures)

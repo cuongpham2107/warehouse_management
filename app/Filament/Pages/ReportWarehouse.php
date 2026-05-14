@@ -2,27 +2,26 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use App\Models\PalletWithInfo;
 use App\Enums\PalletStatus;
-use Filament\Tables\Columns\ColumnGroup;
-use Illuminate\Database\Eloquent\Builder;
+use App\Exports\WarehouseReportExport;
+use App\Models\PalletWithInfo;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Pages\Page;
+use Filament\Tables\Columns\ColumnGroup;
+use Filament\Tables\Columns\Summarizers\Count;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
-use GMP;
-use Illuminate\Support\Facades\DB;
-use App\Exports\WarehouseReportExport;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Facades\Excel;
-use Carbon\Carbon;
 
 class ReportWarehouse extends Page implements HasTable
 {
@@ -30,7 +29,7 @@ class ReportWarehouse extends Page implements HasTable
 
     protected string $view = 'filament.pages.report-warehouse';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-printer';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-printer';
 
     protected static ?int $navigationSort = 4;
 
@@ -64,7 +63,8 @@ class ReportWarehouse extends Page implements HasTable
                     ->label('STT')
                     ->searchable()
                     ->alignCenter()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->summarize([Count::make()->label('Tổng pallet')]),
                 TextColumn::make('plan_code')
                     ->label('Mã kế hoạch nhận hàng')
                     ->sortable()
@@ -92,13 +92,15 @@ class ReportWarehouse extends Page implements HasTable
                             ->alignCenter()
                             ->sortable()
                             ->searchable()
-                            ->toggleable(),
+                            ->toggleable()
+                            ->summarize([Sum::make()->label('Tổng PCS')]),
                         TextColumn::make('crate_gross_weight')
                             ->label('Trọng lượng (KG)')
                             ->sortable()
                             ->alignCenter()
                             ->searchable()
-                            ->toggleable(),
+                            ->toggleable()
+                            ->summarize([Sum::make()->label('Tổng KG')]),
                         TextColumn::make('crate_dimensions')
                             ->label('Kích thước (D x R x C)')
                             ->sortable()
@@ -210,8 +212,6 @@ class ReportWarehouse extends Page implements HasTable
                     ->sortable()
                     ->toggleable(),
 
-
-
             ])
             ->defaultSort('requested_date', 'asc')
             ->striped()
@@ -286,11 +286,11 @@ class ReportWarehouse extends Page implements HasTable
                         return $query
                             ->when(
                                 $data['plan_date_from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('plan_date', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('plan_date', '>=', $date),
                             )
                             ->when(
                                 $data['plan_date_to'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('plan_date', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('plan_date', '<=', $date),
                             );
                     }),
 
@@ -306,11 +306,11 @@ class ReportWarehouse extends Page implements HasTable
                         return $query
                             ->when(
                                 $data['arrival_date_from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('arrival_date', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('arrival_date', '>=', $date),
                             )
                             ->when(
                                 $data['arrival_date_to'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('arrival_date', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('arrival_date', '<=', $date),
                             );
                     }),
 
@@ -326,11 +326,11 @@ class ReportWarehouse extends Page implements HasTable
                         return $query
                             ->when(
                                 $data['departure_time_from'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('departure_time', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('departure_time', '>=', $date),
                             )
                             ->when(
                                 $data['departure_time_to'],
-                                fn(Builder $query, $date): Builder => $query->whereDate('departure_time', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('departure_time', '<=', $date),
                             );
                     }),
 
@@ -351,9 +351,10 @@ class ReportWarehouse extends Page implements HasTable
                             ->minValue(0),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        if (!empty($data['weight_value']) && !empty($data['weight_operator'])) {
+                        if (! empty($data['weight_value']) && ! empty($data['weight_operator'])) {
                             return $query->where('crate_gross_weight', $data['weight_operator'], $data['weight_value']);
                         }
+
                         return $query;
                     }),
 
@@ -374,22 +375,23 @@ class ReportWarehouse extends Page implements HasTable
                             ->minValue(0),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        if (!empty($data['pcs_value']) && !empty($data['pcs_operator'])) {
+                        if (! empty($data['pcs_value']) && ! empty($data['pcs_operator'])) {
                             return $query->where('crate_pcs', $data['pcs_operator'], $data['pcs_value']);
                         }
+
                         return $query;
                     }),
 
                 // Filter chỉ hiển thị những record có thông tin xuất kho
                 Filter::make('has_shipping_info')
                     ->label('Có thông tin xuất kho')
-                    ->query(fn(Builder $query): Builder => $query->whereNotNull('shipping_request_id'))
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('shipping_request_id'))
                     ->toggle(),
 
                 // Filter chỉ hiển thị những record chưa có thông tin xuất kho
                 Filter::make('no_shipping_info')
                     ->label('Chưa có thông tin xuất kho')
-                    ->query(fn(Builder $query): Builder => $query->whereNull('shipping_request_id'))
+                    ->query(fn (Builder $query): Builder => $query->whereNull('shipping_request_id'))
                     ->toggle(),
             ])
             ->groups([
@@ -421,28 +423,28 @@ class ReportWarehouse extends Page implements HasTable
                             ])
                             ->default('all')
                             ->reactive(),
-                        
+
                         Select::make('date_column')
                             ->label('Lọc theo cột ngày')
                             ->options([
                                 'plan_date' => 'Ngày hàng đến',
-                                'arrival_date' => 'Ngày hạ hàng', 
+                                'arrival_date' => 'Ngày hạ hàng',
                                 'requested_date' => 'Ngày giao hàng',
                                 'lifting_time' => 'Thời gian đóng hàng',
                             ])
                             ->default('plan_date')
-                            ->visible(fn($get) => $get('date_filter_type') !== 'all'),
-                            
+                            ->visible(fn ($get) => $get('date_filter_type') !== 'all'),
+
                         DatePicker::make('date_from')
                             ->label('Từ ngày')
-                            ->visible(fn($get) => $get('date_filter_type') === 'custom')
-                            ->required(fn($get) => $get('date_filter_type') === 'custom'),
-                            
+                            ->visible(fn ($get) => $get('date_filter_type') === 'custom')
+                            ->required(fn ($get) => $get('date_filter_type') === 'custom'),
+
                         DatePicker::make('date_to')
                             ->label('Đến ngày')
-                            ->visible(fn($get) => $get('date_filter_type') === 'custom')
-                            ->required(fn($get) => $get('date_filter_type') === 'custom'),
-                            
+                            ->visible(fn ($get) => $get('date_filter_type') === 'custom')
+                            ->required(fn ($get) => $get('date_filter_type') === 'custom'),
+
                         Select::make('pallet_status')
                             ->label('Trạng thái Pallet')
                             ->options(array_merge(['' => 'Tất cả trạng thái'], PalletStatus::getOptions()))
@@ -451,11 +453,11 @@ class ReportWarehouse extends Page implements HasTable
                     ->action(function (array $data) {
                         // Bắt đầu với query cơ bản
                         $query = PalletWithInfo::query();
-                        
+
                         // Áp dụng filter theo thời gian
                         if ($data['date_filter_type'] !== 'all') {
                             $dateColumn = $data['date_column'] ?? 'plan_date';
-                            
+
                             switch ($data['date_filter_type']) {
                                 case 'today':
                                     $query->whereDate($dateColumn, today());
@@ -463,47 +465,47 @@ class ReportWarehouse extends Page implements HasTable
                                 case 'this_week':
                                     $query->whereBetween($dateColumn, [
                                         now()->startOfWeek(),
-                                        now()->endOfWeek()
+                                        now()->endOfWeek(),
                                     ]);
                                     break;
                                 case 'this_month':
                                     $query->whereMonth($dateColumn, now()->month)
-                                          ->whereYear($dateColumn, now()->year);
+                                        ->whereYear($dateColumn, now()->year);
                                     break;
                                 case 'this_year':
                                     $query->whereYear($dateColumn, now()->year);
                                     break;
                                 case 'custom':
-                                    if (!empty($data['date_from']) && !empty($data['date_to'])) {
+                                    if (! empty($data['date_from']) && ! empty($data['date_to'])) {
                                         $query->whereBetween($dateColumn, [
                                             $data['date_from'],
-                                            $data['date_to']
+                                            $data['date_to'],
                                         ]);
                                     }
                                     break;
                             }
                         }
-                        
+
                         // Áp dụng filter theo trạng thái pallet
-                        if (!empty($data['pallet_status'])) {
+                        if (! empty($data['pallet_status'])) {
                             $query->where('pallet_status', $data['pallet_status']);
                         }
-                        
+
                         // Lấy records
                         $records = $query->get();
-                        
+
                         // Tạo tên file với timestamp và thông tin filter
                         $filterInfo = '';
                         if ($data['date_filter_type'] !== 'all') {
-                            $filterInfo = '-' . str_replace('_', '-', $data['date_filter_type']);
-                            if ($data['date_filter_type'] === 'custom' && !empty($data['date_from']) && !empty($data['date_to'])) {
-                                $filterInfo = '-' . \Carbon\Carbon::parse($data['date_from'])->format('d-m-Y') . 
-                                             '-den-' . \Carbon\Carbon::parse($data['date_to'])->format('d-m-Y');
+                            $filterInfo = '-'.str_replace('_', '-', $data['date_filter_type']);
+                            if ($data['date_filter_type'] === 'custom' && ! empty($data['date_from']) && ! empty($data['date_to'])) {
+                                $filterInfo = '-'.\Carbon\Carbon::parse($data['date_from'])->format('d-m-Y').
+                                             '-den-'.\Carbon\Carbon::parse($data['date_to'])->format('d-m-Y');
                             }
                         }
-                        
-                        $fileName = 'bao-cao-tong-hop' . $filterInfo . '-' . now()->format('Y-m-d_H-i-s') . '.xlsx';
-                        
+
+                        $fileName = 'bao-cao-tong-hop'.$filterInfo.'-'.now()->format('Y-m-d_H-i-s').'.xlsx';
+
                         // Export file với collection
                         return Excel::download(
                             new WarehouseReportExport($records),
@@ -513,10 +515,10 @@ class ReportWarehouse extends Page implements HasTable
                     ->color('success')
                     ->modalHeading('Cấu hình xuất Excel')
                     ->modalSubmitActionLabel('Xuất Excel')
-                    ->modalCancelActionLabel('Hủy')
+                    ->modalCancelActionLabel('Hủy'),
             ])
             ->toolbarActions([
-                
+
             ])
 
             ->paginated([10, 25, 50, 100, 'all'])

@@ -3,30 +3,30 @@
 namespace App\Filament\Resources\Pallets\Tables;
 
 use App\Enums\ShippingRequestStatus;
-use Filament\Actions\BulkAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
-use Filament\Tables\Grouping\Group;
-use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
+use App\Http\Controllers\ShippingInvoiceExportController;
 use App\Models\ShippingRequest;
 use Filament\Actions\Action;
-use Filament\Tables\Filters\Filter;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\Textarea;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\ShippingInvoiceExportController;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Enums\RecordActionsPosition;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
+use Filament\Schemas\Components\Section;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class PalletsTable
 {
@@ -45,19 +45,19 @@ class PalletsTable
 
                 TextColumn::make('crate.crate_id')
                     ->label('Mã kiện hàng')
-                     ->width('15%')
+                    ->width('15%')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('crate.pcs')
                     ->label('PCS')
-                     ->alignCenter()
+                    ->alignCenter()
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('crate.gross_weight')
                     ->label('Trọng lượng')
-                     ->alignCenter()
+                    ->alignCenter()
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
@@ -77,9 +77,9 @@ class PalletsTable
                     ->label('Trạng thái')
                     ->alignCenter()
                     ->badge()
-                    ->color(fn($state) => $state instanceof \App\Enums\PalletStatus ? $state->getColor() : 'gray')
-                    ->icon(fn($state) => $state instanceof \App\Enums\PalletStatus ? $state->getIcon() : null)
-                    ->formatStateUsing(fn($state) => $state instanceof \App\Enums\PalletStatus ? $state->getLabel() : ($state ?? 'N/A'))
+                    ->color(fn ($state) => $state instanceof \App\Enums\PalletStatus ? $state->getColor() : 'gray')
+                    ->icon(fn ($state) => $state instanceof \App\Enums\PalletStatus ? $state->getIcon() : null)
+                    ->formatStateUsing(fn ($state) => $state instanceof \App\Enums\PalletStatus ? $state->getLabel() : ($state ?? 'N/A'))
                     ->sortable(),
 
                 // TextColumn::make('checked_in_at')
@@ -124,7 +124,7 @@ class PalletsTable
                         'shipped' => 'Đã xuất kho',
                         'damaged' => 'Bị hư hỏng',
                     ])
-                    ->modifyFormFieldUsing(fn($field) => $field->default('stored'))
+                    ->modifyFormFieldUsing(fn ($field) => $field->default('stored'))
                     ->default(),
 
                 SelectFilter::make('receivingPlan')
@@ -140,10 +140,17 @@ class PalletsTable
                             ->columnSpanFull(),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        if (empty($data['pallet_ids'])) {
+                        $raw = trim($data['pallet_ids'] ?? '');
+                        if ($raw === '') {
                             return $query;
                         }
-                        return $query->whereIn('pallet_id', explode("\n", trim($data['pallet_ids'] ?? '')));
+                        $lines = preg_split('/\r\n|\r|\n/', $raw);
+                        $ids = array_filter(array_map('trim', $lines), fn ($v) => $v !== '');
+                        if (empty($ids)) {
+                            return $query;
+                        }
+
+                        return $query->whereIn('pallet_id', $ids);
                     }),
                 Filter::make('list_crates')
                     ->schema(schema: [
@@ -155,15 +162,32 @@ class PalletsTable
                             ->columnSpanFull(),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        if (empty($data['crate_ids'])) {
+                        $raw = trim($data['crate_ids'] ?? '');
+                        if ($raw === '') {
                             return $query;
                         }
-                        $crateIds = array_map('trim', explode("\n", trim($data['crate_ids'])));
-                        return $query->whereHas('crate', function ($q) use ($crateIds) {
-                            $q->whereIn('crate_id', $crateIds);
+                        $lines = preg_split('/\r\n|\r|\n/', $raw);
+                        $ids = array_filter(array_map('trim', $lines), fn ($v) => $v !== '');
+                        if (empty($ids)) {
+                            return $query;
+                        }
+
+                        return $query->whereHas('crate', function ($q) use ($ids) {
+                            $q->where(function ($q2) use ($ids) {
+                                $first = true;
+                                foreach ($ids as $id) {
+                                    if ($first) {
+                                        $q2->where('crate_id', $id)
+                                            ->orWhere('crate_id', 'like', '%'.$id.'%');
+                                        $first = false;
+                                    } else {
+                                        $q2->orWhere('crate_id', $id)
+                                            ->orWhere('crate_id', 'like', '%'.$id.'%');
+                                    }
+                                }
+                            });
                         });
                     }),
-
 
             ])
             ->defaultGroup('crate.receivingPlan.plan_code')
@@ -187,7 +211,7 @@ class PalletsTable
                         $info = null;
                         if ($record->status->value === 'shipped') {
                             $shippingInfo = $record->shippingRequestItem?->shippingRequest;
-                            if (!$shippingInfo) {
+                            if (! $shippingInfo) {
                                 return [];
                             }
                             $info = [
@@ -200,7 +224,7 @@ class PalletsTable
                             ];
                         } elseif ($record->status->value === 'stored') {
                             $plan = $record->crate?->receivingPlan;
-                            if (!$plan) {
+                            if (! $plan) {
                                 return [];
                             }
                             $info = [
@@ -214,6 +238,7 @@ class PalletsTable
                         } else {
                             return [];
                         }
+
                         return $info;
                     })
                     ->schema(fn ($record) => $record->status->value === 'shipped'
@@ -242,7 +267,7 @@ class PalletsTable
                                     TextInput::make('seal_number')
                                         ->label('Số niêm phong')
                                         ->disabled(),
-                                ])
+                                ]),
                         ]
                         : [
                             Section::make('Thông tin kế hoạch nhập kho')
@@ -273,10 +298,10 @@ class PalletsTable
                                         ->label('Tải trọng xe (tấn)')
                                         ->disabled()
                                         ->columnSpan(2),
-                                ])
+                                ]),
                         ]
-                    )
-            ],position: RecordActionsPosition::BeforeColumns)
+                    ),
+            ], position: RecordActionsPosition::BeforeColumns)
             ->recordUrl(null)
             ->headerActions([
 
@@ -286,13 +311,11 @@ class PalletsTable
                     ->color('primary')
                     ->modalHeading('Chi tiết yêu cầu xuất kho')
                     ->modalDescription('Vui lòng nhập các thông tin cần thiết để xuất kho các kiện hàng.')
-                    ->schema(fn($schema) => ShippingRequestForm::configure($schema))
+                    ->schema(fn ($schema) => ShippingRequestForm::configure($schema))
                     ->modalWidth(\Filament\Support\Enums\Width::SevenExtraLarge)
                     ->visible(
-                        fn($records) =>
-                        $records && $records->every(
-                            fn($record) =>
-                            $record && (
+                        fn ($records) => $records && $records->every(
+                            fn ($record) => $record && (
                                 ($record->status instanceof \App\Enums\PalletStatus && $record->status === \App\Enums\PalletStatus::STORED)
                                 || $record->status === \App\Enums\PalletStatus::STORED->value
                             )
@@ -310,16 +333,18 @@ class PalletsTable
                                 ->body('Vui lòng chọn ít nhất một pallet để xuất kho.')
                                 ->danger()
                                 ->send();
+
                             return;
                         }
                         try {
                             $shippingRequest = ShippingRequest::create($data);
-                            if (!$shippingRequest) {
+                            if (! $shippingRequest) {
                                 \Filament\Notifications\Notification::make()
                                     ->title('Lỗi khi tạo yêu cầu xuất kho')
                                     ->body('Không thể tạo yêu cầu xuất kho. Vui lòng thử lại sau.')
                                     ->danger()
                                     ->send();
+
                                 return;
                             }
                             foreach ($records as $record) {
@@ -352,9 +377,11 @@ class PalletsTable
                                         ->title('Không có items để xuất kho')
                                         ->danger()
                                         ->send();
+
                                     return;
                                 }
-                                return (new ShippingInvoiceExportController())->export($shippingRequest->id);
+
+                                return (new ShippingInvoiceExportController)->export($shippingRequest->id);
                             }
                             \Filament\Notifications\Notification::make()
                                 ->title('Xuất kho thành công')
@@ -373,12 +400,13 @@ class PalletsTable
                                 ->body($e->getMessage())
                                 ->danger()
                                 ->send();
+
                             return;
                         }
                     })
-                    ->modalSubmitAction(fn(Action $action) => $action->label('Tạo yêu cầu xuất kho'))
-                    ->extraModalFooterActions(fn(Action $action): array => [
-                        $action->makeModalSubmitAction('createAndExport', arguments: ['export' => true])->label('Tạo và xuất file Excel')->color('success')
+                    ->modalSubmitAction(fn (Action $action) => $action->label('Tạo yêu cầu xuất kho'))
+                    ->extraModalFooterActions(fn (Action $action): array => [
+                        $action->makeModalSubmitAction('createAndExport', arguments: ['export' => true])->label('Tạo và xuất file Excel')->color('success'),
 
                     ]),
                 BulkAction::make('export-excel')
@@ -390,13 +418,14 @@ class PalletsTable
                             'crate.receivingPlan',
                             'shippingRequestItem.shippingRequest',
                             'checkedInBy',
-                            'checkedOutBy'
+                            'checkedOutBy',
                         ]);
-                        $fileName = 'pallets_export_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
+                        $fileName = 'pallets_export_'.now()->format('Y_m_d_H_i_s').'.xlsx';
+
                         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\PalletExport($records), $fileName);
                     })
                     ->requiresConfirmation(),
-                       
+
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

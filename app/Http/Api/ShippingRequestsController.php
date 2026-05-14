@@ -128,16 +128,12 @@ class ShippingRequestsController extends Controller
                 'message' => 'Không tìm thấy yêu cầu xuất hàng'
             ], 400);
         }
-        // Kiểm tra xem crate có tồn tại không
-        $crate = Crate::where('crate_id', $request->crate_code)->first();
-        if (!$crate) {
-            return response()->json([
-                'message' => 'Không tìm thấy kiện hàng'
-            ], 400);
-        }
-        // Tìm item trong shipping request với crate_id
+        // Tìm item trong shipping request có mã kiện hàng tương ứng
         $shippingItem = $shippingRequest->items()
-            ->where('crate_id', $crate->id)
+            ->whereHas('crate', function ($query) use ($request) {
+                $query->where('crate_id', $request->crate_code);
+            })
+            ->with('crate')
             ->first();
 
         if (!$shippingItem) {
@@ -145,6 +141,8 @@ class ShippingRequestsController extends Controller
                 'message' => 'Không tìm thấy kiện hàng trong yêu cầu xuất hàng'
             ], 400);
         }
+
+        $crate = $shippingItem->crate;
 
         
 
@@ -173,7 +171,7 @@ class ShippingRequestsController extends Controller
         }
 
         // Cập nhật trạng thái
-        $crate->status = CrateStatus::SHIPPED->value;
+        $crate->status = CrateStatus::SHIPPED;
         $crate->save();
         
         $pallet->status = \App\Enums\PalletStatus::SHIPPED->value;

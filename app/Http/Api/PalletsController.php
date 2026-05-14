@@ -2,55 +2,63 @@
 
 namespace App\Http\Api;
 
-use App\Enums\PalletStatus;
 use App\Enums\CrateStatus;
+use App\Enums\PalletStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePalletRequest;
 use App\Http\Resources\PalletResource;
-use App\Models\Pallet;
 use App\Models\Crate;
+use App\Models\Pallet;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PalletsController extends Controller
 {
     /**
      * Hiển thị danh sách các pallet đang di chuyển và chờ gắn vị trí
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     *
      */
     public function index(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
     {
         /**
          * Đây là một tham số truy vấn để tìm kiếm các chuyển động hàng tồn kho.
-         * @example 
-         * @default 
+         *
+         * @example
+         *
+         * @default
          */
         $search = $request->query('search', '');
 
         /**
          * Đây là một tham số truy vấn để xác định trường để sắp xếp.
+         *
          * @example created_at
+         *
          * @default created_at
          */
         $sort = $request->query('sort', 'created_at');
         /**
          * Đây là một tham số truy vấn để xác định hướng sắp xếp.
+         *
          * @example asc
+         *
          * @default desc
          */
         $direction = $request->query('direction', 'desc');
         /**
          * Đây là một tham số truy vấn để xác định số lượng mục trên mỗi trang.
+         *
          * @example 15
+         *
          * @default 15
          */
         $perPage = $request->query('per_page', 15);
         /**
          * Đây là một tham số truy vấn để xác định trang hiện tại.
+         *
          * @example 1
+         *
          * @default 1
          */
         $page = $request->query('page', 1);
@@ -65,27 +73,26 @@ class PalletsController extends Controller
 
         return response()->json([
             'message' => 'Success',
-            'data' => PalletResource::collection($pallets)
+            'data' => PalletResource::collection($pallets),
         ]);
     }
+
     /**
      * Hiển thị thông tin chi tiết của một pallet
      *
-     * @param Pallet $pallet ID của Pallet
-     * @return \Illuminate\Http\JsonResponse
+     * @param  Pallet  $pallet  ID của Pallet
      */
     public function show(Pallet $pallet): \Illuminate\Http\JsonResponse
     {
         return response()->json([
             'message' => 'Success',
-            'data' => new PalletResource($pallet)
+            'data' => new PalletResource($pallet),
         ]);
     }
 
     /**
      * Tìm kiếm pallet theo pallet_code
      *
-     * @param \Illuminate\Http\Request $request
      * @return JsonResource
      */
     public function searchByPalletCode(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
@@ -93,117 +100,130 @@ class PalletsController extends Controller
         $request->validate([
             /**
              * Mã pallet
+             *
              * @example PAL-001
              */
             'pallet_code' => 'required|string|max:255',
         ]);
-        if (!$request->pallet_code) {
+        if (! $request->pallet_code) {
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => [
-                    'pallet_code' => ['pallet_code là bắt buộc.']
-                ]
+                    'pallet_code' => ['pallet_code là bắt buộc.'],
+                ],
             ], 400);
         }
 
         $pallet = Pallet::where('pallet_id', $request->pallet_code)->first();
-      
-        if (!$pallet) {
+
+        if (! $pallet) {
             return response()->json([
                 'message' => 'Pallet not found',
                 'errors' => [
-                    'pallet_code' => ['Pallet không tồn tại.']
-                ]
+                    'pallet_code' => ['Pallet không tồn tại.'],
+                ],
             ], 400);
         }
 
         return response()->json([
             'message' => 'Success',
-            'data' => new PalletResource($pallet)
+            'data' => new PalletResource($pallet),
         ]);
     }
 
     /**
      * 3. Tạo mới một pallet cho kiện hàng
      *
-     * @param StorePalletRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StorePalletRequest $request)
     {
         $validated = $request->validated();
         // Kiểm tra trường crate_code có tồn tại trong validated
-        if (!isset($validated['crate_code'])) {
+        if (! isset($validated['crate_code'])) {
             return response()->json([
                 'message' => 'crate_code là bắt buộc.',
                 'errors' => [
-                    'crate_code' => ['crate_code không được bỏ trống.']
-                ]
+                    'crate_code' => ['crate_code không được bỏ trống.'],
+                ],
             ], 400);
         }
 
-        // Kiểm tra crate có tồn tại
-        $crate = Crate::where('crate_id', $validated['crate_code'])->first();
-        if (!$crate) {
+        try {
+            DB::beginTransaction();
+            // Kiểm tra crate có tồn tại (ưu tiên kiện hàng chưa nhập kho/xuất kho)
+            $crate = Crate::where('crate_id', $validated['crate_code'])
+                ->whereNotIn('status', [CrateStatus::STORED->value, CrateStatus::SHIPPED->value])
+                ->latest()
+                ->first();
+
+            // Nếu không tìm thấy kiện hàng "sống", thử tìm kiện hàng bất kỳ (fallback)
+            if (! $crate) {
+                $crate = Crate::where('crate_id', $validated['crate_code'])->latest()->first();
+            }
+            if (! $crate) {
+                return response()->json([
+                    'message' => 'Crate not found.',
+                    'errors' => [
+                        'crate_code' => ['Crate không tồn tại.'],
+                    ],
+                ], 400);
+            }
+
+            // Kiểm tra pallet_id trùng lặp
+            if (isset($validated['pallet_code']) && Pallet::where('pallet_id', $validated['pallet_code'])->exists()) {
+                return response()->json([
+                    'message' => 'Pallet ID đã tồn tại.',
+                    'errors' => [
+                        'pallet_code' => ['Pallet ID đã tồn tại.'],
+                    ],
+                ], 400);
+            }
+
+            // Cập nhật trạng thái crate
+            $crate->status = CrateStatus::STORED->value;
+            $crate->save();
+
+            $data = array_merge($validated, [
+                'pallet_id' => $validated['pallet_code'],
+                'crate_id' => $crate->id,
+                'status' => PalletStatus::IN_TRANSIT->value,
+                'updated_at' => now(),
+            ]);
+            $pallet = Pallet::create($data);
+
+            // Ghi nhận activity cho pallet
+            $pallet->activities()->create([
+                'action' => 'attach_crate',
+                'description' => 'Gắn crate "'.$crate->crate_id.'" vào pallet "'.$pallet->pallet_id.'"',
+                'user_id' => Auth::id(),
+                'action_time' => now(),
+            ]);
+
+            DB::commit();
+
             return response()->json([
-                'message' => 'Crate not found.',
-                'errors' => [
-                    'crate_code' => ['Crate không tồn tại.']
-                ]
-            ], 400);
-        }
+                'message' => 'Tạo mới pallet thành công',
+                'data' => new PalletResource($pallet),
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating pallet: '.$e->getMessage(), [
+                'exception' => $e,
+                'request' => $request->all(),
+            ]);
 
-        // Kiểm tra crate đã được gán pallet chưa
-        if ($crate->pallet) {
             return response()->json([
-                'message' => 'Crate đã được gán cho pallet khác.',
-                'errors' => [
-                    'crate_code' => ['Crate đã được gán pallet.']
-                ]
-            ], 400);
+                'message' => 'Có lỗi xảy ra khi tạo mới pallet.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Kiểm tra pallet_id trùng lặp
-        if (isset($validated['pallet_code']) && Pallet::where('pallet_id', $validated['pallet_code'])->exists()) {
-            return response()->json([
-                'message' => 'Pallet ID đã tồn tại.',
-                'errors' => [
-                    'pallet_code' => ['Pallet ID đã tồn tại.']
-                ]
-            ], 400);
-        }
-
-        // Cập nhật trạng thái crate
-        $crate->status = CrateStatus::STORED->value;
-        $crate->save();
-
-        $data = array_merge($validated, [
-            'pallet_id' => $validated['pallet_code'],
-            'crate_id' => $crate->id,
-            'status' => PalletStatus::IN_TRANSIT->value,
-            'updated_at' => now(),
-        ]);
-        $pallet = Pallet::create($data);
-
-        // Ghi nhận activity cho pallet
-        $pallet->activities()->create([
-            'action' => 'attach_crate',
-            'description' => 'Gắn crate "' . $crate->crate_id . '" vào pallet "' . $pallet->pallet_id . '"',
-            'user_id' => Auth::id(),
-            'action_time' => now(),
-        ]);
-
-        return response()->json([
-            'message' => 'Tạo mới pallet thành công',
-            'data' => new PalletResource($pallet)
-        ]);
     }
 
     /**
      * 4. Cập nhật vị trí cho pallet - hỗ trợ cả nhập kho và di chuyển vị trí
      *
-     * @param \Illuminate\Http\Request $request
-     * @param Pallet $pallet 
+     * @param  Pallet  $pallet
      * @return PalletResource
      */
     public function updatePalletWithLocation(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
@@ -211,27 +231,29 @@ class PalletsController extends Controller
         $request->validate([
             /**
              * Mã pallet
+             *
              * @example PAL-001
              */
             'pallet_code' => 'required|string|max:255',
             /**
              * Mã vị trí kho mới
+             *
              * @example WH-001
              */
             'location_code' => 'required|string|max:255',
         ]);
         $pallet = Pallet::where('pallet_id', $request->pallet_code)->first();
-        if (!$pallet) {
+        if (! $pallet) {
             return response()->json([
                 'message' => 'Pallet không tồn tại.',
                 'errors' => [
-                    'pallet_code' => ['Pallet không tồn tại.']
-                ]
+                    'pallet_code' => ['Pallet không tồn tại.'],
+                ],
             ], 400);
         }
         $oldLocation = $pallet->location_code ?? '';
         $newLocation = $request->location_code;
-        // Kiểm tra điều kiện 
+        // Kiểm tra điều kiện
         if (isset($oldLocation) && $oldLocation === '') {
             // Nhập kho: kiểm tra pallet có thể nhập kho không
             if ($pallet->status === PalletStatus::STORED->value) {
@@ -239,9 +261,9 @@ class PalletsController extends Controller
                     'message' => 'Không thể nhập kho pallet đã được lưu trữ.',
                     'errors' => [
                         'status' => [
-                            'Pallet đã được lưu trữ không thể nhập kho lại.'
-                        ]
-                    ]
+                            'Pallet đã được lưu trữ không thể nhập kho lại.',
+                        ],
+                    ],
                 ], 400);
             }
             if ($pallet->status === PalletStatus::SHIPPED->value) {
@@ -249,9 +271,9 @@ class PalletsController extends Controller
                     'message' => 'Không thể nhập kho pallet đã được giao hàng.',
                     'errors' => [
                         'status' => [
-                            'Pallet đã được giao hàng không thể nhập kho.'
-                        ]
-                    ]
+                            'Pallet đã được giao hàng không thể nhập kho.',
+                        ],
+                    ],
                 ], 400);
             }
 
@@ -265,7 +287,7 @@ class PalletsController extends Controller
             // Ghi nhận activity cho nhập kho
             $pallet->activities()->create([
                 'action' => 'import_pallet',
-                'description' => 'Nhập kho pallet ' . $pallet->pallet_id . ' vào vị trí ' . $newLocation,
+                'description' => 'Nhập kho pallet '.$pallet->pallet_id.' vào vị trí '.$newLocation,
                 'user_id' => Auth::id(),
                 'action_time' => now(),
             ]);
@@ -276,9 +298,9 @@ class PalletsController extends Controller
                     'message' => 'Không thể di chuyển pallet đã được giao hàng.',
                     'errors' => [
                         'status' => [
-                            'Pallet đã được giao hàng không thể di chuyển.'
-                        ]
-                    ]
+                            'Pallet đã được giao hàng không thể di chuyển.',
+                        ],
+                    ],
                 ], 400);
             }
 
@@ -291,14 +313,15 @@ class PalletsController extends Controller
             // Ghi nhận activity cho di chuyển
             $pallet->activities()->create([
                 'action' => 'relocate_pallet',
-                'description' => 'Chuyển pallet ' . $pallet->pallet_id . ' từ vị trí ' . ($oldLocation ?: 'chưa xác định') . ' sang vị trí ' . $newLocation,
+                'description' => 'Chuyển pallet '.$pallet->pallet_id.' từ vị trí '.($oldLocation ?: 'chưa xác định').' sang vị trí '.$newLocation,
                 'user_id' => Auth::id(),
                 'action_time' => now(),
             ]);
         }
+
         return response()->json([
             'message' => 'Cập nhật pallet thành công',
-            'data' => $pallet
+            'data' => $pallet,
         ]);
     }
 
@@ -309,12 +332,12 @@ class PalletsController extends Controller
     {
         $crate = Crate::with('pallet')->where('id', $id)->first();
 
-        if (!$crate) {
+        if (! $crate) {
             return response()->json([
                 'message' => 'Crate not found.',
                 'errors' => [
-                    'crate_code' => ['Crate không tồn tại.']
-                ]
+                    'crate_code' => ['Crate không tồn tại.'],
+                ],
             ], 400);
         }
 
@@ -323,8 +346,8 @@ class PalletsController extends Controller
             return response()->json([
                 'message' => 'Crate đã được gán pallet.',
                 'errors' => [
-                    'crate_code' => ['Crate đã được gán pallet.']
-                ]
+                    'crate_code' => ['Crate đã được gán pallet.'],
+                ],
             ], 400);
         }
 
@@ -338,21 +361,21 @@ class PalletsController extends Controller
                     'pallet_code' => $crate->pallet->pallet_id,
                     'location_code' => $crate->pallet->location_code,
                     'status' => $crate->pallet->status->value,
-                ] : null
-            ]
+                ] : null,
+            ],
         ]);
     }
 
-
-    /** 
+    /**
      * Lấy danh sách pallet có trạng thái không phải là IN_STOCK, SHIPPED, DAMAGED
      */
     public function getPalletsNotInStock(): \Illuminate\Http\JsonResponse
     {
         $pallets = Pallet::whereNotIn('status', [PalletStatus::IN_STOCK->value, PalletStatus::SHIPPED->value, PalletStatus::DAMAGED->value])->orderBy('updated_at', 'desc')->get();
+
         return response()->json([
             'message' => 'Lấy danh sách pallet thành công',
-            'data' => PalletResource::collection($pallets)
+            'data' => PalletResource::collection($pallets),
         ]);
     }
 }

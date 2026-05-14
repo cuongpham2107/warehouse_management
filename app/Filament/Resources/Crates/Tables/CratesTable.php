@@ -3,23 +3,23 @@
 namespace App\Filament\Resources\Crates\Tables;
 
 use App\Enums\CrateStatus;
+use App\Enums\PalletActivityAction;
+use App\Models\WarehouseLocation;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Grouping\Group;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Enums\RecordActionsPosition;
-use Filament\Actions\Action;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use App\Models\WarehouseLocation;
-use App\Enums\PalletActivityAction;
 
 class CratesTable
 {
@@ -57,7 +57,7 @@ class CratesTable
                     ->alignCenter(true)
                     ->numeric()
                     ->sortable()
-                    ->formatStateUsing(fn($state) => number_format($state, 2) . ' kg'),
+                    ->formatStateUsing(fn ($state) => number_format($state, 2).' kg'),
 
                 TextColumn::make('dimensions')
                     ->label('Kích thước (L×W×H)')
@@ -65,6 +65,7 @@ class CratesTable
                         $l = $record->dimensions_length ?? 0;
                         $w = $record->dimensions_width ?? 0;
                         $h = $record->dimensions_height ?? 0;
+
                         return "{$l} × {$w} × {$h} cm";
                     })
                     ->toggleable(),
@@ -72,16 +73,16 @@ class CratesTable
                 TextColumn::make('status')
                     ->label('Trạng thái')
                     ->badge()
-                    ->color(fn($state): string => $state instanceof CrateStatus ? $state->getColor() : 'gray')
-                    ->formatStateUsing(fn($state): string => $state instanceof CrateStatus ? $state->getLabel() : ($state ?? 'N/A'))
-                    ->icon(fn($state): string => $state instanceof CrateStatus ? $state->getIcon() : 'heroicon-m-question-mark-circle')
+                    ->color(fn ($state): string => $state instanceof CrateStatus ? $state->getColor() : 'gray')
+                    ->formatStateUsing(fn ($state): string => $state instanceof CrateStatus ? $state->getLabel() : ($state ?? 'N/A'))
+                    ->icon(fn ($state): string => $state instanceof CrateStatus ? $state->getIcon() : 'heroicon-m-question-mark-circle')
                     ->sortable(),
 
-                TextColumn::make('barcode')
-                    ->label('Mã vạch')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->copyable(),
+                // TextColumn::make('barcode')
+                //     ->label('Mã vạch')
+                //     ->searchable()
+                //     ->toggleable(isToggledHiddenByDefault: true)
+                //     ->copyable(),
 
                 TextColumn::make('created_at')
                     ->label('Ngày tạo')
@@ -94,7 +95,6 @@ class CratesTable
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-
 
             ])
             ->filters([
@@ -116,9 +116,9 @@ class CratesTable
                         if (empty($data['crate_ids'])) {
                             return $query;
                         }
-                        return $query->whereIn('crate_id', explode("\n", trim($data['crate_ids'] ?? '')));
-                    })
 
+                        return $query->whereIn('crate_id', explode("\n", trim($data['crate_ids'] ?? '')));
+                    }),
 
             ])
             ->defaultGroup('receivingPlan.plan_code')
@@ -132,6 +132,7 @@ class CratesTable
                     ->label('Tạo pallet từ kiện hàng')
                     ->icon('heroicon-o-plus')
                     ->iconButton()
+                    ->hidden(fn ($record) => $record->status === CrateStatus::STORED || $record->status === CrateStatus::SHIPPED)
                     ->schema([
                         Section::make('Thông tin pallet')
                             ->columns(2)
@@ -145,7 +146,7 @@ class CratesTable
                                     ->label('Mã vị trí')
                                     ->placeholder('Nhập mã vị trí (nếu có)')
                                     ->datalist(
-                                        fn() => WarehouseLocation::query()->pluck('location_code')->all()
+                                        fn () => WarehouseLocation::query()->pluck('location_code')->all()
                                     ),
                             ]),
 
@@ -167,7 +168,7 @@ class CratesTable
                         $record->save();
                         $record->refresh();
                     }),
-                
+
                 EditAction::make()
                     ->icon('heroicon-o-pencil')
                     ->iconButton(),

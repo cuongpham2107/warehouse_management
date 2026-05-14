@@ -2,21 +2,20 @@
 
 namespace App\Exports;
 
-use App\Models\PalletWithInfo;
 use App\Enums\PalletStatus;
-use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use App\Models\PalletWithInfo;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Carbon\Carbon;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class WarehouseReportExport implements FromCollection, WithHeadings, WithMapping, WithTitle, WithStyles, WithColumnWidths
+class WarehouseReportExport implements FromCollection, WithColumnWidths, WithHeadings, WithMapping, WithStyles, WithTitle
 {
     protected $data;
 
@@ -27,15 +26,21 @@ class WarehouseReportExport implements FromCollection, WithHeadings, WithMapping
 
     public function collection()
     {
-        if ($this->data instanceof Collection) {
-            return $this->data;
+        $collection = $this->data;
+
+        if ($collection instanceof Builder) {
+            $collection = $collection->with(['receivingPlan.vendor'])->get();
+        } elseif (! $collection instanceof Collection) {
+            $collection = PalletWithInfo::with(['receivingPlan.vendor'])->get();
+        } else {
+            // Đảm bảo load quan hệ để sắp xếp và hiển thị không bị N+1
+            $collection->loadMissing(['receivingPlan.vendor']);
         }
-        
-        if ($this->data instanceof Builder) {
-            return $this->data->get();
-        }
-        
-        return PalletWithInfo::all();
+
+        // Sắp xếp theo tên nhà cung cấp
+        return $collection->sortBy(function ($item) {
+            return $item->receivingPlan?->vendor?->vendor_name ?? '';
+        })->values();
     }
 
     public function headings(): array
@@ -63,7 +68,7 @@ class WarehouseReportExport implements FromCollection, WithHeadings, WithMapping
             'Tải trọng xe xuất (tấn)',
             'Khách hàng',
             'Ghi chú xuất kho',
-            'Trạng thái Pallet'
+            'Trạng thái Pallet',
         ];
     }
 
@@ -92,7 +97,7 @@ class WarehouseReportExport implements FromCollection, WithHeadings, WithMapping
             $row->shipping_vehicle_capacity,
             $row->customer_name,
             $row->shipping_notes,
-            $this->getPalletStatusLabel($row->pallet_status)
+            $this->getPalletStatusLabel($row->pallet_status),
         ];
     }
 

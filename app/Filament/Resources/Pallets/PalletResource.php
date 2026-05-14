@@ -35,7 +35,14 @@ class PalletResource extends Resource
     }
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('status', PalletStatus::STORED->value)->count();
+        $model = static::getModel();
+
+        $sum = $model::query()
+            ->where('pallets.status', PalletStatus::STORED->value)
+            ->join('crates', 'pallets.crate_id', '=', 'crates.id')
+            ->sum('crates.pcs');
+
+        return $sum ? (string) $sum : null;
     }
     public static function getModelLabel(): string
     {

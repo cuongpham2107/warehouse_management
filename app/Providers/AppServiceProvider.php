@@ -2,13 +2,13 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Filament\Support\Facades\FilamentTimezone;
-use Illuminate\Support\Facades\URL;
+use Carbon\Carbon;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
-use Carbon\Carbon;
+use Filament\Support\Facades\FilamentTimezone;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,17 +27,17 @@ class AppServiceProvider extends ServiceProvider
     {
         // Set timezone cho Filament
         FilamentTimezone::set('Asia/Ho_Chi_Minh');
-        
+
         // Set locale cho Carbon (để hiển thị tên tháng, ngày bằng tiếng Việt)
         Carbon::setLocale('vi');
-        
+
         // Set locale cho ứng dụng Laravel
         app()->setLocale('vi');
 
         if (str_contains(config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
-        
+
         Scramble::configure()
             ->withDocumentTransformers(function (OpenApi $openApi) {
                 $openApi->secure(

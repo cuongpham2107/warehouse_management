@@ -2,15 +2,14 @@
 
 namespace App\Filament\Resources\Crates\Schemas;
 
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
 use App\Enums\CrateStatus;
-use Filament\Schemas\Components\Flex;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 
 class CrateForm
 {
@@ -37,20 +36,24 @@ class CrateForm
                                     ->searchable()
                                     ->preload()
                                     ->placeholder('Chọn kế hoạch nhập kho'),
-                            ])->columns(2),
-                        Tab::make('Thông tin bổ sung')
-                            // ->description('Mã vạch và mô tả chi tiết')
-                            ->schema([
-                                TextInput::make('barcode')
-                                    ->label('Mã vạch')
-                                    ->maxLength(255)
-                                    ->placeholder('Nhập mã vạch'),
-
                                 Textarea::make('description')
                                     ->label('Mô tả')
                                     ->rows(3)
                                     ->placeholder('Nhập mô tả thùng hàng'),
-                            ])->columns(1),
+                            ])->columns(2),
+                        // Tab::make('Thông tin bổ sung')
+                        //     // ->description('Mã vạch và mô tả chi tiết')
+                        //     ->schema([
+                        //         // TextInput::make('barcode')
+                        //         //     ->label('Mã vạch')
+                        //         //     ->maxLength(255)
+                        //         //     ->placeholder('Nhập mã vạch'),
+
+                        //         Textarea::make('description')
+                        //             ->label('Mô tả')
+                        //             ->rows(3)
+                        //             ->placeholder('Nhập mô tả thùng hàng'),
+                        //     ])->columns(1),
                     ]),
 
                 Section::make('Thông tin số lượng và trạng thái')
@@ -114,7 +117,6 @@ class CrateForm
                     ])
                     ->columns(3)
                     ->collapsible(),
-
 
             ]);
     }
