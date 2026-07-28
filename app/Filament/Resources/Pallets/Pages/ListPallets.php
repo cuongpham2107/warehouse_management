@@ -25,6 +25,13 @@ class ListPallets extends ListRecords
         ];
     }
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\PalletCountByStatusWidget::class,
+        ];
+    }
+
     protected function getTableQuery(): Builder
     {
         return parent::getTableQuery()->with([

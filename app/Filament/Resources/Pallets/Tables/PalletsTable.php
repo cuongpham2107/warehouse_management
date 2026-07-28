@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Pallets\Tables;
 
+use App\Enums\PalletStatus;
 use App\Enums\ShippingRequestStatus;
 use App\Filament\Resources\ShippingRequests\Schemas\ShippingRequestForm;
 use App\Http\Controllers\ShippingInvoiceExportController;
@@ -117,13 +118,7 @@ class PalletsTable
             ->filters([
                 SelectFilter::make('status')
                     ->label('Trạng thái')
-                    ->options([
-                        'in_transit' => 'Đang vận chuyển',
-                        'received' => 'Đã nhận',
-                        'stored' => 'Đã lưu kho',
-                        'shipped' => 'Đã xuất kho',
-                        'damaged' => 'Bị hư hỏng',
-                    ])
+                    ->options(PalletStatus::getOptions())
                     ->modifyFormFieldUsing(fn ($field) => $field->default('stored'))
                     ->default(),
 
@@ -433,7 +428,7 @@ class PalletsTable
                 ])->label('Hành động hàng loạt'),
             ])
             ->defaultSort('created_at', 'desc')
-            ->paginated([10, 25, 50, 100, 'all'])
+            ->paginated([10, 25, 50, 100])
             ->reorderableColumns();
     }
 }

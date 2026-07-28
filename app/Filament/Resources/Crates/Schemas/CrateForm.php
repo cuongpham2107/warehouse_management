@@ -66,6 +66,12 @@ class CrateForm
                             ->default(0)
                             ->minValue(0)
                             ->placeholder('Nhập số lượng'),
+                        TextInput::make('pcs')
+                            ->label('PCS')
+                            ->numeric()
+                            ->default(0)
+                            ->minValue(0)
+                            ->placeholder('Nhập PCS'),
                         TextInput::make('type')
                             ->label('Loại thùng hàng')
                             ->required(),

@@ -7,7 +7,10 @@ use App\Exports\WarehouseReportExport;
 use App\Models\PalletWithInfo;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\DatePicker;
+use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\ColumnGroup;
@@ -521,8 +524,23 @@ class ReportWarehouse extends Page implements HasTable
 
             ])
 
-            ->paginated([10, 25, 50, 100, 'all'])
+            ->paginated([10, 25, 50, 100])
             ->defaultPaginationPageOption(25)
-            ->reorderableColumns();
+            ->reorderableColumns()
+            ->selectable()
+            ->bulkActions([
+                BulkAction::make('export-excel-selected')
+                    ->label('Xuất Excel các dòng đã chọn')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function (Collection $records) {
+                        $fileName = 'bao-cao-tong-hop-' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+
+                        return Excel::download(
+                            new WarehouseReportExport($records),
+                            $fileName
+                        );
+                    }),
+            ]);
     }
 }

@@ -2,58 +2,69 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\PalletWithInfo;
-use App\Models\Vendor;
 use App\Models\VendorStats;
-use App\Enums\PalletStatus;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
+use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
-use Illuminate\Contracts\Pagination\Paginator;
 
 class ReceivingPlanStatsWidget extends BaseWidget
 {
     protected static ?string $heading = 'Thống kê Pallet theo nhà cung cấp';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
-    {        
+    {
         return $table
-            ->query(
-                // Sử dụng VendorStats model với join trực tiếp
-                VendorStats::query()
-                    ->join('pallet_with_info', 'vendors.id', '=', 'pallet_with_info.vendor_id')
-                    ->whereNotNull('pallet_with_info.vendor_id')
+            ->query(function () {
+                // Deduplicate pallet_with_info per pallet_id to avoid double-counting
+                $pwi = DB::table('pallet_with_info')
+                    ->select(
+                        'pallet_id',
+                        'vendor_id',
+                        'pallet_status',
+                        'plan_code',
+                        DB::raw('MAX(COALESCE(crate_pcs,0)) AS crate_pcs'),
+                        DB::raw('MAX(COALESCE(crate_gross_weight,0)) AS crate_gross_weight')
+                    )
+                    ->groupBy('pallet_id', 'vendor_id', 'pallet_status', 'plan_code');
+
+                $query = VendorStats::query()
+                    ->from('vendors')
+                    ->joinSub($pwi, 'pwi', function ($join) {
+                        $join->on('vendors.id', '=', 'pwi.vendor_id');
+                    })
+                    ->whereNotNull('pwi.vendor_id')
                     ->select([
                         'vendors.id',
                         'vendors.vendor_name',
                         'vendors.vendor_code',
-                        DB::raw('COUNT(*) as total_pallets'),
-                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "stored" THEN 1 ELSE 0 END) as stored_pallets'),
-                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "shipped" THEN 1 ELSE 0 END) as shipped_pallets'),
-                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "in_stock" THEN 1 ELSE 0 END) as in_stock_pallets'),
-                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "in_transit" THEN 1 ELSE 0 END) as in_transit_pallets'),
-                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "damaged" THEN 1 ELSE 0 END) as damaged_pallets'),
-                        // Tổng crate_pcs theo từng trạng thái
-                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "stored" THEN COALESCE(pallet_with_info.crate_pcs, 0) ELSE 0 END) as stored_pcs'),
-                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "shipped" THEN COALESCE(pallet_with_info.crate_pcs, 0) ELSE 0 END) as shipped_pcs'),
-                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "in_stock" THEN COALESCE(pallet_with_info.crate_pcs, 0) ELSE 0 END) as in_stock_pcs'),
-                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "in_transit" THEN COALESCE(pallet_with_info.crate_pcs, 0) ELSE 0 END) as in_transit_pcs'),
-                        DB::raw('SUM(CASE WHEN pallet_with_info.pallet_status = "damaged" THEN COALESCE(pallet_with_info.crate_pcs, 0) ELSE 0 END) as damaged_pcs'),
-                        DB::raw('SUM(COALESCE(pallet_with_info.crate_pcs, 0)) as total_pcs'),
-                        DB::raw('SUM(COALESCE(pallet_with_info.crate_gross_weight, 0)) as total_weight'),
-                        DB::raw('COUNT(DISTINCT pallet_with_info.plan_code) as total_plans'),
+                        DB::raw('COUNT(DISTINCT pwi.pallet_id) as total_pallets'),
+                        DB::raw('SUM(CASE WHEN pwi.pallet_status = "stored" THEN 1 ELSE 0 END) as stored_pallets'),
+                        DB::raw('SUM(CASE WHEN pwi.pallet_status = "shipped" THEN 1 ELSE 0 END) as shipped_pallets'),
+                        DB::raw('SUM(CASE WHEN pwi.pallet_status = "in_stock" THEN 1 ELSE 0 END) as in_stock_pallets'),
+                        DB::raw('SUM(CASE WHEN pwi.pallet_status = "in_transit" THEN 1 ELSE 0 END) as in_transit_pallets'),
+                        DB::raw('SUM(CASE WHEN pwi.pallet_status = "damaged" THEN 1 ELSE 0 END) as damaged_pallets'),
+                        // Tổng crate_pcs theo từng trạng thái (deduped)
+                        DB::raw('SUM(CASE WHEN pwi.pallet_status = "stored" THEN COALESCE(pwi.crate_pcs, 0) ELSE 0 END) as stored_pcs'),
+                        DB::raw('SUM(CASE WHEN pwi.pallet_status = "shipped" THEN COALESCE(pwi.crate_pcs, 0) ELSE 0 END) as shipped_pcs'),
+                        DB::raw('SUM(CASE WHEN pwi.pallet_status = "in_stock" THEN COALESCE(pwi.crate_pcs, 0) ELSE 0 END) as in_stock_pcs'),
+                        DB::raw('SUM(CASE WHEN pwi.pallet_status = "in_transit" THEN COALESCE(pwi.crate_pcs, 0) ELSE 0 END) as in_transit_pcs'),
+                        DB::raw('SUM(CASE WHEN pwi.pallet_status = "damaged" THEN COALESCE(pwi.crate_pcs, 0) ELSE 0 END) as damaged_pcs'),
+                        DB::raw('SUM(COALESCE(pwi.crate_pcs, 0)) as total_pcs'),
+                        DB::raw('SUM(COALESCE(pwi.crate_gross_weight, 0)) as total_weight'),
+                        DB::raw('COUNT(DISTINCT pwi.plan_code) as total_plans'),
                     ])
                     ->groupBy('vendors.id', 'vendors.vendor_name', 'vendors.vendor_code')
-                    ->orderByRaw('COUNT(*) DESC, vendors.vendor_name ASC')
-            )
+                    ->orderByRaw('COUNT(DISTINCT pwi.pallet_id) DESC, vendors.vendor_name ASC');
+
+                return $query;
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('vendor_code')
                     ->label('Mã NCC')
@@ -127,17 +138,26 @@ class ReceivingPlanStatsWidget extends BaseWidget
                     ->state(function ($record) {
                         $total = $record->total_pallets ?? 0;
                         $stored = $record->stored_pallets ?? 0;
-                        
-                        if ($total == 0) return 0;
-                        
+
+                        if ($total == 0) {
+                            return 0;
+                        }
+
                         return round(($stored / $total) * 100, 1);
                     })
-                    ->formatStateUsing(fn ($state) => $state . '%')
+                    ->formatStateUsing(fn ($state) => $state.'%')
                     ->badge()
                     ->color(function ($state) {
-                        if ($state >= 70) return 'success';
-                        if ($state >= 40) return 'warning';
-                        if ($state > 0) return 'info';
+                        if ($state >= 70) {
+                            return 'success';
+                        }
+                        if ($state >= 40) {
+                            return 'warning';
+                        }
+                        if ($state > 0) {
+                            return 'info';
+                        }
+
                         return 'gray';
                     })
                     ->sortable(false),
@@ -148,17 +168,26 @@ class ReceivingPlanStatsWidget extends BaseWidget
                     ->state(function ($record) {
                         $total = $record->total_pallets ?? 0;
                         $shipped = $record->shipped_pallets ?? 0;
-                        
-                        if ($total == 0) return 0;
-                        
+
+                        if ($total == 0) {
+                            return 0;
+                        }
+
                         return round(($shipped / $total) * 100, 1);
                     })
-                    ->formatStateUsing(fn ($state) => $state . '%')
+                    ->formatStateUsing(fn ($state) => $state.'%')
                     ->badge()
                     ->color(function ($state) {
-                        if ($state >= 70) return 'primary';
-                        if ($state >= 40) return 'warning';
-                        if ($state > 0) return 'info';
+                        if ($state >= 70) {
+                            return 'primary';
+                        }
+                        if ($state >= 40) {
+                            return 'warning';
+                        }
+                        if ($state > 0) {
+                            return 'info';
+                        }
+
                         return 'gray';
                     })
                     ->sortable(false),
@@ -295,9 +324,16 @@ class ReceivingPlanStatsWidget extends BaseWidget
                     ->label('Theo tỷ lệ tồn kho')
                     ->getDescriptionFromRecordUsing(function ($record) {
                         $rate = $record->total_pallets > 0 ? round(($record->stored_pallets / $record->total_pallets) * 100, 1) : 0;
-                        if ($rate >= 70) return 'Tồn kho cao (≥70%)';
-                        if ($rate >= 40) return 'Tồn kho trung bình (40-69%)';
-                        if ($rate > 0) return 'Tồn kho thấp (<40%)';
+                        if ($rate >= 70) {
+                            return 'Tồn kho cao (≥70%)';
+                        }
+                        if ($rate >= 40) {
+                            return 'Tồn kho trung bình (40-69%)';
+                        }
+                        if ($rate > 0) {
+                            return 'Tồn kho thấp (<40%)';
+                        }
+
                         return 'Không tồn kho (0%)';
                     })
                     ->collapsible(),
@@ -306,9 +342,16 @@ class ReceivingPlanStatsWidget extends BaseWidget
                     ->label('Theo tỷ lệ xuất kho')
                     ->getDescriptionFromRecordUsing(function ($record) {
                         $rate = $record->total_pallets > 0 ? round(($record->shipped_pallets / $record->total_pallets) * 100, 1) : 0;
-                        if ($rate >= 70) return 'Xuất kho cao (≥70%)';
-                        if ($rate >= 40) return 'Xuất kho trung bình (40-69%)';
-                        if ($rate > 0) return 'Xuất kho thấp (<40%)';
+                        if ($rate >= 70) {
+                            return 'Xuất kho cao (≥70%)';
+                        }
+                        if ($rate >= 40) {
+                            return 'Xuất kho trung bình (40-69%)';
+                        }
+                        if ($rate > 0) {
+                            return 'Xuất kho thấp (<40%)';
+                        }
+
                         return 'Chưa xuất kho (0%)';
                     })
                     ->collapsible(),
@@ -317,9 +360,16 @@ class ReceivingPlanStatsWidget extends BaseWidget
                     ->label('Theo khối lượng pallet')
                     ->getDescriptionFromRecordUsing(function ($record) {
                         $total = $record->total_pallets;
-                        if ($total >= 50) return 'Khối lượng rất lớn (≥50 pallet)';
-                        if ($total >= 20) return 'Khối lượng lớn (20-49 pallet)';
-                        if ($total >= 10) return 'Khối lượng trung bình (10-19 pallet)';
+                        if ($total >= 50) {
+                            return 'Khối lượng rất lớn (≥50 pallet)';
+                        }
+                        if ($total >= 20) {
+                            return 'Khối lượng lớn (20-49 pallet)';
+                        }
+                        if ($total >= 10) {
+                            return 'Khối lượng trung bình (10-19 pallet)';
+                        }
+
                         return 'Khối lượng nhỏ (<10 pallet)';
                     })
                     ->collapsible(),
