@@ -9,6 +9,7 @@ enum PalletActivityAction: string
     case IMPORT_PALLET = 'import_pallet';
     case RELOCATE_PALLET = 'relocate_pallet';
     case EXPORT_PALLET = 'export_pallet';
+    case RETURN_TO_STORED = 'return_to_stored';
 
     public function getLabel(): string
     {
@@ -17,6 +18,7 @@ enum PalletActivityAction: string
             self::IMPORT_PALLET => 'Nhập kho',
             self::RELOCATE_PALLET => 'Chuyển vị trí pallet sang vị trí khác',
             self::EXPORT_PALLET => 'Xuất kho',
+            self::RETURN_TO_STORED => 'Hoàn về lưu kho',
         };
     }
 
@@ -27,6 +29,7 @@ enum PalletActivityAction: string
             self::IMPORT_PALLET => 'primary',
             self::RELOCATE_PALLET => 'warning',
             self::EXPORT_PALLET => 'danger',
+            self::RETURN_TO_STORED => 'success',
         };
     }
 
@@ -37,6 +40,7 @@ enum PalletActivityAction: string
             self::IMPORT_PALLET => 'heroicon-m-arrows-up-down',
             self::RELOCATE_PALLET => 'heroicon-m-arrows-right-left',
             self::EXPORT_PALLET => 'heroicon-m-trash',
+            self::RETURN_TO_STORED => 'heroicon-m-archive-box',
         };
     }
     public static function getOptions(): array

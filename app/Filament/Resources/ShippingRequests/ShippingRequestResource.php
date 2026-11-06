@@ -30,12 +30,12 @@ class ShippingRequestResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return '2. Yêu cầu xuất kho';
+        return '2. Xuất kho';
     }
 
     public static function getModelLabel(): string
     {
-        return '2. Yêu cầu xuất kho';
+        return '2. Xuất kho';
     }
 
     // public static function getNavigationBadge(): ?string
@@ -45,7 +45,7 @@ class ShippingRequestResource extends Resource
 
     public static function getPluralModelLabel(): string
     {
-        return '2. Yêu cầu xuất kho';
+        return '2. Xuất kho';
     }
 
     protected function getTitle(): string

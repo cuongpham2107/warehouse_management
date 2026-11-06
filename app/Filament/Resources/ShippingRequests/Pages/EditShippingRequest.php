@@ -6,6 +6,7 @@ use App\Filament\Resources\ShippingRequests\ShippingRequestResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use App\Enums\ShippingRequestStatus;
 use Livewire\Attributes\On;
 use App\Http\Controllers\ShippingInvoiceExportController;
 use Illuminate\Database\Eloquent\Model;
@@ -50,7 +51,8 @@ class EditShippingRequest extends EditRecord
                 ->label('Xem'),
             DeleteAction::make()
                 ->icon('heroicon-o-trash')
-                ->label('Xóa'),
+                ->label('Xóa')
+                ->hidden(fn (Model $record) => $record->status === ShippingRequestStatus::COMPLETED),
         ];
     }
     protected function getFormActions(): array

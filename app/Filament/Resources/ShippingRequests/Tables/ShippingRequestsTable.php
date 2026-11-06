@@ -11,11 +11,10 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Filament\Support\Enums\FontWeight;
 use App\Enums\ShippingRequestStatus;
-use App\Enums\PalletStatus;
+use App\Models\ShippingRequest;
 use Filament\Actions\DeleteAction;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Enums\RecordActionsPosition;
-use Filament\Notifications\Notification;
 
 class ShippingRequestsTable
 {
@@ -137,36 +136,26 @@ class ShippingRequestsTable
                     ->label('Tài xế'),
             ])
             ->defaultSort('requested_date', 'desc')
+            ->checkIfRecordIsSelectableUsing(
+                fn (ShippingRequest $record) => $record->status !== ShippingRequestStatus::COMPLETED
+            )
             ->recordActions([
-                EditAction::make()
-                    ->icon('heroicon-m-pencil-square')
-                    ->iconButton(),
                 DeleteAction::make()
                     ->icon('heroicon-m-trash')
                     ->iconButton()
                     ->requiresConfirmation()
-                    ->action(function ($record) {
-                        // Cập nhật trạng thái pallet về "stored" trước khi xóa
-                        $record->items()->with('pallet')->get()->each(function ($item) {
-                            if ($item->pallet) {
-                                $item->pallet->status = PalletStatus::STORED;
-                                $item->pallet->save();
-                            }
-                        });
-
-                        $record->delete();
-
-                        Notification::make()
-                            ->title('Yêu cầu vận chuyển đã được xóa thành công.')
-                            ->success()
-                            ->send();
-                    }),
+                    ->successNotificationTitle('Yêu cầu vận chuyển đã được xóa thành công.')
+                    ->visible(fn (ShippingRequest $record) => $record->status !== ShippingRequestStatus::COMPLETED),
+                EditAction::make()
+                    ->icon('heroicon-m-pencil-square')
+                    ->iconButton(),
+                
             ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->label('Xóa'),
-                ]),
+                // BulkActionGroup::make([
+                //     DeleteBulkAction::make()
+                //         ->label('Xóa'),
+                // ]),
             ])
             ->recordUrl(null);
     }
